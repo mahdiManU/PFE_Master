@@ -8,6 +8,6 @@ def upload(request):
         uploaded_file = request.FILES['document']
         fs = FileSystemStorage()
         fs.save(uploaded_file.name,uploaded_file)
-        return render(request, 'upload_success.html')
+        return render(request, 'upload_success.html',{'file_name': uploaded_file.name})
     return render(request ,"upload.html")
 
