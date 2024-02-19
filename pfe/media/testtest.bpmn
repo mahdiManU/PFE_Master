@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="sid-38422fae-e03e-43a3-bef4-bd33b32041b2" targetNamespace="http://bpmn.io/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="16.4.0">
+  <process id="Process_1" isExecutable="false">
+    <task id="Activity_1gegnl2" name="tesk 1">
+      <incoming>Flow_0ju9d74</incoming>
+      <outgoing>Flow_0qkooe4</outgoing>
+    </task>
+    <startEvent id="Event_0217ghm">
+      <outgoing>Flow_0ju9d74</outgoing>
+    </startEvent>
+    <sequenceFlow id="Flow_0ju9d74" sourceRef="Event_0217ghm" targetRef="Activity_1gegnl2" />
+    <exclusiveGateway id="Gateway_1lvs875" name="condition manquante ici">
+      <incoming>Flow_0qkooe4</incoming>
+      <outgoing>Flow_0wtzuq2</outgoing>
+    </exclusiveGateway>
+    <exclusiveGateway id="Gateway_1guyq08" name="condition manquante ici">
+      <incoming>Flow_0i9lonf</incoming>
+    </exclusiveGateway>
+    <task id="Activity_1sd24ow" name="task 2">
+      <incoming>Flow_0wtzuq2</incoming>
+      <outgoing>Flow_0i9lonf</outgoing>
+    </task>
+    <sequenceFlow id="Flow_0qkooe4" sourceRef="Activity_1gegnl2" targetRef="Gateway_1lvs875" />
+    <sequenceFlow id="Flow_0wtzuq2" sourceRef="Gateway_1lvs875" targetRef="Activity_1sd24ow" />
+    <sequenceFlow id="Flow_0i9lonf" sourceRef="Activity_1sd24ow" targetRef="Gateway_1guyq08" />
+    <textAnnotation id="TextAnnotation_0bw3f72">
+      <text>la loi 12</text>
+    </textAnnotation>
+    <association id="Association_09mpbps" associationDirection="None" sourceRef="Gateway_1lvs875" targetRef="TextAnnotation_0bw3f72" />
+    <textAnnotation id="TextAnnotation_11inikc">
+      <text>la loi 13</text>
+    </textAnnotation>
+    <association id="Association_07z1t38" associationDirection="None" sourceRef="Gateway_1guyq08" targetRef="TextAnnotation_11inikc" />
+  </process>
+  <bpmndi:BPMNDiagram id="BpmnDiagram_1">
+    <bpmndi:BPMNPlane id="BpmnPlane_1" bpmnElement="Process_1">
+      <bpmndi:BPMNShape id="Activity_1gegnl2_di" bpmnElement="Activity_1gegnl2">
+        <omgdc:Bounds x="320" y="150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0217ghm_di" bpmnElement="Event_0217ghm">
+        <omgdc:Bounds x="152" y="172" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1lvs875_di" bpmnElement="Gateway_1lvs875" isMarkerVisible="true" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <omgdc:Bounds x="525" y="165" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1guyq08_di" bpmnElement="Gateway_1guyq08" isMarkerVisible="true" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <omgdc:Bounds x="725" y="335" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1sd24ow_di" bpmnElement="Activity_1sd24ow">
+        <omgdc:Bounds x="700" y="150" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_09mpbps_di" bpmnElement="Association_09mpbps">
+        <omgdi:waypoint x="561" y="176" />
+        <omgdi:waypoint x="617" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_07z1t38_di" bpmnElement="Association_07z1t38">
+        <omgdi:waypoint x="761" y="346" />
+        <omgdi:waypoint x="817" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ju9d74_di" bpmnElement="Flow_0ju9d74">
+        <omgdi:waypoint x="188" y="190" />
+        <omgdi:waypoint x="320" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qkooe4_di" bpmnElement="Flow_0qkooe4">
+        <omgdi:waypoint x="420" y="190" />
+        <omgdi:waypoint x="525" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wtzuq2_di" bpmnElement="Flow_0wtzuq2">
+        <omgdi:waypoint x="575" y="190" />
+        <omgdi:waypoint x="700" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0i9lonf_di" bpmnElement="Flow_0i9lonf">
+        <omgdi:waypoint x="750" y="230" />
+        <omgdi:waypoint x="750" y="335" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_0bw3f72_di" bpmnElement="TextAnnotation_0bw3f72">
+        <omgdc:Bounds x="580" y="80" width="100" height="30" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_11inikc_di" bpmnElement="TextAnnotation_11inikc">
+        <omgdc:Bounds x="780" y="250" width="100" height="30" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
