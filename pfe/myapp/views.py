@@ -1,6 +1,7 @@
 from django.shortcuts import render , HttpResponse
 from django.core.files.storage import FileSystemStorage
 import re
+
 def getways_ids(bpmn_file_path):
    ids_list = []
    with open(bpmn_file_path, 'r') as file:
@@ -52,13 +53,13 @@ def modify_bpmn_file(bpmn_file_path):
             lines = file.readlines()
     return message
 def home(request):
-    return render(request ,"home.html")
+    return render(request ,"myapp/home.html")
 def upload(request):
     if request.method == 'POST':
         uploaded_file = request.FILES['document']
         fs = FileSystemStorage()
         fs.save(uploaded_file.name,uploaded_file)
         annotation = modify_bpmn_file(fs.path(uploaded_file.name)).__str__()
-        return render(request, 'upload_success.html',{'file_name': uploaded_file.name,'annotation': annotation})
-    return render(request ,"upload.html")
+        return render(request, 'myapp/upload_success.html',{'file_name': uploaded_file.name,'annotation': annotation})
+    return render(request ,"myapp/upload.html")
 
