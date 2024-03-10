@@ -37,10 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'myapp.apps.MyappConfig'
+    'rest_framework',
+    'myapp.apps.MyappConfig',
+    'corsheaders',
+    'frontend',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,7 +60,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'myreactapp/build'),
+            os.path.join(BASE_DIR, 'frontend/build'),
             BASE_DIR / 'templates'
         ],
         'APP_DIRS': True,
@@ -132,6 +136,5 @@ MEDIA_URL =  '/media/'
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,'myapp/static'),
-    os.path.join(BASE_DIR, 'myreactapp/build/static')
+    os.path.join(BASE_DIR,'myapp/static')
 ]
