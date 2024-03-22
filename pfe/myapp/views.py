@@ -1,6 +1,9 @@
 from django.shortcuts import render , HttpResponse
 from django.core.files.storage import FileSystemStorage
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 import re
+
 def getids(bpmn_file_path):
    ids_list = []
    with open(bpmn_file_path, 'r') as file:
@@ -99,6 +102,7 @@ def modify_bpmn_file(bpmn_file_path):
             lines = file.readlines()
     message1 = getways_ids2(bpmn_file_path)
     return message1 + message
+
 def home(request):
     return render(request ,"myapp/home.html")
 def upload(request):

@@ -1,0 +1,102 @@
+.search_box{
+    display: flex;
+    align-items: center;
+  }
+  .search_box input{
+    padding: 9px;
+    width: 250px;
+    background: rgb(228, 228, 228);
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+  }
+  .search_box i{
+    padding: 0.66rem;
+    cursor: pointer;
+    color: #fff;
+    background: #000;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+  .header-icons{
+    display: flex;
+    align-items: center;
+  }
+  .header-icons i{
+    margin-right: 2rem;
+    cursor: pointer;
+  }
+  .header-icons .account{
+    width: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-icons .account img{
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+  .container{
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+  /* Side menubar section */
+ 
+  .side_navbar{
+    padding: 1px;
+    display: flex;
+    flex-direction: column;
+    background-color: #d7d7f0;
+  }
+  .side_navbar span{
+    color: rgb(90, 88, 88);
+    margin: 1rem 3rem;
+    font-size: 12px;
+    
+  }
+  .side_navbar a{
+    width: 100%;
+    padding: 0.8rem 3rem;
+    font-weight: 500;
+    font-size: 15px;
+    color: rgb(66, 66, 66);
+  }
+  .links{
+    margin-top: 13.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+ 
+  .side_navbar a:hover{
+    background: rgb(235, 235, 235);
+  }
+  .side_navbar .active{
+    border-left: 2px solid rgb(100, 100, 100);
+  }
+  /* Main Body Section */
+  .main-body{
+    width: 90%;
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+  .promo_card{
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 8px;
+    padding: 0.5rem 1rem 1rem 3rem;
+
+  }
+  .promo_card h1, .promo_card span, button{
+    margin: 10px;
+  }
+  .promo_card button{
+    display: block;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #d7d7f0;
+  }
+ 
+  

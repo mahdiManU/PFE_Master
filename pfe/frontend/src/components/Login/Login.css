@@ -1,8 +1,8 @@
 /* components/Login/Login.css */
 .login {
-    max-width: 400px;
+    max-width: 430px;
     width: 100%;
-    margin: 3em auto;
+    margin: 2em auto;
     padding: 2em;
     background-color: var(--clr-bg-alt);
     box-shadow: var(--shadow);
@@ -11,7 +11,8 @@
   }
   
   .login h2 {
-    margin-bottom: 1em;
+    margin-right: 0.5em;
+    margin-bottom: 0.9em;
   }
   
   .login form {
@@ -32,7 +33,7 @@
   }
   
   .login button {
-    padding: 0.8em 1.2em;
+    padding: 0.6em 1.2em;
     background-color: var(--clr-primary);
     color: var(--clr-bg-alt);
     border: none;
@@ -46,9 +47,10 @@
   }
   
   .login .btn--outline {
-    margin-top: 1em;
+    margin-bottom: 18em;
     color: var(--clr-primary);
-    border: 1px solid var(--clr-primary);
+    margin-left: 1.5em;
+    padding-left: 0.8em;
     background-color: var(--clr-bg-alt);
     transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
   }
@@ -56,5 +58,9 @@
   .login .btn--outline:hover {
     color: var(--clr-bg-alt);
     border-color: var(--clr-fg);
+  }
+  .login span.error {
+    font-size: 0.8rem; /* Adjust the font size as needed */
+    color: red;
   }
   

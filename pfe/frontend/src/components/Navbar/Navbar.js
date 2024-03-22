@@ -6,11 +6,15 @@ import CloseIcon from '@material-ui/icons/Close'
 import { ThemeContext } from '../../contexts/theme'
 import { projects, skills, contact } from '../../Portfolio'
 import './Navbar.css'
+import { Link } from 'react-router-dom';
+
 
 
 const Navbar = () => {
   const [{ themeName, toggleTheme }] = useContext(ThemeContext)
   const [showNavList, setShowNavList] = useState(false)
+
+
 
   const toggleNavList = () => setShowNavList(!showNavList)
 
@@ -34,14 +38,14 @@ const Navbar = () => {
 
         {skills.length ? (
           <li className='nav__list-item'>
-            <a
-              href='#login'
-              onClick={toggleNavList}
-              className='link link--nav'
-            >
-              LogIn
-            </a>
-          </li>
+          <Link
+            to="/login" // Link to the login page
+            onClick={toggleNavList}
+            className='link link--nav'
+          >
+            LogIn
+          </Link>
+        </li>
         ) : null}
 
         {contact.email ? (
