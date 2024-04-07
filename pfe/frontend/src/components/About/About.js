@@ -1,4 +1,4 @@
-import { about } from '../../Portfolio'
+import { about } from '../../English'
 import './About.css'
 
 const About = () => {

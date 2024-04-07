@@ -49,7 +49,7 @@ const NavDash = () => {
             onClick={toggleNavList}
             className='link link--nav'
           >
-            My Profile
+            Projects
           </Link>
         </li>
 

@@ -7,9 +7,9 @@ const header = {
   const about = {
     // all the properties are optional - can be left empty or deleted
     name: 'BPMN.io Diagram',
-    role: 'a tool for detecting legal errors in administrative processes',
+    role: 'Un outil de détection des erreurs juridiques dans les processus administratifs.',
     description:
-      'The primary goal is to create a solution that can identify and highlight any legal inconsistencies or errors within administrative process models. The tool is designed to enhance the quality and reliability of legal administrative processes by providing a mechanism for automated error detection, ensuring compliance with legal requirements and minimizing the risk of legal issues in administrative procedures..',
+      'Le but principal est de créer une solution capable d\'identifier et de mettre en évidence les incohérences ou erreurs juridiques dans les modèles de processus administratifs. L\'outil est conçu pour améliorer la qualité et la fiabilité des processus administratifs juridiques en fournissant un mécanisme de détection automatique des erreurs, garantissant la conformité aux exigences légales et minimisant le risque de problèmes juridiques dans les procédures administratives.',
     resume: 'https://drive.google.com/file/d/1lptHKG35TLhTgnnzbZpk5fm1iLYGb_3T/view?usp=sharing',
   }
   
@@ -60,6 +60,12 @@ const header = {
     // email is optional - if left empty Contact section won't show up
     email: 'imenerabahi25@mail.com',
   }
+
+  const navbar={
+    one : 'exemples processus',
+    two : 'se connecter',
+    three : 'contact',
+  }
   
-  export { header, about, projects, skills, contact }
+  export { header, about, projects, skills, contact , navbar}
   
