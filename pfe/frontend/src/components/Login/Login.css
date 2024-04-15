@@ -1,15 +1,19 @@
-/* components/Login/Login.css */
+
 .login {
-    max-width: 430px;
-    width: 100%;
-    margin: 2em auto;
-    padding: 2em;
-    background-color: var(--clr-bg-alt);
-    box-shadow: var(--shadow);
-    border-radius: 8px;
-    text-align: center;
-  }
-  
+  max-width: 430px;
+  width: 100%;
+  margin: 1em auto;
+  padding: 2em;
+  background-color: var(--clr-bg-alt);
+  box-shadow: var(--shadow);
+  border-radius: 8px;
+  text-align: center;
+  justify-content: space-between; 
+}
+
+.login .reset-button {
+  margin-left: auto; /* Push the reset button to the right */
+}
   .login h2 {
     margin-right: 0.5em;
     margin-bottom: 0.9em;
@@ -47,10 +51,9 @@
   }
   
   .login .btn--outline {
-    margin-bottom: 18em;
+ 
     color: var(--clr-primary);
-    margin-left: 1.5em;
-    padding-left: 0.8em;
+    
     background-color: var(--clr-bg-alt);
     transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
   }

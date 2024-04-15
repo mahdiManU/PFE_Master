@@ -4,6 +4,7 @@ import WbSunnyRoundedIcon from '@material-ui/icons/WbSunnyRounded'
 import MenuIcon from '@material-ui/icons/Menu'
 import CloseIcon from '@material-ui/icons/Close'
 import { ThemeContext } from '../../contexts/theme'
+import { LanguageContext } from '../../contexts/language';
 import * as EnglishContent from '../../English';
 import * as FrenchContent from '../../Frensh';
 
@@ -15,13 +16,11 @@ import { Link } from 'react-router-dom';
 const Navbar = () => {
   const [{ themeName, toggleTheme }] = useContext(ThemeContext)
   const [showNavList, setShowNavList] = useState(false)
-  const [currentLanguage, setCurrentLanguage] = useState('en');
+  const { currentLanguage, switchLanguage } = useContext(LanguageContext);
 
   const { navbar, projects, skills, contact } = currentLanguage === 'en' ? EnglishContent : FrenchContent;
 
-  const switchLanguage = () => {
-    setCurrentLanguage(currentLanguage === 'en' ? 'fr' : 'en');
-  };
+
 
   const toggleNavList = () => setShowNavList(!showNavList)
 
@@ -85,7 +84,9 @@ const Navbar = () => {
       >
         {showNavList ? <CloseIcon /> : <MenuIcon />}
       </button>
-      <button onClick={switchLanguage}>Switch</button>
+      <div className="language-switcher" onClick={switchLanguage}>
+        {currentLanguage === 'en' ? 'EN' : 'FR'}
+      </div>
     </nav>
   )
 }

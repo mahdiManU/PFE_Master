@@ -1,19 +1,27 @@
-import { contact } from '../../English'
-import './Contact.css'
+import React, { useContext } from 'react';
+import { LanguageContext } from '../../contexts/language';
+import { contact as EnglishContact } from '../../English';
+import { contact as FrenchContact } from '../../Frensh';
+import './Contact.css';
 
 const Contact = () => {
-  if (!contact.email) return null
+  const { currentLanguage } = useContext(LanguageContext);
+  const contactInfo = currentLanguage === 'en' ? EnglishContact : FrenchContact;
+
+  if (!contactInfo.email) return null;
 
   return (
     <section className='section contact center' id='contact'>
-      <h2 className='section__title'>Contact</h2>
-      <a href={`mailto:${contact.email}`}>
+      <h2 className='section__title'>
+        {currentLanguage === 'en' ? 'Contact' : 'Contactez Nous'}
+      </h2>
+      <a href={`mailto:${contactInfo.email}`}>
         <span type='button' className='btn btn--outline'>
-          Email me
+          {currentLanguage === 'en' ? 'Email me' : 'Envoyez un email'}
         </span>
       </a>
     </section>
-  )
+  );
 }
 
-export default Contact
+export default Contact;

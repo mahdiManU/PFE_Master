@@ -1,21 +1,27 @@
-
-import { header } from '../../English'
+import React, { useContext } from 'react';
+import { LanguageContext } from '../../contexts/language'; 
+import { header as EnglishContent}  from '../../English'
+import { header as FrenchContent }from '../../Frensh'
 import Navbar from '../Navbar/Navbar'
 import './Header.css'
 import { NavLink} from 'react-router-dom'
 
 const Header = () => {
-  const { homepage, title } = header
+  const { currentLanguage } = useContext(LanguageContext);
+  
+  // Dynamically select the header object based on the current language
+  const header = currentLanguage === 'en' ? EnglishContent : FrenchContent;
+
 
   return (
     <header id="top" className='header center'>
       <h3>
-        {homepage ? (
-          <NavLink to={homepage} className='link'>
-            {title}
+        {header.homepage ? (
+          <NavLink to='/' className='link'>
+            {header.title}
           </NavLink>
         ) : (
-          title
+          header.title
         )}
       </h3>
         <Navbar />

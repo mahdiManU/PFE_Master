@@ -8,6 +8,7 @@ const ACTIVATE_URL = `${BACKEND_DOMAIN}/api/v1/auth/users/activation/`
 const RESET_PASSWORD_URL = `${BACKEND_DOMAIN}/api/v1/auth/users/reset_password/`
 const RESET_PASSWORD_CONFIRM_URL = `${BACKEND_DOMAIN}/api/v1/auth/users/reset_password_confirm/`
 const GET_USER_INFO = `${BACKEND_DOMAIN}/api/v1/auth/users/me/`
+const PROJECTS_URL = `${BACKEND_DOMAIN}/api/projects/`;
 
 
 
@@ -105,8 +106,22 @@ const getUserInfo = async (accessToken) => {
     return response.data
 }
 
+const fetchProjects = async (userId, accessToken) => {
+    const config = {
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        }
+    };
 
+    try {
+        const response = await axios.get(`${PROJECTS_URL}?user=${userId}`, config);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching projects:", error);
+        throw error; // Re-throw the error to handle it in the component
+    }
+};
 
-const authService = { register, login, logout, activate, resetPassword, resetPasswordConfirm, getUserInfo }
+const authService = { register, login, logout, activate, resetPassword, resetPasswordConfirm, getUserInfo, fetchProjects}
 
 export default authService

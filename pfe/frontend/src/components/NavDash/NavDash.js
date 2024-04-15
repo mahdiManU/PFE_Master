@@ -4,6 +4,7 @@ import WbSunnyRoundedIcon from '@material-ui/icons/WbSunnyRounded'
 import MenuIcon from '@material-ui/icons/Menu'
 import CloseIcon from '@material-ui/icons/Close'
 import { ThemeContext } from '../../contexts/theme'
+import { LanguageContext } from '../../contexts/language'
 import './NavDash.css'
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useDispatch} from 'react-redux'
@@ -15,8 +16,11 @@ const NavDash = () => {
   const [{ themeName, toggleTheme }] = useContext(ThemeContext)
   const [showNavList, setShowNavList] = useState(false)
 
+  const { currentLanguage, switchLanguage } = useContext(LanguageContext);
+
+
   const navigate = useNavigate()
-    const dispatch = useDispatch()
+  const dispatch = useDispatch()
 
     
 
@@ -33,7 +37,7 @@ const NavDash = () => {
         <header id="top" className='header center'>
       <h3>
           <NavLink to='/dashboard' className='link'>
-            Home
+          {currentLanguage === 'en' ? 'Dashboard' : 'Accueil'}
           </NavLink>
 
       </h3>
@@ -49,7 +53,7 @@ const NavDash = () => {
             onClick={toggleNavList}
             className='link link--nav'
           >
-            Projects
+            {currentLanguage === 'en' ? 'Projects' : 'Projets'}
           </Link>
         </li>
 
@@ -59,7 +63,7 @@ const NavDash = () => {
               onClick={handleLogout}
               className='link link--nav'
             >
-              Logout
+              {currentLanguage === 'en' ? 'Logout' : 'Déconnexion'}
             </Link>
           </li>
 
@@ -82,6 +86,9 @@ const NavDash = () => {
       >
         {showNavList ? <CloseIcon /> : <MenuIcon />}
       </button>
+      <div className="language-switcher" onClick={switchLanguage}>
+        {currentLanguage === 'en' ? 'EN' : 'FR'}
+      </div>
     </nav>
     </header>
     </div>

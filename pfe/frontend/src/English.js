@@ -6,11 +6,12 @@ const header = {
   
   const about = {
     // all the properties are optional - can be left empty or deleted
-    name: 'BPMN.io Diagram',
-    role: 'a tool for detecting legal errors in administrative processes',
+    name:'Start, Verifying ',
+    role: 'A tool for detecting legal errors in administrative processes',
     description:
       'The primary goal is to create a solution that can identify and highlight any legal inconsistencies or errors within administrative process models. The tool is designed to enhance the quality and reliability of legal administrative processes by providing a mechanism for automated error detection, ensuring compliance with legal requirements and minimizing the risk of legal issues in administrative procedures..',
     resume: 'https://drive.google.com/file/d/1lptHKG35TLhTgnnzbZpk5fm1iLYGb_3T/view?usp=sharing',
+    memoire:'view memoire'
   }
   
   const projects = [
@@ -66,6 +67,7 @@ const header = {
     two : 'login',
     three : 'contact',
   }
+  
 
   export { header, about, projects, skills, contact, navbar }
   

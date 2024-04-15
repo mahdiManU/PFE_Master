@@ -1,2 +1,0 @@
-erreur S 1 (Deterministic deadlock) 
-erreur MI 1 condition manquante :[] 

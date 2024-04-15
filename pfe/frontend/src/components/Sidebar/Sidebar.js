@@ -1,9 +1,6 @@
 import React, {useState} from 'react'
 import './Sidebar.css'
-import 
-{BsCart3, BsGrid1X2Fill, BsFillArchiveFill, BsFillGrid3X3GapFill, BsPeopleFill, 
-  BsListCheck, BsMenuButtonWideFill, BsFillGearFill}
- from 'react-icons/bs'
+
 
  const Sidebar = ({ annotations }) => {
     const [openSidebarToggle, setOpenSidebarToggle] = useState(false)

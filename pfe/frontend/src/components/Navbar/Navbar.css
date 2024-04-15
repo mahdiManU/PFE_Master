@@ -37,4 +37,23 @@
       margin-left: 0.8em;
     }
   }
+  .language-switcher {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0.5em 1em;
+    background-color: #dedceb;
+    color: #333;
+    cursor: pointer;
+  }
   
+  .language-switcher:hover {
+    background-color: #bfc6d8;
+  }
+  @media (max-width: 600px) {
+    .language-switcher {
+      position: fixed;
+      top: 0.5em;
+      right: 0.5em;
+      z-index: 3;
+    }
+  }

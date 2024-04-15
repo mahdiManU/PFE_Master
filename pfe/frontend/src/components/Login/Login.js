@@ -1,12 +1,37 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate , Link} from "react-router-dom"
 import { login, reset, getUserInfo } from '../../features/authSlice'
 import './Login.css'; 
+import { LanguageContext } from '../../contexts/language';
 
 
 const Login = () => {
+  const { currentLanguage } = useContext(LanguageContext);
+  const content = currentLanguage === 'en' ? {
+    login: 'Login',
+    emailLabel: 'E-mail',
+    passwordLabel: 'Password',
+    forgetPasswordLink: 'Forget Password ?',
+    signInButton: 'Sign In',
+    errors: {
+      emailRequired: 'Please provide your email.',
+      passwordRequired: 'Please provide your password.',
+      invalidCredentials: 'Invalid email or password. Please try again.'
+    }
+  } : {
+    login: 'Se Connecter',
+    emailLabel: 'E-mail',
+    passwordLabel: 'Mot de passe',
+    forgetPasswordLink: 'Mot de passe oublié ?',
+    signInButton: 'Connexion',
+    errors: {
+      emailRequired: 'Veuillez fournir votre adresse e-mail.',
+      passwordRequired: 'Veuillez fournir votre mot de passe.',
+      invalidCredentials: 'E-mail ou mot de passe incorrect. Veuillez réessayer.'
+    }
+  };
 
   const [formData, setFormData] = useState({
     "email": "",
@@ -41,11 +66,11 @@ const Login = () => {
     e.preventDefault()
     // Validate email and password
     if (!email) {
-      setEmailError('Please provide your email.');
+      setEmailError(content.errors.emailRequired);
       return;
     }
     if (!password) {
-      setPasswordError('Please provide your password.');
+      setPasswordError(content.errors.passwordRequired);
       return;
     }
     const userData = {
@@ -58,7 +83,7 @@ const Login = () => {
 
   useEffect(() => {
     if (isError) {
-      setUserError('Invalid email or password. Please try again.')
+      setUserError(content.errors.invalidCredentials)
     }
 
     if (isSuccess || user) {
@@ -71,29 +96,35 @@ const Login = () => {
 }, [isError, isSuccess, user,message, navigate, dispatch])
 
   return (
-     <div className='login center'>
-       <h2>Login</h2>
+     <div className={`login ${currentLanguage} `}>
+      {/* Reset button for clearing form fields */}
+      <button type='button' className='btn btn--outline reset-button' onClick={() => {
+  setFormData({ email: '', password: '' });
+  setEmailError('');
+  setPasswordError('');
+  setUserError('');
+}}>
+  X
+</button>
+       <h2>{content.login}</h2>
          <form >
          {userError && <span className="error">{userError}</span>}
-            <label htmlFor='email'>E-mail</label>
+            <label htmlFor='email'>{content.emailLabel}</label>
             <input type='text' id='email' name='email' onChange={handleChange}
                         value={email} required />
                         {emailError && <span className="error">{emailError}</span>}
     
-            <label htmlFor='password'>Password</label>
+            <label htmlFor='password'>{content.passwordLabel}</label>
             <input type='password' id='password' name='password' onChange={handleChange}
                          value={password} required />
                          {passwordError && <span className="error">{passwordError}</span>}
                           
-            <Link to="/reset-password">Forget Password ?</Link>            
+            <Link to="/reset-password">{content.forgetPasswordLink}</Link>            
     
-            <button type='submit' onClick={handleSubmit}>Sign In</button>
+            <button type='submit' onClick={handleSubmit}>{content.signInButton}</button>
           </form>
-          
-          <button type='button' className='btn btn--outline'  >
-            X
-          </button>
       </div>
+      
   );
 }
 

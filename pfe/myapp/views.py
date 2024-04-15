@@ -8,6 +8,24 @@ import uuid
 import os
 from django.conf import settings
 from .mabib import *
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from .models import Project
+from .serializers import ProjectSerializer
+
+
+class ProjectListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+class ProjectDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
 
 def negative_event(bpmnfile):
    with open(bpmnfile, 'r') as file:
@@ -252,3 +270,17 @@ def verify_diagram(request):
         return JsonResponse({'filename': uploaded_file.name, 'annotations': annotation})
     else:
         return HttpResponse(status=400)
+
+def projects_api(request):
+    if request.method == 'GET':
+        # Query the database to fetch all projects
+        projects = Project.objects.all()
+
+        # Serialize the projects data into JSON format
+        serialized_projects = [{'name': project.name, 'description': project.description} for project in projects]
+
+        # Return the serialized projects as JSON response
+        return JsonResponse({'projects': serialized_projects})
+    else:
+        # If the request method is not GET, return an error response
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
