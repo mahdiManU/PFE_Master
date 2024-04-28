@@ -4,28 +4,51 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import re
 from django.http import JsonResponse
+from rest_framework.parsers import JSONParser
 import uuid
 import os
 from django.conf import settings
 from .mabib import *
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
+from rest_framework import generics, permissions
 from .models import Project
 from .serializers import ProjectSerializer
-
 
 class ProjectListCreateAPIView(generics.ListCreateAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
-    
+    permission_classes = [permissions.IsAuthenticated]  # Restrict access to authenticated users only
+
+    def get_queryset(self):
+        user = self.request.user
+        return self.queryset.filter(owner=user)
+
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(owner=self.request.user)  # Automatically set the owner of the project to the current user
+
+    def dispatch(self, request, *args, **kwargs):
+        # Print request headers before calling the parent dispatch method
+        print('Request Headers:', request.headers)
+
+        # Call parent dispatch method
+        return super().dispatch(request, *args, **kwargs)
 
 class ProjectDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return self.queryset.filter(owner=user)
+
+    def dispatch(self, request, *args, **kwargs):
+        # Print request headers before calling the parent dispatch method
+        print('Request Headers:', request.headers)
+
+        # Call parent dispatch method
+        return super().dispatch(request, *args, **kwargs)
 
 def negative_event(bpmnfile):
    with open(bpmnfile, 'r') as file:
@@ -53,7 +76,6 @@ def negative_event(bpmnfile):
       target_list = []
       type_target = []
    return list_finale
-
 def getway_exclusive_valide(bpmnfile,id):
    cpt=0
    with open(bpmnfile, 'r') as file:
@@ -65,7 +87,6 @@ def getway_exclusive_valide(bpmnfile,id):
       return False
    else:
       return True
-
 def getid_picine(bpmn_file_path):
    ids_list = []
    with open(bpmn_file_path, 'r') as file:
@@ -74,8 +95,7 @@ def getid_picine(bpmn_file_path):
         if (("<participant" in line) and ("name=" not in line)):
          match = re.search(r'id="([^"]+)"', line)
          ids_list.append(match.group(1))
-   return ids_list
-
+   return ids_list         
 def getids(bpmn_file_path):
    ids_list = []
    with open(bpmn_file_path, 'r') as file:
@@ -85,7 +105,6 @@ def getids(bpmn_file_path):
          match = re.search(r'id="([^"]+)"', line)
          ids_list.append(match.group(1))
    return ids_list
-
 def verif_logique(maliste,id):
   # Use regular expression to find all numbers in the string
     numbers = re.findall(r'\d+', maliste)
@@ -98,13 +117,11 @@ def verif_logique(maliste,id):
         return "missing information : missing interval dans la getway avec l'id : "+id 
     else:
         return 0
-
 def colorier_picine(id,liste):
    for i in liste:
       if((id in i) and ("<bpmndi:BPMNShape" in i)):
         i= i[:-2]+' bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">\n'
    return liste
- 
 def getways_ids2(bpmn_file_path,err):
    ids_list = []
    content = []
@@ -131,8 +148,7 @@ def getways_ids2(bpmn_file_path,err):
        if(verif_logique(content.__str__(),i)):
           message.append(verif_logique(content.__str__(),i))
        content = []        
-   return message 
-
+   return message
 def getways_ids(bpmn_file_path):
    ids_list = []
    with open(bpmn_file_path, 'r') as file:
@@ -143,7 +159,6 @@ def getways_ids(bpmn_file_path):
          if(getway_exclusive_valide(bpmn_file_path,match.group(1))):
             ids_list.append(match.group(1))
    return ids_list
-
 def get_annotation(bpmn_file_path,id):
    msg = []
    with open(bpmn_file_path, 'r') as file:
@@ -156,7 +171,7 @@ def get_annotation(bpmn_file_path,id):
              if temp in line2 and  '<textAnnotation' in line2:
                 msg.append("missing information : "+re.search(r'<text>(.*?)</text>', lines[lines.index(line2)+1]).group(1)+ " condition manquante dans la getway avec l'id : "+id)
    return msg
-
+ 
 def modify_bpmn_file(bpmn_file_path):
     err = 0
     with open(bpmn_file_path, 'r') as file:
@@ -227,9 +242,37 @@ def modify_bpmn_file(bpmn_file_path):
          file.writelines(modified_lines)
     message1 = getways_ids2(bpmn_file_path,err)
     return message1 + message 
-
 def home(request):
     return render(request ,"myapp/home.html")
+
+def upload(request):
+    if request.method == 'POST':
+       # testPDF()
+        uploaded_file = request.FILES['document']
+        fs = FileSystemStorage()
+        fs.save(uploaded_file.name,uploaded_file)
+        myfile =os.path.splitext(uploaded_file.name)[0]
+        fs.save(myfile+'first.bpmn',uploaded_file)
+       # print(fs.path('loi.txt'))
+        #le fichier avec first a la fin c'est avant verification
+        annotation , loi , taches = message(fs.path(uploaded_file.name).__str__(),fs.path(myfile+'first.bpmn'))
+        print("les err : "+ annotation.__str__())
+        print("les annotation" + loi.__str__())
+        print("les taches" + taches.__str__())
+        arts = []
+        for i in range(len(annotation)):
+            arts.append(trouver_article(fs.path('loi.txt').__str__(),loi[i],annotation[i],taches[i]))
+        print(arts)
+        with open(fs.path(uploaded_file.name+".txt"), 'a') as f:
+            for i in arts:
+             f.write(i+" \n")
+        annotation += modify_bpmn_file(fs.path(uploaded_file.name).__str__())
+      
+        with open(fs.path(uploaded_file.name+".txt"), 'a') as f:
+            for i in annotation:
+             f.write(i+" \n")
+        return render(request, 'myapp/new.html',{'file_name': uploaded_file.name,'file_name2' : myfile+'first.bpmn','annotation': annotation.__str__()})
+    return render(request ,"myapp/upload.html")
 
 @api_view(['POST'])
 def diagram(request):
@@ -252,15 +295,29 @@ def diagram(request):
 @api_view(['POST'])
 def verify_diagram(request):
     if request.method == 'POST' and 'document' in request.FILES:
-        uploaded_file = request.FILES['document']
 
-       # Save the uploaded file to a specific location
+
+       # testPDF()
+        uploaded_file = request.FILES['document']
         fs = FileSystemStorage()
         fs.save(uploaded_file.name,uploaded_file)
-      
-        annotation =message(fs.path(uploaded_file.name).__str__())
+        myfile =os.path.splitext(uploaded_file.name)[0]
+        fs.save(myfile+'first.bpmn',uploaded_file)
+       # print(fs.path('loi.txt'))
+        #le fichier avec first a la fin c'est avant verification
+        annotation , loi , taches = message(fs.path(uploaded_file.name).__str__(),fs.path(myfile+'first.bpmn'))
+        print("les err : "+ annotation.__str__())
+        print("les annotation" + loi.__str__())
+        print("les taches" + taches.__str__())
+        arts = []
+        for i in range(len(annotation)):
+            arts.append(trouver_article(fs.path('loi.txt').__str__(),loi[i],annotation[i],taches[i]))
+        print(arts)
+        with open(fs.path(uploaded_file.name+".txt"), 'a') as f:
+            for i in arts:
+             f.write(i+" \n")
         annotation += modify_bpmn_file(fs.path(uploaded_file.name).__str__())
-        print(annotation)
+      
         with open(fs.path(uploaded_file.name+".txt"), 'a') as f:
             for i in annotation:
              f.write(i+" \n")
@@ -270,17 +327,3 @@ def verify_diagram(request):
         return JsonResponse({'filename': uploaded_file.name, 'annotations': annotation})
     else:
         return HttpResponse(status=400)
-
-def projects_api(request):
-    if request.method == 'GET':
-        # Query the database to fetch all projects
-        projects = Project.objects.all()
-
-        # Serialize the projects data into JSON format
-        serialized_projects = [{'name': project.name, 'description': project.description} for project in projects]
-
-        # Return the serialized projects as JSON response
-        return JsonResponse({'projects': serialized_projects})
-    else:
-        # If the request method is not GET, return an error response
-        return JsonResponse({'error': 'Method not allowed'}, status=405)

@@ -60,7 +60,7 @@ class CustomUserManager(BaseUserManager):
         else:
             raise ValueError(_("Admin user and email adress is required")) 
         
-        user = self.create_user(first_name,last_name,email,password, **extra_fields)
+        user = super().create_user(first_name, last_name, email, password, **extra_fields)
 
 
         return user

@@ -1,0 +1,48 @@
+/* CSS for ProjectCard.js */
+
+.project-card {
+  padding: 2em;
+  margin: 0 auto;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s linear;
+}
+
+.project-card:hover {
+  transform: translateY(-7px);
+}
+
+.project-card h3 {
+  margin-bottom: 0.5em;
+}
+
+.project-card p {
+  margin-bottom: 0.5em;
+}
+
+.project-card p:last-child {
+  margin-bottom: 0;
+}
+
+  
+  /* CSS for ProjectListPage.js */
+  
+  .project-list-page {
+    padding: 2em;
+  }
+  
+  .projects-grid {
+    max-width: 1200px; /* Adjust the max-width as needed */
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18em, 1fr));
+    grid-gap: 2em;
+  }
+  
+  .project-cards {
+    display: flex; /* Use flexbox to ensure projects are aligned in a row */
+    flex-wrap: wrap; /* Allow projects to wrap to the next line if there's not enough space */
+    justify-content: space-between; /* Distribute projects evenly across the container */
+  }
+  
+  

@@ -15,7 +15,7 @@ def dfs(bpmnfile,graph, start, end, path=[], paths=[]):
         paths.append(path)
         return paths
     if((get_element_type(start,bpmnfile)!="endEvent") and (start in graph)):
-        print(has_no_next(bpmnfile,start))
+        
         
         for neighbor in graph[start]:
             if neighbor not in path:
@@ -33,7 +33,7 @@ def get_gateway_paths(xml_file, start_gateway_id, end_gateway_id):
     tree = ET.parse(xml_file)
     root = tree.getroot()
     graph = {}
-    for sequenceFlow in root.findall('.//{http://www.omg.org/spec/BPMN/20100524/MODEL}sequenceFlow'):
+    for sequenceFlow in root.findall('.//{http://www.omg.org/spec/BPMN/20100524/MODEL}sequenceFlow') + root.findall('.//{http://www.omg.org/spec/BPMN/20100524/MODEL}messageFlow'):
         sourceRef = sequenceFlow.get('sourceRef')
         targetRef = sequenceFlow.get('targetRef')
         if sourceRef not in graph:
@@ -85,7 +85,7 @@ def verif(bpmnfile):
     exclu = get_all_exclusiveG(bpmnfile)
     para = get_all_parallelG(bpmnfile)
     inclu= get_all_inclusiveG(bpmnfile)
-    print(exclu)
+    
     list_finale = []
     for i in exclu:
         for j in para:
@@ -99,7 +99,6 @@ def verif2(bpmnfile):
     listef = []
     exclu = get_all_exclusiveG(bpmnfile)
     para = get_all_parallelG(bpmnfile)
-    print(exclu)
     list_finale = []
     for i in exclu:
         for j in para:
@@ -113,7 +112,6 @@ def verif3(bpmnfile):
     listef = []
     exclu = get_all_exclusiveG(bpmnfile)
     inclu= get_all_inclusiveG(bpmnfile)
-    print(exclu)
     list_finale = []
     for i in exclu:
         for j in inclu:
@@ -151,9 +149,8 @@ def modifier_noms(bpmnfile, id_liste, nouveau_nom):
                     
                     nv_lines.append(nv_line)
                if("name=" in line):
-                    print("imene")
+                   
                     nv_line = re.sub(r'name="([^"]+)"', r'name="erreur '+nouveau_nom+'"', line)
-                    print(nv_line)
                     nv_lines.append(nv_line)
            else:
                nv_lines.append(line)
@@ -191,7 +188,7 @@ def colorier_chemin(bpmnfile):
     chemin +=verif3(bpmnfile)
     chemin +=verif4(bpmnfile)
     retoure = []
-    print(chemin)
+    
     final = []
     with open(bpmnfile, 'r') as file:
         lines = file.readlines()
@@ -200,11 +197,11 @@ def colorier_chemin(bpmnfile):
             for k in j:
                 for t in lines:
                     if((k in t) and ("<bpmndi:BPMNShape" in t) and (' bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">\n' not in t)):
-                        print(t)
+                        
                         t= t[:-2]+' bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">\n'
-                        print(t)
+                       
                         final.append(t)
-                        print(k)
+                        
                     else:
                         final.append(t)
                 with open(bpmnfile, 'w') as file:
@@ -215,7 +212,29 @@ def colorier_chemin(bpmnfile):
                 with open(bpmnfile, 'r') as file:
                    lines = file.readlines()
     return chemin ,exclu ,para , inclu
-def message(bpmnfile):
+def get_annotation2(bpmn_file_path,id):
+   msg = []
+   with open(bpmn_file_path, 'r') as file:
+        lines = file.readlines()
+   for line in lines:
+        if ("<association" in line) and (id in line):
+         match = re.search(r'targetRef="([^"]+)"', line)
+         temp = match.group(1)
+         for line2 in lines : 
+             if temp in line2 and  '<textAnnotation' in line2:
+                msg = re.search(r'<text>(.*?)</text>', lines[lines.index(line2)+1])
+                if (msg):
+                    return msg.group(1)
+   return msg
+def get_task(bpmnfile,id_tache):
+   with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+   for line in lines:
+        if ("<task" in line) and (id_tache in line):
+            msg = re.search(r'name="([^"]+)"', line)
+   return msg.group(1)
+
+def message2(bpmnfile):
     mesmessage , exclu, para ,inclu = colorier_chemin(bpmnfile)
     print("helloo mahdi "+mesmessage.__str__())
     nvmsg = []
@@ -256,3 +275,114 @@ def message(bpmnfile):
             nvmsg.append("erreur S "+str(trr)+" tache sans source")
             temp = []
     return nvmsg
+
+
+def message(bpmnfile,bpmnfile2):
+    mesmessage , exclu, para ,inclu = colorier_chemin(bpmnfile)
+    
+    nvmsg = []
+    acti = []
+    temp = []
+    test = []
+    err =0
+    trr = 0
+    for i in mesmessage:
+        trr+=1
+        if((i[0][0] in exclu) and (i[0][-1] in para)):
+          nvmsg.append("erreur S "+str(trr)+" (Deterministic deadlock)")
+        if((i[0][-1] in exclu) and (i[0][0] in para)):
+          nvmsg.append("erreur S "+str(trr)+" (Deterministic lack of synchronization)")
+        if((i[0][-1] in exclu) and (i[0][0] in inclu)):
+          nvmsg.append("erreur S "+str(trr)+" (Nondeterministic lack of synchronization)")
+        if((i[0][-1] in para) and (i[0][0] in inclu)):
+          nvmsg.append("erreur S "+str(trr)+" (Nondeterministic deadlock)")
+    for i in mesmessage:
+        err+=1
+        for j in i:
+            modifier_noms(bpmnfile,j,"erreur S "+str(err))
+    with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+    for line in lines:
+        if("<task" in line):
+            match = re.search(r'id="([^"]+)"', line)
+            acti.append(match.group(1))
+    for id in acti:
+        cpt = 0
+        for line in lines:
+            if(('targetRef="'+id) in line):
+                cpt+=1
+        if(cpt == 0):
+            trr = trr+1
+            temp.append(id)
+            modifier_noms(bpmnfile,temp,"erreur S "+str(trr))
+            
+            nvmsg.append("erreur S "+str(trr)+" tache sans source")
+            temp = []
+    
+    taches = []
+    for i in mesmessage:
+        loi = []
+        tache = [] 
+        for j in i:
+            for t in j:
+                if(get_element_type(t,bpmnfile) == "task"):
+                    
+                    loi.append(get_annotation2(bpmnfile,t))
+                    tache.append(get_task(bpmnfile2,t))
+        taches.append(tache)
+        test.append(loi)    
+    return nvmsg,test,taches
+def valide_type_err(typeErr,articles):
+    if("(Deterministic deadlock)" in typeErr):
+        print((("either" in articles) and ("or" in articles)) or (("soit" in articles) and ("ou" in articles)))
+        if((("either" in articles) and ("or" in articles)) or (("soit" in articles) and ("ou" in articles))):
+            return True
+    if("(Deterministic lack of synchronization)" in typeErr):
+        if((("and" in articles) and ("or" in articles)) or (("et" in articles) and ("ou" in articles))):
+            return True
+    if("(Nondeterministic lack of synchronization)" in typeErr):
+        if((("or" in articles) and ("then" in articles)) or (("ou" in articles) and ("puis" in articles))):
+            return True
+    if("(Nondeterministic deadlock)" in typeErr):
+        if((("and" in articles) and ("then" in articles)) or (("et" in articles) and ("puis" in articles))):
+            return True
+    return False
+
+def taches_dans_article(article,listedestaches):
+    cpt = 0
+    for i in listedestaches:
+        if (i in article):
+            cpt +=1
+    if(cpt == len(listedestaches)):
+        return True
+    else:
+        return False
+def trouver_article(nom_fichier, nom_article ,typeErr,listeTaches):
+    with open(nom_fichier, 'r', encoding='utf-8') as file:
+        contenu = file.read()
+        articles = re.findall(r'(Art\..*?)(?=(Art\.|\Z))', contenu, re.DOTALL)
+    monArt = ""
+    for i in nom_article:
+            monArt += i
+    mesArticles = []
+    for titre in nom_article:
+       print(titre)
+       for article in articles:
+            if(titre in article[0]):
+                mesArticles.append(article[0])
+    
+    print( "test 1" + monArt)
+    print(mesArticles)
+    print("la liste est : " + listeTaches.__str__())
+    print(taches_dans_article(mesArticles.__str__(),listeTaches))
+    print(valide_type_err(typeErr,mesArticles.__str__()))
+    print(mesArticles.__str__())
+    if(("(Deterministic deadlock)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
+            return "probleme dans either // or dans les aticles suivants : "+mesArticles.__str__()
+    if(("(Deterministic lack of synchronization)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
+            return "probleme dans and // or dans les articles suivants : "+mesArticles.__str__()
+    if(("(Nondeterministic lack of synchronization)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
+            return "probleme dans or // then dans les articles suivants: "+mesArticles.__str__()
+    if(("(Nondeterministic deadlock)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
+            return "probleme dans and // then dans les articles suivants : "+mesArticles.__str__()
+    return "L'article spécifié n'a pas été trouvé dans le fichier."

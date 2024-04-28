@@ -4,6 +4,40 @@ import authService from "./authService";
 const user = JSON.parse(localStorage.getItem("user"))
 
 
+
+// Define async thunk for creating a project
+export const createProject = createAsyncThunk(
+    "auth/createProject",
+    async (projectData, thunkAPI) => {
+      try {
+        // Get the access token from the state
+        const accessToken = thunkAPI.getState().auth.user.access;
+        // Call the authService.createProject function passing the project data and access token
+        return await authService.createProject(projectData, accessToken);
+      } catch (error) {
+        // Handle any errors
+        return thunkAPI.rejectWithValue(error.message);
+      }
+    }
+  );
+  
+  // Define async thunk for fetching user's projects
+  export const fetchProjects = createAsyncThunk(
+    "auth/fetchProjects",
+    async (userData, thunkAPI) => {
+      try {
+        // Get the access token from the state
+        const accessToken = thunkAPI.getState().auth.user.access;
+        // Call the authService.fetchProjects function passing the access token
+        return await authService.fetchProjects(userData,accessToken);
+      } catch (error) {
+        // Handle any errors
+        return thunkAPI.rejectWithValue(error.message);
+      }
+    }
+  );
+
+
 const initialState = {
     user: user ? user : null,
     userInfo: {},
@@ -108,8 +142,9 @@ export const getUserInfo = createAsyncThunk(
 
             return thunkAPI.rejectWithValue(message)
         }
-    }
+   }
 )
+
 
 
 export const authSlice = createSlice({
@@ -204,6 +239,41 @@ export const authSlice = createSlice({
             .addCase(getUserInfo.fulfilled, (state, action) => {
                 state.userInfo = action.payload
             })
+            // Handle createProject.pending action
+    builder.addCase(createProject.pending, (state) => {
+        state.isLoading = true;
+      });
+      // Handle createProject.fulfilled action
+      builder.addCase(createProject.fulfilled, (state, action) => {
+        // Update state with the newly created project
+        // Here you can update the state.projects array with the new project data if needed
+        state.isLoading = false;
+      });
+      // Handle createProject.rejected action
+      builder.addCase(createProject.rejected, (state, action) => {
+        // Handle any errors
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      });
+  
+      // Handle fetchProjects.pending action
+      builder.addCase(fetchProjects.pending, (state) => {
+        state.isLoading = true;
+      });
+      // Handle fetchProjects.fulfilled action
+      builder.addCase(fetchProjects.fulfilled, (state, action) => {
+        // Update state with the fetched projects
+        // Here you can update the state.projects array with the fetched projects data
+        state.isLoading = false;
+      });
+      // Handle fetchProjects.rejected action
+      builder.addCase(fetchProjects.rejected, (state, action) => {
+        // Handle any errors
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      });
     }
 })
 

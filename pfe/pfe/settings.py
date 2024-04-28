@@ -15,6 +15,8 @@ import os
 import environ
 from datetime import timedelta
 
+
+
 env = environ.Env(DEBUG=(bool, False))
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -161,6 +163,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
 }
 
 SIMPLE_JWT = {
@@ -189,7 +194,7 @@ DJOSER = {
     'SERIALIZERS': {
         'user_create': 'myapp.serializers.CreateUserSerializer',
         'user': "myapp.serializers.CreateUserSerializer",
-        'user_delete': "djoser.serializers.UserDeleteSerializer",      
+        'user_delete': "djoser.serializers.UserDeleteSerializer",    
     },
 }
 

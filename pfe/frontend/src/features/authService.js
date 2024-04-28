@@ -10,8 +10,6 @@ const RESET_PASSWORD_CONFIRM_URL = `${BACKEND_DOMAIN}/api/v1/auth/users/reset_pa
 const GET_USER_INFO = `${BACKEND_DOMAIN}/api/v1/auth/users/me/`
 const PROJECTS_URL = `${BACKEND_DOMAIN}/api/projects/`;
 
-
-
 // Register user
 
 const register = async (userData) => {
@@ -39,6 +37,7 @@ const login = async (userData) => {
 
     if (response.data) {
         localStorage.setItem("user", JSON.stringify(response.data))
+        localStorage.setItem("access", response.data.access);
     }
 
     return response.data
@@ -106,6 +105,8 @@ const getUserInfo = async (accessToken) => {
     return response.data
 }
 
+
+// Fetch projects
 const fetchProjects = async (userId, accessToken) => {
     const config = {
         headers: {
@@ -113,15 +114,32 @@ const fetchProjects = async (userId, accessToken) => {
         }
     };
 
-    try {
-        const response = await axios.get(`${PROJECTS_URL}?user=${userId}`, config);
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching projects:", error);
-        throw error; // Re-throw the error to handle it in the component
-    }
+    const response = await axios.get(PROJECTS_URL, config);
+    return response.data;
 };
 
-const authService = { register, login, logout, activate, resetPassword, resetPasswordConfirm, getUserInfo, fetchProjects}
+// Create Project
+const createProject = async (projectData) => {
+    const accessToken = localStorage.getItem('access');
+    if (!accessToken) {
+        throw new Error('Access token not found.');
+    }
+    const config = {
+      headers: {
+        "Content-type": "application/json",
+        "Authorization": `Bearer ${accessToken}` // Include the access token in the request headers
+      }
+    };
+  
+    try {
+      const response = await axios.post(PROJECTS_URL, projectData, config);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating project:', error);
+      throw error; // Re-throw the error for handling in the component
+    }
+  };
+
+const authService = { register, login, logout, activate, resetPassword, resetPasswordConfirm, getUserInfo, createProject, fetchProjects}
 
 export default authService

@@ -7,6 +7,8 @@ import './Login.css';
 import { LanguageContext } from '../../contexts/language';
 
 
+
+
 const Login = () => {
   const { currentLanguage } = useContext(LanguageContext);
   const content = currentLanguage === 'en' ? {
@@ -63,23 +65,34 @@ const Login = () => {
 
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     // Validate email and password
     if (!email) {
-      setEmailError(content.errors.emailRequired);
-      return;
+        setEmailError(content.errors.emailRequired);
+        return;
     }
     if (!password) {
-      setPasswordError(content.errors.passwordRequired);
-      return;
+        setPasswordError(content.errors.passwordRequired);
+        return;
     }
     const userData = {
-      email,
-      password,
-  }
-  dispatch(login(userData))
+        email,
+        password,
+    };
+    // Dispatch the login action
+    dispatch(login(userData))
+    .then((response) => {
+        // Redirect the user to the dashboard
+        navigate("/dashboard");
 
-  }
+      
+    })
+    .catch((error) => {
+        // Handle login error
+        console.error('Login error:', error);
+        setUserError(content.errors.invalidCredentials);
+    });
+  };
 
   useEffect(() => {
     if (isError) {
@@ -93,7 +106,7 @@ const Login = () => {
     dispatch(reset())
     dispatch(getUserInfo())
 
-}, [isError, isSuccess, user,message, navigate, dispatch])
+}, [isError, isSuccess, user, message, navigate, dispatch, content.errors.invalidCredentials])
 
   return (
      <div className={`login ${currentLanguage} `}>

@@ -1,0 +1,3 @@
+probleme dans either // or dans les aticles suivants : ['Art. 2. — “….establish either Decline offer then Receive decline or Accept offer then Receive invoice then Receive confirmation then Receive payment then Send invoice then Dispatch goods  \n', 'Art. 3. — “….establish either task 1  or task 2  then send task 1 and the task 2 \n« '] 
+erreur S 1 (Deterministic deadlock) 
+erreur MI: il manque le cas de egale 

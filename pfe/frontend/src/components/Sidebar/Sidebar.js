@@ -3,11 +3,9 @@ import './Sidebar.css'
 
 
  const Sidebar = ({ annotations }) => {
-    const [openSidebarToggle, setOpenSidebarToggle] = useState(false)
+    const [openSidebarToggle] = useState(false)
 
-  const OpenSidebar = () => {
-    setOpenSidebarToggle(!openSidebarToggle)
-  }
+
   return (
 
         <div  id="sidebar" className={openSidebarToggle ? "sidebar-responsive": ""}>
