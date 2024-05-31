@@ -8,6 +8,7 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
+  path("upload/",views.upload,name="upload"),
   path("", views.home, name="home"),
   path('api/csrf-token/', views.get_csrf_token, name='get_csrf_token'),
   path("upload/",views.upload,name="upload"),

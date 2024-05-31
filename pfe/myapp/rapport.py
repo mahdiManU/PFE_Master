@@ -1,10 +1,10 @@
-from docx import Document  # type: ignore
-from docx.shared import Cm, Pt, RGBColor  # type: ignore
-from docx.oxml.ns import qn  # type: ignore
-from docx.oxml import OxmlElement  # type: ignore
-from docx.enum.text import WD_ALIGN_PARAGRAPH  # type: ignore
-from docx.enum.style import WD_STYLE_TYPE  # type: ignore
-
+from docx import Document
+from docx.shared import Cm, Pt, RGBColor
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.style import WD_STYLE_TYPE
+from docx.shared import Pt
 def color_red_in_text(paragraph, words_to_color):
     for run in paragraph.runs:
         text = run.text
@@ -114,3 +114,5 @@ def generer_rapport(erreurs,nom_fichier):
   set_table_border(tableS)
   document.add_page_break()
   document.save(nom_fichier)
+
+

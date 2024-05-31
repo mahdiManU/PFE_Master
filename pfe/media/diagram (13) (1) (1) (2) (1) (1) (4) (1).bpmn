@@ -241,7 +241,7 @@
         <omgdc:Bounds x="340" y="520" width="1110" height="330" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Lane_0fy55rl_di" bpmnElement="Lane_0fy55rl" isHorizontal="true">
+      <bpmndi:BPMNShape id="Lane_0fy55rl_di" bpmnElement="Lane_0fy55rl" isHorizontal="true" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
         <omgdc:Bounds x="340" y="310" width="1110" height="210" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1xjw4eq_di" bpmnElement="Event_1xjw4eq">
