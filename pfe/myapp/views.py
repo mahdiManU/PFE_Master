@@ -9,30 +9,50 @@ import uuid
 import os
 from django.conf import settings
 from .mabib import *
-from rest_framework import generics
+from .mabib import trouver_article
+from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework import generics, permissions
-from .models import Project
-from .serializers import ProjectSerializer
+from .models import Project,Diagram
+from .serializers import ProjectSerializer, DiagramSerializer
+from django.db.models import Count
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.exceptions import PermissionDenied
+import logging
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.middleware.csrf import get_token
+from django.shortcuts import get_object_or_404
+from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+
+
+@ensure_csrf_cookie
+def get_csrf_token(request):
+    return JsonResponse({'csrfToken': request.META.get('CSRF_COOKIE')})
 
 class ProjectListCreateAPIView(generics.ListCreateAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Restrict access to authenticated users only
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
         return self.queryset.filter(owner=user)
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)  # Automatically set the owner of the project to the current user
+        # Save the project
+        project = serializer.save(owner=self.request.user)
+        
+        # Create directories
+        user_directory = os.path.join('media', f'user_{self.request.user.id}')
+        project_directory = os.path.join(user_directory, f'project_{project.id}')
+        os.makedirs(project_directory, exist_ok=True)
 
-    def dispatch(self, request, *args, **kwargs):
-        # Print request headers before calling the parent dispatch method
-        print('Request Headers:', request.headers)
-
-        # Call parent dispatch method
-        return super().dispatch(request, *args, **kwargs)
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class ProjectDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Project.objects.all()
@@ -44,11 +64,43 @@ class ProjectDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         return self.queryset.filter(owner=user)
 
     def dispatch(self, request, *args, **kwargs):
-        # Print request headers before calling the parent dispatch method
-        print('Request Headers:', request.headers)
-
-        # Call parent dispatch method
+        project_id = kwargs.get('pk')
+        if not Project.objects.filter(id=project_id).exists():
+            return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
         return super().dispatch(request, *args, **kwargs)
+
+class DiagramListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Diagram.objects.all()
+    serializer_class = DiagramSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        project_id = self.kwargs['project_id']
+        return Diagram.objects.filter(project_id=project_id)
+
+    def perform_create(self, serializer):
+        project_id = self.kwargs['project_id']
+        project = Project.objects.get(id=project_id)
+        serializer.save(project=project)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            logging.error(f"Invalid data: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+def get_project_diagrams(request, project_id):
+    try:
+        # Retrieve diagrams associated with the specified project ID
+        diagrams = Diagram.objects.filter(project_id=project_id)
+        # Serialize the diagrams data
+        serialized_diagrams = [{'id': diagram.id, 'name': diagram.name, 'description':diagram.description, 'file': diagram.file.url, 'verified': diagram.verified} for diagram in diagrams]
+        # Return the serialized diagrams data as JSON response
+        return JsonResponse(serialized_diagrams, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 def negative_event(bpmnfile):
    with open(bpmnfile, 'r') as file:
@@ -92,7 +144,7 @@ def getid_picine(bpmn_file_path):
    with open(bpmn_file_path, 'r') as file:
         lines = file.readlines()
    for line in lines:
-        if (("<participant" in line) and ("name=" not in line)):
+        if ((("<participant" in line) and ("name=" not in line)) or (("<lane " in line) and ("name=" not in line))):
          match = re.search(r'id="([^"]+)"', line)
          ids_list.append(match.group(1))
    return ids_list         
@@ -194,7 +246,7 @@ def modify_bpmn_file(bpmn_file_path):
                   modified_line =re.sub(r'(id="[^"]+")', r'\1 name="erreur MI'+str(err)+'"', line)
                   modified_lines.append(modified_line)
            if ("<bpmndi:BPMNShape" in line) and (id in line):
-                line = line[:-2]+' bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">\n'
+                line = line[:-2]+' bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">\n'
                 modified_lines.append(line)
            elif ("<exclusiveGateway" not in line) or (id not in line):
               modified_lines.append(line) 
@@ -209,13 +261,15 @@ def modify_bpmn_file(bpmn_file_path):
     if(ids_picine.__len__()>0):
       for i in ids_picine:
             for j in lines2:
-              if((i in j) and ("name=" not in i) and ("<participant" in j)):
+              if((i in j) and ("<bpmndi:BPMNShape" in j)):
                 err +=1
-                modified_line =re.sub(r'(id="[^"]+")', r'\1 name="erreur MI '+str(err)+'"', j)
+                modified_line =j[:-2]+' bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">\n'
+                
                 modified_lines.append(modified_line)
                 message.append("erreur MI " +str(err)+" role manquant")
               else:
                 modified_lines.append(j)
+      
       with open(bpmn_file_path, 'w') as file:
          file.truncate(0)
          print("hello")
@@ -232,7 +286,7 @@ def modify_bpmn_file(bpmn_file_path):
              message.append("erreur MI " +str(err)+" negative event")
              modified_lines.append(modified_line)
           elif ("<bpmndi:BPMNShape" in line) and (id in line):
-                line = line[:-2]+' bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">\n'
+                line = line[:-2]+' bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">\n'
                 modified_lines.append(line)
           else:
              modified_lines.append(line)
@@ -261,8 +315,9 @@ def upload(request):
         print("les taches" + taches.__str__())
         arts = []
         for i in range(len(annotation)):
-            arts.append(trouver_article(fs.path('loi.txt').__str__(),loi[i],annotation[i],taches[i]))
-        print(arts)
+            if ('tache sans source' not in annotation[i]):
+              arts.append(trouver_article(fs.path('loi.txt').__str__(),loi[i],annotation[i],taches[i]))
+        print('faute ' +arts.__str__())
         with open(fs.path(uploaded_file.name+".txt"), 'a') as f:
             for i in arts:
              f.write(i+" \n")
@@ -302,9 +357,8 @@ def verify_diagram(request):
         fs = FileSystemStorage()
         fs.save(uploaded_file.name,uploaded_file)
         myfile =os.path.splitext(uploaded_file.name)[0]
-        fs.save(myfile+'first.bpmn',uploaded_file)
+        
        # print(fs.path('loi.txt'))
-        #le fichier avec first a la fin c'est avant verification
         annotation , loi , taches = message(fs.path(uploaded_file.name).__str__(),fs.path(myfile+'first.bpmn'))
         print("les err : "+ annotation.__str__())
         print("les annotation" + loi.__str__())

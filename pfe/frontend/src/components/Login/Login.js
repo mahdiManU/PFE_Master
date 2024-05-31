@@ -81,17 +81,7 @@ const Login = () => {
     };
     // Dispatch the login action
     dispatch(login(userData))
-    .then((response) => {
-        // Redirect the user to the dashboard
-        navigate("/dashboard");
-
-      
-    })
-    .catch((error) => {
-        // Handle login error
-        console.error('Login error:', error);
-        setUserError(content.errors.invalidCredentials);
-    });
+    
   };
 
   useEffect(() => {
@@ -124,12 +114,12 @@ const Login = () => {
          {userError && <span className="error">{userError}</span>}
             <label htmlFor='email'>{content.emailLabel}</label>
             <input type='text' id='email' name='email' onChange={handleChange}
-                        value={email} required />
+                        value={email} required  />
                         {emailError && <span className="error">{emailError}</span>}
     
             <label htmlFor='password'>{content.passwordLabel}</label>
             <input type='password' id='password' name='password' onChange={handleChange}
-                         value={password} required />
+                         value={password} required autoComplete="off"  />
                          {passwordError && <span className="error">{passwordError}</span>}
                           
             <Link to="/reset-password">{content.forgetPasswordLink}</Link>            

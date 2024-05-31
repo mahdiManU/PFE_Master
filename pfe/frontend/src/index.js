@@ -8,6 +8,7 @@ import { LanguageProvider } from './contexts/language';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
+
 root.render(
   <ThemeProvider>
     <LanguageProvider> {/* Wrap App with LanguageProvider */}

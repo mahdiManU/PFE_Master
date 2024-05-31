@@ -276,7 +276,6 @@ def message2(bpmnfile):
             temp = []
     return nvmsg
 
-
 def message(bpmnfile,bpmnfile2):
     mesmessage , exclu, para ,inclu = colorier_chemin(bpmnfile)
     
@@ -334,8 +333,7 @@ def message(bpmnfile,bpmnfile2):
     return nvmsg,test,taches
 def valide_type_err(typeErr,articles):
     if("(Deterministic deadlock)" in typeErr):
-        print((("either" in articles) and ("or" in articles)) or (("soit" in articles) and ("ou" in articles)))
-        if((("either" in articles) and ("or" in articles)) or (("soit" in articles) and ("ou" in articles))):
+        if((("either" in articles) and ("or" in articles)) or (("soit" in articles) and ("et" in articles))):
             return True
     if("(Deterministic lack of synchronization)" in typeErr):
         if((("and" in articles) and ("or" in articles)) or (("et" in articles) and ("ou" in articles))):
@@ -344,7 +342,7 @@ def valide_type_err(typeErr,articles):
         if((("or" in articles) and ("then" in articles)) or (("ou" in articles) and ("puis" in articles))):
             return True
     if("(Nondeterministic deadlock)" in typeErr):
-        if((("and" in articles) and ("then" in articles)) or (("et" in articles) and ("puis" in articles))):
+        if((("and" in articles) and ("or" in articles)) or (("et" in articles) and ("puis" in articles))):
             return True
     return False
 
@@ -353,7 +351,7 @@ def taches_dans_article(article,listedestaches):
     for i in listedestaches:
         if (i in article):
             cpt +=1
-    if(cpt == len(listedestaches)):
+    if(cpt <= len(listedestaches)):
         return True
     else:
         return False
@@ -363,11 +361,12 @@ def trouver_article(nom_fichier, nom_article ,typeErr,listeTaches):
         articles = re.findall(r'(Art\..*?)(?=(Art\.|\Z))', contenu, re.DOTALL)
     monArt = ""
     for i in nom_article:
-            monArt += i
+        monArt += i.__str__()
     mesArticles = []
     for titre in nom_article:
        print(titre)
        for article in articles:
+            print("nanani" +titre.__str__())
             if(titre in article[0]):
                 mesArticles.append(article[0])
     
@@ -375,8 +374,6 @@ def trouver_article(nom_fichier, nom_article ,typeErr,listeTaches):
     print(mesArticles)
     print("la liste est : " + listeTaches.__str__())
     print(taches_dans_article(mesArticles.__str__(),listeTaches))
-    print(valide_type_err(typeErr,mesArticles.__str__()))
-    print(mesArticles.__str__())
     if(("(Deterministic deadlock)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
             return "probleme dans either // or dans les aticles suivants : "+mesArticles.__str__()
     if(("(Deterministic lack of synchronization)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):

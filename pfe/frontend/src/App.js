@@ -5,8 +5,8 @@ import Login from './components/Login/Login'
 import './App.css'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import HomePage from './HomePage'
-import Dashboard from './components/Dashboard/Dashboard'
-
+import Principale from './components/Dashboard/Principale'
+import axios from 'axios';
 
 
 
@@ -21,7 +21,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
           <Route path="/login" element={<MainLayout><Login /></MainLayout>} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/*" element={<Principale />} />
         </Routes>
       </Router>
     </div>

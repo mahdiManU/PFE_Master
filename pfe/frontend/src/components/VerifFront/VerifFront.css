@@ -1,0 +1,170 @@
+.project-details-container {
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 3px solid var(--clr-primary);
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.project-details-container h2 {
+   color: #363c56;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.button-container {
+    display: inline;
+    align-items: center;
+}
+
+.button-container button {
+    margin-left: 10px;
+    background-color: var(--clr-primary); /* New color for the Verify button */
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button-container button:hover {
+    background-color: #30df82; /* New hover color for the Verify button */
+}
+
+.content {
+    display: flex;
+}
+
+.diagram-container {
+    width: 80%;
+    max-width: 800px;
+    margin: 1px auto;
+    padding: 10px;
+   
+    border-radius: 10px;
+    background-color: var(--clr-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.canvas {
+    width: 100%;
+    height: 430px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    background-color: #ffffff;
+}
+
+.sidebar {
+    flex: 1;
+    background-color: var(--clr-bg);
+    border-radius: 5px;
+    padding: 20px;
+    margin-left: 12px;
+    border: 1px solid var(--clr-primary);
+    margin-bottom: 8px;
+    
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+    color: var(--clr-primary);
+    text-align: center;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar li {
+    margin-bottom: 10px;
+    color: #666;
+}
+
+
+
+.loading {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+.file-input {
+    display: none; /* Hide the default file input */
+}
+
+.custom-file-input {
+    margin-left: 10px;
+    background-color: var(--clr-primary);/* Button background color */
+    color: #fff; /* Button text color */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.custom-file-input:hover {
+    background-color: #2f2f44; /* Button hover background color */
+}
+.view-report-container {
+    text-align: center;
+    margin-left: 800px;
+}
+
+.view-report-btn {
+    background-color: var(--clr-primary);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.view-report-btn:hover {
+    background-color: #494a4c;
+}
+
+.result-item {
+    display: flex;
+
+    margin-bottom: 10px;
+}
+
+.color-square {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.yellow::before,
+.red::before,
+.purple::before {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.yellow::before {
+    background-color: #efcd9b;
+}
+
+.red::before {
+    background-color: #e17e88;
+}
+
+.purple::before {
+    background-color: #e0b2e8;
+}
+.result-item p {
+    font-size: 14px; /* Adjust the font size as desired */
+}

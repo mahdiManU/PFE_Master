@@ -1,19 +1,18 @@
-import React, {useState, useEffect, useContext} from 'react'
-import { useSelector, useDispatch} from 'react-redux'
+import React, { useEffect, useContext} from 'react'
+import { useSelector} from 'react-redux'
 import NavDash from '../NavDash/NavDash'
 import './Dashboard.css'
 import BpmnViewer from 'bpmn-js';
-import Sidebar from '../Sidebar/Sidebar';
-import authService from '../../features/authService';
 import ProjectListPage from './ProjectListPage';
 import { LanguageContext } from '../../contexts/language';
+
 
 
 
 const Dashboard = () => {
     const { currentLanguage } = useContext(LanguageContext);
     const { userInfo } = useSelector((state) => state.auth)
-    const [annotations, setAnnotations] = useState([]);
+   // const [annotations, setAnnotations] = useState([]);
 
     const content = currentLanguage === 'en' ? {
         welcome: 'Welcome',
@@ -24,18 +23,7 @@ const Dashboard = () => {
         annotations: 'Annotations',
         verifyDiagram: 'Vérifier le diagramme'
       };
-    
-    const handleCreateProject = async (projectData) => {
-        try {
-            // Call authService's createProject function
-            const createdProject = await authService.createProject(projectData);
-            console.log('Project created:', createdProject);
-            // You can handle success (e.g., display a message) or navigate to another page
-        } catch (error) {
-            console.error('Error creating project:', error);
-            // You can handle errors (e.g., display an error message)
-        }
-    };
+
 
 
     
@@ -171,22 +159,23 @@ const Dashboard = () => {
     });
     };
     const displayAnnotations = (annotations) => {
-        setAnnotations(annotations);
+       // setAnnotations(annotations);
     };
+    //<Sidebar annotations={annotations} />
     return (
         <div>
-      <NavDash />
       <div className="container">
         <div className="main-body">
           <div className="promo_card">
-            <h1>{content.welcome}, {userInfo.first_name}</h1>
+            <h1>{content.welcome},<span className='about__name'>{userInfo.first_name}</span></h1>
             <ProjectListPage/>
              <input type="file" name="document"  onChange={handleDiagram}/>
                         <div id="canvas" style={{ width: '100%', height: '500px' }}></div>
                         <button onClick={handleVerifyDiagram}>{content.verifyDiagram}</button>
+                       
           </div>
         </div>
-        <Sidebar annotations={annotations} />
+        
       </div>
     </div>
     )

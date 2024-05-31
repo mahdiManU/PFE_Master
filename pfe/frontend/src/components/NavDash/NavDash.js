@@ -48,15 +48,26 @@ const NavDash = () => {
       >
 
           <li className='nav__list-item'>
-          <Link
-            to="" 
+          <a
+            href="#my-project" 
             onClick={toggleNavList}
             className='link link--nav'
           >
             {currentLanguage === 'en' ? 'Projects' : 'Projets'}
-          </Link>
+          </a>
         </li>
 
+          
+
+          <li className='nav__list-item'>
+            <a
+              href='#create-project'
+              
+              className='link link--nav'
+            >
+              {currentLanguage === 'en' ? 'New Project' : 'Nouveau Projet'}
+            </a>
+          </li>
           <li className='nav__list-item'>
             <Link
               to='/'
@@ -66,18 +77,7 @@ const NavDash = () => {
               {currentLanguage === 'en' ? 'Logout' : 'Déconnexion'}
             </Link>
           </li>
-
       </ul>
-
-      <button
-        type='button'
-        onClick={toggleTheme}
-        className='btn btn--icon nav__theme'
-        aria-label='toggle theme'
-      >
-        {themeName === 'dark' ? <WbSunnyRoundedIcon /> : <Brightness2Icon />}
-      </button>
-
       <button
         type='button'
         onClick={toggleNavList}
@@ -89,6 +89,17 @@ const NavDash = () => {
       <div className="language-switcher" onClick={switchLanguage}>
         {currentLanguage === 'en' ? 'EN' : 'FR'}
       </div>
+
+      <button
+        type='button'
+        onClick={toggleTheme}
+        className='btn btn--icon nav__theme'
+        aria-label='toggle theme'
+      >
+        {themeName === 'dark' ? <WbSunnyRoundedIcon /> : <Brightness2Icon />}
+      </button>
+
+      
     </nav>
     </header>
     </div>

@@ -1,0 +1,86 @@
+/* ProjectDetailsPage.css */
+
+.container {
+    margin: 20px;
+    color: black;
+}
+.main-body {
+    display: flex;
+    justify-content: center;
+}
+
+.project-details {
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    width: 100%;
+    background-color: #f9f9f9;
+}
+
+.diagram-list {
+    margin-top: 20px;
+}
+
+.diagram-list h3 {
+    color: black;
+}
+
+.diagram-container {
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+.diagram-item p {
+    margin: 5px 0;
+}
+
+.create-diagram-form {
+    margin-top: 20px;
+}
+
+.create-diagram-form h4 {
+    margin-bottom: 10px;
+    color: black;
+}
+
+.create-diagram-form input,
+.create-diagram-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.create-diagram-form button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #2a5d94;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.create-diagram-form button:hover {
+    background-color: #0056b3;
+}
+.diagram-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.diagram-table th, .diagram-table td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.diagram-table th {
+    background-color: #f2f2f2;
+}
+
+.diagram-table tr:hover {
+    background-color: #f2f2f2;
+}

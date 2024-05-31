@@ -1,0 +1,74 @@
+.create-project {
+  max-width: 700px;
+  width: 100%;
+  margin: 1em auto;
+  padding: 2em;
+  background-color: var(--clr-bg-alt);
+  box-shadow: var(--shadow);
+  border-radius: 8px;
+  text-align: left;
+}
+
+.create-project .reset-button {
+  margin-left: auto;
+}
+
+.create-project h3 {
+  margin-right: 0.5em;
+  margin-bottom: 0.9em;
+  text-align: center;
+}
+
+.create-project form {
+  display: flex;
+  flex-direction: column;
+}
+
+.create-project label {
+  font-size: 1.5rem;
+  margin-bottom: 0.3em;
+}
+
+.create-project input,
+.create-project textarea {
+  padding: 0.6em;
+  margin-bottom: 1em;
+  border: 1px solid var(--clr-fg-alt);
+  border-radius: 4px;
+  width: 100%; /* Ensure inputs and textarea take full width */
+  box-sizing: border-box; /* Ensure padding and border are included in the width */
+}
+
+.create-project textarea {
+  height: 150px; /* Adjust height for the textarea */
+}
+
+.create-project button {
+  padding: 0.6em 1.2em;
+  background-color: var(--clr-primary);
+  color: var(--clr-bg-alt);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.create-project button:hover {
+  background-color: var(--clr-fg);
+}
+
+.create-project .btn--outline {
+  color: var(--clr-primary);
+  background-color: var(--clr-bg-alt);
+  transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.create-project .btn--outline:hover {
+  color: var(--clr-bg-alt);
+  border-color: var(--clr-fg);
+}
+
+.create-project span.error {
+  font-size: 0.8rem;
+  color: red;
+}
