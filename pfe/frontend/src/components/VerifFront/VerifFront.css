@@ -14,10 +14,29 @@
 
 .header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     margin-bottom: 20px;
+    position: relative;
 }
+
+.back-arrow {
+    position: absolute;
+    left: 0;
+    font-size: 18px; /* Adjust the size of the arrow */
+    text-decoration: none;
+    color: var(--clr-primary); /* Ensure it uses the primary color */
+}
+
+.back-arrow:hover {
+    color: #2f2f44; /* Change color on hover for better visibility */
+}
+
+.header h2 {
+    margin: 0 auto; /* Center the title */
+    text-align: center; /* Ensure text is centered */
+}
+
 
 .button-container {
     display: inline;

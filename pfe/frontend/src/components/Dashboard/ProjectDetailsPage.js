@@ -1,17 +1,27 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useContext , useRef} from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ProjectDetailsPage.css';
 import { LanguageContext } from '../../contexts/language';
+
 
 const ProjectDetailsPage = () => {
     const [diagrams, setDiagrams] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [newDiagram, setNewDiagram] = useState({ name: '', description: '', file: null });
+    const [showModal, setShowModal] = useState(false);
+    const [selectedDiagramId, setSelectedDiagramId] = useState(null);
     const { projectId } = useParams();
     const { currentLanguage } = useContext(LanguageContext);
+    const [activeDropdown, setActiveDropdown] = useState(null);
+    const navigate = useNavigate();
+    const fileInputRef = useRef(null);
 
+
+    const handleToggleDropdown = (diagramId) => {
+        setActiveDropdown(activeDropdown === diagramId ? null : diagramId);
+    };
 
     const content = currentLanguage === 'en' ? {
         diagrams: "Diagrams",
@@ -28,7 +38,14 @@ const ProjectDetailsPage = () => {
         errorFetchingDiagrams: "Error fetching diagrams.",
         failedToCreateDiagram: "Failed to create diagram.",
         pleaseSelectFile: "Please select a file.",
-        chooseFile: "Choose file"
+        chooseFile: "Choose file",
+        delete: "Delete",
+        update: "Update",
+        actions: "Actions",
+        confirmDelete: "Are you sure you want to delete this diagram?",
+        cancel: "Cancel",
+        confirm: "Confirm",
+        view: "View"
     } : {
         diagrams: "Diagrammes",
         name: "Nom",
@@ -44,8 +61,29 @@ const ProjectDetailsPage = () => {
         errorFetchingDiagrams: "Erreur lors du chargement des diagrammes.",
         failedToCreateDiagram: "Échec de la création du diagramme.",
         pleaseSelectFile: "Veuillez sélectionner un fichier.",
-        chooseFile: "Choisir un fichier"
+        chooseFile: "Choisir un fichier",
+        delete: "Supprimer",
+        update: "Mettre à jour",
+        actions: "Actions",
+        confirmDelete: "Êtes-vous sûr de vouloir supprimer ce diagramme?",
+        cancel: "Annuler",
+        confirm: "Confirmer",
+        view: "Voir"
     };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!event.target.closest('.dropdown')) {
+                setActiveDropdown(null);
+            }
+        };
+    
+        document.addEventListener('mousedown', handleClickOutside);
+    
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const fetchDiagrams = async () => {
         setLoading(true);
@@ -77,33 +115,79 @@ const ProjectDetailsPage = () => {
 
     const handleCreateDiagram = async (e) => {
         e.preventDefault();
+        setError(null); // Reset error on new submission
+    
         try {
             const accessToken = localStorage.getItem('access');
             if (!accessToken) {
                 throw new Error('Access token not found.');
             }
-
+    
             if (!newDiagram.file) {
                 throw new Error(content.pleaseSelectFile);
             }
-
+    
             const formData = new FormData();
             formData.append('name', newDiagram.name);
             formData.append('description', newDiagram.description);
             formData.append('file', newDiagram.file);
-
+    
             const response = await axios.post(`http://127.0.0.1:8000/api/projects/${projectId}/create-diagrams/`, formData, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                     'Content-Type': 'multipart/form-data',
                 },
             });
-
+    
             setDiagrams([...diagrams, response.data]);
             setNewDiagram({ name: '', description: '', file: null });
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''; // Reset the file input value
+            }
         } catch (error) {
             setError(error.message || content.failedToCreateDiagram);
         }
+    };
+
+    const handleDeleteDiagram = async (diagramId) => {
+        try {
+            const accessToken = localStorage.getItem('access');
+            if (!accessToken) {
+                throw new Error('Access token not found.');
+            }
+
+            await axios.delete(`http://127.0.0.1:8000/api/projects/${projectId}/diagrams/${diagramId}/`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            setDiagrams(diagrams.filter(diagram => diagram.id !== diagramId));
+        } catch (error) {
+            setError(error.message || 'Failed to delete diagram.');
+        }
+    };
+
+    const handleShowModal = (diagramId) => {
+        setSelectedDiagramId(diagramId);
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedDiagramId(null);
+        setActiveDropdown(null);
+    };
+
+    const handleConfirmDelete = () => {
+        if (selectedDiagramId) {
+            handleDeleteDiagram(selectedDiagramId);
+        }
+        handleCloseModal();
+    };
+
+    const handleNavigateToVerification = (diagramId) => {
+        navigate(`/dashboard/project/${projectId}/verify/${diagramId}`);
     };
 
     return (
@@ -124,6 +208,7 @@ const ProjectDetailsPage = () => {
                                         <th>{content.description}</th>
                                         <th>{content.verified}</th>
                                         <th>{content.file}</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -132,7 +217,18 @@ const ProjectDetailsPage = () => {
                                             <td>{diagram.name}</td>
                                             <td>{diagram.description}</td>
                                             <td>{diagram.verified ? '✔️' : '❌'}</td>
-                                            <td><a href={diagram.file} target="_blank" rel="noopener noreferrer">{content.download}</a></td>
+                                            <td><a href={`http://127.0.0.1:8000${diagram.file}`} target="_blank" rel="noopener noreferrer">{content.download}</a></td>
+                                            <td>
+                                                <div className="dropdown">
+                                                    <button className="dropbtn" onClick={() => handleToggleDropdown(diagram.id)}>⋮</button>
+                                                    {activeDropdown === diagram.id && (
+                                                    <div className="dropdown-content">
+                                                        <button onClick={() => handleShowModal(diagram.id)}>{content.delete}</button>
+                                                        <button onClick={() => handleNavigateToVerification(diagram.id)}>{content.view}</button>
+                                                    </div>
+                                                    )}
+                                                </div>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -160,15 +256,24 @@ const ProjectDetailsPage = () => {
                                     type="file"
                                     id="diagramFile"
                                     accept=".bpmn"
+                                    ref={fileInputRef} // Add this line
                                     onChange={(e) => setNewDiagram({ ...newDiagram, file: e.target.files[0] })}
                                     required
                                     autoComplete="off"
-                                    aria-label={content.chooseFile}
                                 />
                                 <button type="submit">{content.create}</button>
                             </form>
                         </div>
                     )}
+                </div>
+            </div>
+
+            <div id="myModal" className={`modal ${showModal ? 'show' : ''}`} onClick={handleCloseModal}>
+                <div className="modal-content" onClick={e => e.stopPropagation()}>
+                    <span className="close" onClick={handleCloseModal}>&times;</span>
+                    <p>{content.confirmDelete}</p>
+                    <button className="button cancel" onClick={handleCloseModal}>{content.cancel}</button>
+                    <button className="button confirm" onClick={handleConfirmDelete}>{content.confirm}</button>
                 </div>
             </div>
         </div>

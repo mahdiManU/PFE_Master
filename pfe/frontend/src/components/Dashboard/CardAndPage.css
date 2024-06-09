@@ -1,11 +1,13 @@
 /* CSS for ProjectCard.js */
 
 .project-card {
+  position: relative; /* Ensure positioning for the menu */
   padding: 2em;
   margin: 0 auto;
   text-align: center;
   box-shadow: var(--shadow);
   transition: transform 0.2s linear;
+  border-radius: 8px; /* Added for better visual */
 }
 
 .project-card:hover {
@@ -13,11 +15,12 @@
 }
 
 .project__description {
-    margin-top: 1em;
-  }
+  margin-top: 1em;
+}
 
 .project-card h3 {
   margin-bottom: 0.5em;
+  text-align: center; /* Center the project name */
 }
 
 .project-card p {
@@ -27,43 +30,53 @@
 .project-card p:last-child {
   margin-bottom: 0;
 }
- .project-card .diag_number {
+
+.project-card .diag_number {
   color: rgb(106, 122, 192);
- }
+}
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu-icon {
+  cursor: pointer;
+}
+
+.menu {
+  position: absolute;
+  top: 1em;
+  right: 1em;
   
-  /* CSS for ProjectListPage.js */
-  
-  .project-list-page {
-    padding: 2em;
-    
-  }
-  .project-list-page .formulaire {
-    margin-top: 5em;
-  }
-  .project-list-page h2 {
-    margin-bottom: 1em;
-  }
+  box-shadow: var(--shadow);
+  padding: 0.5em;
+  border-radius: 4px;
+  z-index: 1;
+  display: none; /* Initially hide the menu */
+}
 
-  .projects-grid {
+.menu.open {
+  display: block; /* Show the menu when open */
+}
 
-      max-width: 1100px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(18em, 1fr));
-      grid-gap: 5em;
+.menu button {
+  display: block;
+  background: none;
+  border: none;
+  padding: 0.5em;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
 
-  }
-  
-  .project-cards {
-    display:contents; /* Use flexbox to ensure projects are aligned in a row */
-    flex-wrap: wrap; /* Allow projects to wrap to the next line if there's not enough space */
-    justify-content: space-between; /* Distribute projects evenly across the container */
-  }
+.menu button:hover {
+  background-color: #f0f0f0;
+}
 
-  /* CSS for ProjectCard.js*/
-
-  .btn-details {
+/* Additional CSS */
+.btn-details {
   display: inline-block;
   padding: 8px 16px;
   margin-top: 10px;
@@ -77,5 +90,100 @@
 .btn-details:hover {
   background-color: #0056b3; /* Darker shade of blue on hover */
 }
-  
-  
+
+/* Existing styles for project card */
+
+.confirmation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  padding: 8px 16px;
+  margin-left: 10px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-buttons button:first-child {
+  background-color: #ccc;
+}
+
+.modal-buttons button:last-child {
+  background-color: #d9534f;
+  color: white;
+}
+
+/* CSS for ProjectListPage.js */
+
+.project-list-page {
+  padding: 2em;
+}
+
+.project-list-page .formulaire {
+  margin-top: 5em;
+}
+
+.project-list-page h2 {
+  margin-bottom: 1em;
+}
+
+.projects-grid {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18em, 1fr));
+  grid-gap: 2em; /* Adjusted for better spacing */
+}
+
+.project-cards {
+  display: contents; /* Ensures projects are aligned in a row */
+  flex-wrap: wrap; /* Allows projects to wrap to the next line if there's not enough space */
+  justify-content: space-between; /* Distributes projects evenly across the container */
+}
+
+/* Additional styles for the edit form inside the card */
+.project-card input,
+.project-card textarea {
+  width: 100%;
+  margin-bottom: 1em;
+  padding: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.project-card button {
+  margin: 0.5em 0.25em;
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 4px;
+  background-color: #587696;
+  color: white;
+  cursor: pointer;
+}
+
+.project-card button:hover {
+  background-color: #0056b3;
+}

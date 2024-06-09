@@ -5,7 +5,6 @@ import './CardAndPage.css';
 import CreateProjectForm from './CreateProjectForm';
 import { LanguageContext } from '../../contexts/language';
 
-
 const ProjectListPage = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -25,31 +24,43 @@ const ProjectListPage = () => {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-        const accessToken = localStorage.getItem('access');
-        if (!accessToken) {
-            throw new Error('Access token not found.');
-        }
+      const accessToken = localStorage.getItem('access');
+      if (!accessToken) {
+        throw new Error('Access token not found.');
+      }
 
-        const response = await axios.get('http://127.0.0.1:8000/api/projects/', {
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
-        });
-        setProjects(response.data);
+      const response = await axios.get('http://127.0.0.1:8000/api/projects/', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      setProjects(response.data);
     } catch (error) {
-        setError(error.message || 'Failed to fetch projects.');
+      setError(error.message || 'Failed to fetch projects.');
     }
     setLoading(false);
-};
+  };
 
   useEffect(() => {
-   
     fetchProjects();
   }, []);
 
+  const handleProjectUpdated = (updatedProject) => {
+    setProjects((prevProjects) =>
+      prevProjects.map((project) =>
+        project.id === updatedProject.id ? updatedProject : project
+      )
+    );
+  };
+
+  const handleProjectDeleted = (deletedProjectId) => {
+    setProjects((prevProjects) =>
+      prevProjects.filter((project) => project.id !== deletedProjectId)
+    );
+  };
+
   return (
     <div className='project-list-page'>
-      
       <h2>{content.my}</h2>
       <div id='my-projects' className='projects-grid'>
         {loading && <p>{content.loading}</p>}
@@ -58,13 +69,19 @@ const ProjectListPage = () => {
         {projects.length > 0 && (
           <div className='project-cards'>
             {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onProjectUpdated={handleProjectUpdated}
+                onProjectDeleted={handleProjectDeleted}
+              />
             ))}
           </div>
         )}
       </div>
-      <div id='create-project' className='formulaire'><CreateProjectForm fetchProjects={fetchProjects} /></div>
-      
+      <div id='create-project' className='formulaire'>
+        <CreateProjectForm fetchProjects={fetchProjects} />
+      </div>
     </div>
   );
 };

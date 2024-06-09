@@ -1,199 +1,310 @@
-import React, {useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import './VerifFront.css';
 import BpmnViewer from 'bpmn-js';
+import { useParams, Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { LanguageContext } from '../../contexts/language';
 
 const VerifFront = () => {
-    const [diagrams, setDiagrams] = useState([]);
+    const { currentLanguage } = useContext(LanguageContext);
+    const { projectId, diagramId } = useParams();
+    const [diagramUrl, setDiagramUrl] = useState(null);
+    const [annotations, setAnnotations] = useState({
+        missingInformation: [],
+        structuralErrors: [],
+        contradictory: [],
+    });
     const [loading, setLoading] = useState(true);
     const [verifyClicked, setVerifyClicked] = useState(false);
-  useEffect(() => {
-    // Dynamically load the required CSS file
-    const bpmnCssLink = document.createElement('link');
-    bpmnCssLink.href = 'https://unpkg.com/bpmn-js@17.0.0/dist/assets/bpmn-js.css';
-    bpmnCssLink.rel = 'stylesheet';
-    document.head.appendChild(bpmnCssLink);
+    const [uploadedFile, setUploadedFile] = useState(null);
+    const [isUploaded, setIsUploaded] = useState(false); // Track if the diagram is uploaded
+    const [reportUrl, setReportUrl] = useState(null);
 
-    // Dynamically load the required JavaScript file
-    const bpmnJsScript = document.createElement('script');
-    bpmnJsScript.src = 'https://unpkg.com/bpmn-js@17.0.0/dist/bpmn-navigated-viewer.development.js';
-    document.body.appendChild(bpmnJsScript);
-
-    // Cleanup function to remove the dynamically added elements
-    return () => {
-      document.head.removeChild(bpmnCssLink);
-      document.body.removeChild(bpmnJsScript);
+    const content = currentLanguage === 'en' ? {
+        upload: "Upload",
+        verify:"Verify",
+        results: "Results",
+        back: "Back",
+        report: "Download Report",
+        mi: "Missing Informations :",
+        s: "Structural Errors :",
+        c: "Contradictory :"
+        
+      
+    } : {
+        
+        upload: "Importer",
+        verify:"Vérifier",
+        results: "Resulats",
+        back: "Retour",
+        report: "Télécharger Raport",
+        mi: "Informations manquantes :",
+        s: "Erreurs Structurelles :",
+        c: "Contradiction :"
     };
-  }, []);
 
-  const handleVerifyDiagram = () => {
-    setVerifyClicked(true);
-    const formData = new FormData();
-    formData.append('document', document.querySelector('input[name="document"]').files[0]);
+    useEffect(() => {
+        const bpmnCssLink = document.createElement('link');
+        bpmnCssLink.href = 'https://unpkg.com/bpmn-js@17.0.0/dist/assets/bpmn-js.css';
+        bpmnCssLink.rel = 'stylesheet';
+        document.head.appendChild(bpmnCssLink);
 
-    const accessToken = localStorage.getItem('access');
-    if (!accessToken) {
-        console.error('Access token not found.');
-        return;
-    }
-    fetch('http://127.0.0.1:8000/api/verify-diagram/', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
-    })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error('Failed to verify diagram');
+        const bpmnJsScript = document.createElement('script');
+        bpmnJsScript.src = 'https://unpkg.com/bpmn-js@17.0.0/dist/bpmn-navigated-viewer.development.js';
+        document.body.appendChild(bpmnJsScript);
+
+        return () => {
+            document.head.removeChild(bpmnCssLink);
+            document.body.removeChild(bpmnJsScript);
+        };
+    }, []);
+
+    useEffect(() => {
+        const fetchDiagram = async () => {
+            setLoading(true);
+            try {
+                const accessToken = localStorage.getItem('access');
+                const response = await fetch(`http://127.0.0.1:8000/api/projects/${projectId}/diagrams/${diagramId}`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch diagram');
+                }
+
+                const data = await response.json();
+                //console.log('Fetched diagram data:', data); // Debugging log
+                setDiagramUrl(data.file);
+                setIsUploaded(false); // Set to false when diagram is fetched from database
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching diagram:', error);
+                setLoading(false);
             }
-        })
-        .then(data => {
+        };
+
+        if (projectId && diagramId) {
+            fetchDiagram();
+        }
+    }, [projectId, diagramId]);
+
+    useEffect(() => {
+        if (diagramUrl) {
+            //console.log('Displaying BPMN diagram:', diagramUrl); // Debugging log
             const canvas = document.querySelector('#canvas');
             canvas.innerHTML = ''; 
-            // Assuming the response data contains the BPMN XML
-            // Now you can display the diagram in the dashboard
-            displayBPMNDiagram(data.filename);
-            displayAnnotations(data.annotations);
-        })
-        .catch(error => {
-            console.error("Error:", error);
-        });
-        setTimeout(() => {
-            setLoading(false); // Simulation of verification completion
-        }, 2000);
-};
-
-const handleDiagram = () => {
-    setVerifyClicked(false);
-    const formData = new FormData();
-    formData.append('document', document.querySelector('input[name="document"]').files[0]);
-
-    const accessToken = localStorage.getItem('access');
-    if (!accessToken) {
-        console.error('Access token not found.');
-        return;
-    }
-
-    fetch('http://127.0.0.1:8000/api/diagram/', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
-    })
-    .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error('Failed to verify diagram');
+            displayBPMNDiagram(diagramUrl);
         }
-    })
-    .then(data => {
-        const canvas = document.querySelector('#canvas');
-        canvas.innerHTML = '';
-        // Assuming the response data contains the BPMN XML
-        // Now you can display the diagram in the dashboard
-        displayBPMNDiagram(data.filename);
-    })
-    .catch(error => {
-        console.error("Error:", error);
-    });
-};
+    }, [diagramUrl]);
 
-const displayBPMNDiagram = (filename) => {
-    const diagramUrl = 'http://127.0.0.1:8000/media/' + filename;
+    const handleVerifyDiagram = async () => {
+        setVerifyClicked(true);
+        setLoading(true);
 
-    // Create a new BPMN viewer instance
-    const bpmnViewer = new BpmnViewer({
-        container: '#canvas'
-    });
-
-    // Function to open and render the BPMN diagram
-    const openDiagram = async (bpmnXML) => {
         try {
-            // Import the BPMN XML and render the diagram
-            await bpmnViewer.importXML(bpmnXML);
-            const canvas = bpmnViewer.get('canvas');
-           // const overlays = bpmnViewer.get('overlays');
-            canvas.zoom('fit-viewport');
-           
+            const accessToken = localStorage.getItem('access');
+            let response;
+            if (isUploaded) {
+                // Verify uploaded diagram
+                const formData = new FormData();
+                formData.append('file', uploadedFile);
+
+                response = await fetch(`http://127.0.0.1:8000/api/upload/verify/`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                    body: formData,
+                });
+            } else {
+                // Verify diagram from database
+                response = await fetch(`http://127.0.0.1:8000/api/projects/${projectId}/diagrams/${diagramId}/verify/`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+            }
+
+            if (!response.ok) {
+                throw new Error('Failed to verify diagram');
+            }
+
+            const data = await response.json();
+            //console.log('Verification response data:', data); // Debugging log
             
-        } catch (err) {
-            console.error('Could not import BPMN 2.0 diagram', err);
+            const canvas = document.querySelector('#canvas');
+            canvas.innerHTML = ''; 
+            displayBPMNDiagram('http://127.0.0.1:8000' + data.filename);
+            setAnnotations(parseAnnotations(data.annotations));
+            setReportUrl(data.report_url);
+            setLoading(false);
+        } catch (error) {
+            console.error('Error verifying diagram:', error);
+            setLoading(false);
         }
     };
 
-    fetch(diagramUrl)
-.then(response => {
-    if (!response.ok) {
-        throw new Error('Failed to fetch BPMN diagram');
-    }
-    return response.text();
-})
-.then(bpmnXML => {
-    // Once the BPMN XML is fetched, open and render the diagram
-    openDiagram(bpmnXML);
-})
-.catch(error => {
-    console.error('Error fetching BPMN diagram:', error);
-});
-};
-const displayAnnotations = (annotations) => {
-   // setAnnotations(annotations);
-};
-//<Sidebar annotations={annotations} />
+    const handleFileUpload = (event) => {
+        setVerifyClicked(false);
+        const file = event.target.files[0];
+        if (file) {
+            setUploadedFile(file);
+            setIsUploaded(true); // Set to true when a file is uploaded
+            setAnnotations({ 
+                missingInformation: [], 
+                structuralErrors: [], 
+                contradictory: [] 
+            }); // Clear annotations
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const xml = e.target.result;
+                const canvas = document.querySelector('#canvas');
+                canvas.innerHTML = '';
+                displayBPMNDiagramFromXML(xml);
+            };
+            reader.readAsText(file);
+        }
+    };
 
-  return (
-    <div className="project-details-container">
-            <div className="header">
-                <h2><i>LegProV : Legal Process Verification</i></h2>
-                <div className="button-container">
-                    <label htmlFor="file" className="custom-file-input">Upload </label>
-                    <input type="file" id="file" name="document" className="file-input" onChange={handleDiagram} />
-                    <button onClick={handleVerifyDiagram}>Verify</button>
+    const parseAnnotations = (annotations) => {
+        const parsedAnnotations = {
+            missingInformation: [],
+            structuralErrors: [],
+            contradictory: [],
+        };
+
+        annotations.forEach(annotation => {
+            const parts = annotation.split('#');
+            const errorType = parts[0].split(' ')[1]; // "MI" or "S" or "C"
+            const errorCode = parts[0].split(' ')[2]; // Error code like "1"
+
+            if (errorType === 'MI') {
+                parsedAnnotations.missingInformation.push(`MI ${errorCode}: ${parts[1].trim()}`);
+            } else if (errorType === 'S') {
+                parsedAnnotations.structuralErrors.push(`S ${errorCode}: ${parts[1].trim()}`);
+            } else if (errorType === 'C') {
+                parsedAnnotations.contradictory.push(`C ${errorCode}: ${parts[1].trim()}`);
+            }
+        });
+
+        return parsedAnnotations;
+    };
+
+    const displayBPMNDiagram = (url) => {
+        const bpmnViewer = new BpmnViewer({
+            container: '#canvas',
+        });
+
+        const openDiagram = async (bpmnXML) => {
+            try {
+                await bpmnViewer.importXML(bpmnXML);
+                const canvas = bpmnViewer.get('canvas');
+                canvas.zoom('fit-viewport');
+            } catch (err) {
+                console.error('Could not import BPMN 2.0 diagram', err);
+            }
+        };
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch BPMN diagram');
+                }
+                return response.text();
+            })
+            .then(bpmnXML => {
+                console.log('Fetched BPMN XML:', bpmnXML); // Debugging log
+                openDiagram(bpmnXML);
+            })
+            .catch(error => {
+                console.error('Error fetching BPMN diagram:', error);
+           
+            });
+        };
+    
+        const displayBPMNDiagramFromXML = (xml) => {
+            const bpmnViewer = new BpmnViewer({
+                container: '#canvas',
+            });
+    
+            const openDiagram = async (bpmnXML) => {
+                try {
+                    await bpmnViewer.importXML(bpmnXML);
+                    const canvas = bpmnViewer.get('canvas');
+                    canvas.zoom('fit-viewport');
+                } catch (err) {
+                    console.error('Could not import BPMN 2.0 diagram', err);
+                }
+            };
+    
+            openDiagram(xml);
+        };
+    
+        return (
+            <div className="project-details-container">
+                <div className="header">
+                    <Link to={`/dashboard/project/${projectId}`} className="back-arrow">&larr; {content.back}</Link>
+                    <h2><i>LegProV : Legal Process Verification</i></h2>
+                    <div className="button-container">
+                        <label htmlFor="file" className="custom-file-input">{content.upload} </label>
+                        <input type="file" id="file" name="document" className="file-input" onChange={handleFileUpload} />
+                        <button onClick={handleVerifyDiagram}>{content.verify}</button>
+                        
+                    </div>
                 </div>
+                <div className="content">
+                    <div className="diagram-container">
+                        <div id="canvas" className="canvas"></div>
+                    </div>
+                    <div className="sidebar">
+                        <h2>{content.results}</h2>
+                        {annotations.missingInformation.length > 0 && (
+                            <div className="result-item">
+                                <div className="color-square yellow"></div>
+                                <div>
+                                    <h5>{content.mi}</h5>
+                                    {annotations.missingInformation.map((item, index) => (
+                                        <p key={index}>{item}</p>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {annotations.structuralErrors.length > 0 && (
+                            <div className="result-item">
+                                <div className="color-square red"></div>
+                                <div>
+                                    <h5>{content.s}</h5>
+                                    {annotations.structuralErrors.map((item, index) => (
+                                        <p key={index}>{item}</p>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {annotations.contradictory.length > 0 && (
+                            <div className="result-item">
+                                <div className="color-square purple"></div>
+                                <div>
+                                    <h5>{content.c}</h5>
+                                    {annotations.contradictory.map((item, index) => (
+                                        <p key={index}>{item}</p>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                {verifyClicked && !loading && (
+                    <div className="view-report-container">
+                        <button className="view-report-btn" onClick={() => window.open(`http://127.0.0.1:8000${reportUrl}`, '_blank')}>
+            {content.report}
+        </button>
+                    </div>
+                )}
             </div>
-            <div className="content">
-                <div className="diagram-container">
-                    <div id="canvas" className="canvas"></div>
-                </div>
-                <div className="sidebar">
-                    <h2>Results</h2>
-                    <div className="result-item">
-                        <div className="color-square yellow"></div>
-                        <div>
-                            <h5>Missing Information:</h5>
-                            <p>MI 1: Undefined gatway</p>
-                            <p>MI 2: Undefined role</p>
-                        </div>
-                    </div>
-                    <div className="result-item">
-                        <div className="color-square red"></div>
-                        <div>
-                            <h5>Structural Errors:</h5>
-                            <p>S1: Nondeterministic deadlock</p>
-                        </div>
-                    </div>
-                    <div className="result-item">
-                        <div className="color-square purple"></div>
-                        <div>
-                            <h5>Contradictory:</h5>
-                            <p>No error found</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {verifyClicked && !loading && ( // Show View Report button only if Verify button is clicked and verification is completed
-                <div className="view-report-container">
-                    <button className="view-report-btn">View Report</button>
-                </div>
-            )}
-        </div>
-
-
-  );
-};
-
-export default VerifFront;
+        );
+    };
+    
+    export default VerifFront;
+    

@@ -74,17 +74,31 @@ def create_diagram_directory(sender, instance, created, **kwargs):
     if created:
         project_directory = os.path.join(settings.MEDIA_ROOT, f'user_{instance.project.owner.id}', f'project_{instance.project.id}')
         diagram_directory = os.path.join(project_directory, f'diagram_{instance.id}')
+        none_directory = os.path.join(project_directory, 'diagram_None')
+
+        # Create the actual diagram directory
         os.makedirs(diagram_directory, exist_ok=True)
-        
+
         # Handle file upload
         if instance.file:
             # Construct destination path
             destination_path = os.path.join(diagram_directory, instance.file.name.split('/')[-1])
-            
+
             # Move the uploaded file to the diagram directory
             os.rename(instance.file.path, destination_path)
-            
+
             # Update the file path in the instance
             instance.file.name = destination_path
             instance.save()
+
+        # Delete the `diagram_None` folder if it exists
+        if os.path.exists(none_directory):
+            try:
+                os.rmdir(none_directory)
+            except OSError:
+                print(f"Could not remove non-empty folder: {none_directory}")
+
+
+
+
 

@@ -16,7 +16,7 @@ const CreateProjectForm = ({ onSuccess,fetchProjects }) => {
     create: 'Create a New Project',
     submit: 'Create Project'
   } : {
-    name: 'Nom Du Projet :',
+    name: 'Nom du Projet :',
     description: 'Description :',
     create: 'Créer Un Nouveau Projet',
     submit: 'Crée Projet'
