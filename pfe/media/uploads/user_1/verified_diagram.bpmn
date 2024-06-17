@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="sid-38422fae-e03e-43a3-bef4-bd33b32041b2" targetNamespace="http://bpmn.io/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="17.6.4">
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="sid-38422fae-e03e-43a3-bef4-bd33b32041b2" targetNamespace="http://bpmn.io/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="17.7.1">
   <collaboration id="Collaboration_1gc2382">
     <participant id="Participant_1fqf8ce" name="Insured" processRef="Process_1" />
     <participant id="Participant_1covxfy" name="Insured&#39;s doctor" processRef="Process_01njie6" />
@@ -11,7 +11,7 @@
     </textAnnotation>
     <association id="Association_00mnwb2" associationDirection="None" sourceRef="TextAnnotation_0p13ihi" targetRef="Participant_1covxfy" />
     <textAnnotation id="TextAnnotation_1e74i2k">
-      <text>Decree n°.05-171 Article 8</text>
+      <text>Decree n°.05-171/Article 8</text>
     </textAnnotation>
     <textAnnotation id="TextAnnotation_132zd1w">
       <text>Decree n°.05-171 Article 4</text>
@@ -424,22 +424,12 @@
         <omgdi:waypoint x="550" y="480" />
         <omgdi:waypoint x="662" y="480" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_1hnt7rg_di" bpmnElement="Association_1hnt7rg">
-        <omgdi:waypoint x="250" y="380" />
-        <omgdi:waypoint x="360" y="400" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0nz09kj_di" bpmnElement="Association_0nz09kj">
-        <omgdi:waypoint x="218" y="350" />
-        <omgdi:waypoint x="270" y="310" />
-        <omgdi:waypoint x="662" y="339" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_1qcgbrb_di" bpmnElement="Association_1qcgbrb">
-        <omgdi:waypoint x="200" y="391" />
-        <omgdi:waypoint x="200" y="470" />
-        <omgdi:waypoint x="662" y="480" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="TextAnnotation_0p13ihi_di" bpmnElement="TextAnnotation_0p13ihi">
         <omgdc:Bounds x="1230" y="70" width="99.99274099883856" height="40.65040650406504" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_1e74i2k_di" bpmnElement="TextAnnotation_1e74i2k">
+        <omgdc:Bounds x="150" y="350" width="100.00000192176184" height="40.99496125574376" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_132zd1w_di" bpmnElement="TextAnnotation_132zd1w">
@@ -462,6 +452,20 @@
       <bpmndi:BPMNEdge id="Association_0pdidm4_di" bpmnElement="Association_0pdidm4">
         <omgdi:waypoint x="310" y="540" />
         <omgdi:waypoint x="220" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1hnt7rg_di" bpmnElement="Association_1hnt7rg">
+        <omgdi:waypoint x="250" y="380" />
+        <omgdi:waypoint x="360" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0nz09kj_di" bpmnElement="Association_0nz09kj">
+        <omgdi:waypoint x="218" y="350" />
+        <omgdi:waypoint x="270" y="310" />
+        <omgdi:waypoint x="662" y="339" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1qcgbrb_di" bpmnElement="Association_1qcgbrb">
+        <omgdi:waypoint x="200" y="391" />
+        <omgdi:waypoint x="200" y="470" />
+        <omgdi:waypoint x="662" y="480" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1aay1gh_di" bpmnElement="Association_1aay1gh">
         <omgdi:waypoint x="410" y="909" />
@@ -488,10 +492,6 @@
         <omgdi:waypoint x="590" y="430" />
         <omgdi:waypoint x="680" y="430" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="TextAnnotation_1e74i2k_di" bpmnElement="TextAnnotation_1e74i2k">
-        <omgdc:Bounds x="150" y="350" width="100" height="41" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </definitions>

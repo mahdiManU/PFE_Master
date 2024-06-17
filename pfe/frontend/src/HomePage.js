@@ -12,7 +12,6 @@ const HomePage = () => {
       <div>
         <About />
         <Projects />
-        <Skills />
         <Contact />
       </div>
     )

@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useContext , useRef} from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ProjectDetailsPage.css';
 import { LanguageContext } from '../../contexts/language';
 
-
 const ProjectDetailsPage = () => {
     const [diagrams, setDiagrams] = useState([]);
+    const [projectName, setProjectName] = useState(''); // State to store the project name
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [newDiagram, setNewDiagram] = useState({ name: '', description: '', file: null });
@@ -17,7 +17,6 @@ const ProjectDetailsPage = () => {
     const [activeDropdown, setActiveDropdown] = useState(null);
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
-
 
     const handleToggleDropdown = (diagramId) => {
         setActiveDropdown(activeDropdown === diagramId ? null : diagramId);
@@ -85,6 +84,25 @@ const ProjectDetailsPage = () => {
         };
     }, []);
 
+    const fetchProjectDetails = async () => {
+        try {
+            const accessToken = localStorage.getItem('access');
+            if (!accessToken) {
+                throw new Error('Access token not found.');
+            }
+
+            const response = await axios.get(`http://127.0.0.1:8000/api/projects/${projectId}`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            setProjectName(response.data.name);
+        } catch (error) {
+            setError(error.message || content.errorFetchingDiagrams);
+        }
+    };
+
     const fetchDiagrams = async () => {
         setLoading(true);
         setError(null);
@@ -110,6 +128,7 @@ const ProjectDetailsPage = () => {
     };
 
     useEffect(() => {
+        fetchProjectDetails(); // Fetch project details on component mount
         fetchDiagrams();
     }, [projectId]);
 
@@ -194,6 +213,7 @@ const ProjectDetailsPage = () => {
         <div className="container">
             <div className="main-body">
                 <div className="project-details">
+                    <h2 className="project-name">{projectName}</h2> {/* Display project name */}
                     {loading ? (
                         <p>{content.loadingDiagrams}</p>
                     ) : error ? (

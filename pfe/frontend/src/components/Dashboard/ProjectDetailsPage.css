@@ -17,6 +17,16 @@
     background-color: var(--clr-bg-alt);
 }
 
+.project-name {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: var(--clr-fg);
+    text-decoration: underline;
+}
+
+
 .diagram-list {
     margin-top: 20px;
     padding: 10px;
