@@ -27,7 +27,7 @@ from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from .rapport import *
-
+from .contradiction import *
 @ensure_csrf_cookie
 def get_csrf_token(request):
     return JsonResponse({'csrfToken': request.META.get('CSRF_COOKIE')})
@@ -157,6 +157,7 @@ def get_project_diagrams(request, project_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+
 def get_nom_taches_role(bpmnfile,id):
    taches = []
    liste_elements = get_flow_node_refs_from_lane(bpmnfile,id)
@@ -192,6 +193,14 @@ def get_flow_node_refs_from_lane(bpmn_file_path, lane_id):
 def clean_list(string_list):
     # Utiliser un ensemble pour éliminer les doublons, puis filtrer les chaînes vides
     return list({s for s in string_list if s})
+def supprimer_doublons(liste):
+    vue = []
+    resultat = []
+    for element in liste:
+        if element not in vue:
+            resultat.append(element)
+            vue.append(element)
+    return resultat
 def get_lane_id_from_flow_node(bpmn_file_path, flow_node_id):
     lane_id = ""
     with open(bpmn_file_path, 'r') as file:
@@ -227,7 +236,7 @@ def get_annotation_proxy(bpmnfile,id):
       loi.append(get_annotation2(bpmnfile,i))
    loi.append(get_annotation2(bpmnfile,id))
    loi.append(get_annotation2(bpmnfile,get_lane_id_from_flow_node(bpmnfile,id)))
-   return clean_list(loi)
+   return supprimer_doublons(loi)
 def get_annotation_role(bpmnfile,id):
    finale = []
    tache_liste = get_flow_node_refs_from_lane(bpmnfile,id)
@@ -466,6 +475,7 @@ def upload(request):
         fs.save(myfile+'first.bpmn',uploaded_file)
        # print(fs.path('loi.txt'))
         #le fichier avec first a la fin c'est avant verification
+        
         arts = message(fs.path(uploaded_file.name).__str__(),fs.path(myfile+'first.bpmn'),fs.path('loi.txt').__str__())
         
         with open(fs.path(uploaded_file.name+".txt"), 'a') as f:
@@ -474,10 +484,10 @@ def upload(request):
         annotation = modify_bpmn_file(fs.path(uploaded_file.name).__str__())
         liste_finale = arts + annotation
         report_name = uploaded_file.name + '.docx'
-        report_name_eng = uploaded_file.name +'ENG'+ '.docx'
+        #report_name_eng = uploaded_file.name +'ENG'+ '.docx'
         report_path = os.path.join(settings.MEDIA_ROOT, report_name)
         #report_pathENG = os.path.join(settings.MEDIA_ROOT, report_name_eng)
-        generer_rapport(liste_finale, report_path)
+        generer_rapport(liste_finale, report_path,uploaded_file.name)
         #generer_rapportENG(liste_finale,report_pathENG)
         with open(fs.path(uploaded_file.name+".txt"), 'a') as f:
             for i in annotation:
@@ -515,7 +525,7 @@ logger = logging.getLogger(__name__)
 def verify_diagram(request, project_id, diagram_id):
     try:
         logger.info(f"Verifying diagram {diagram_id} for project {project_id}")
-        
+
         # Fetch the diagram object
         diagram = Diagram.objects.get(id=diagram_id, project_id=project_id)
 
@@ -531,11 +541,7 @@ def verify_diagram(request, project_id, diagram_id):
             return HttpResponse(status=404, content="Diagram directory not found")
 
         # Find the BPMN file in the directory
-        diagram_file = None
-        for file_name in os.listdir(diagram_folder_path):
-            if file_name.endswith('.bpmn'):
-                diagram_file = file_name
-                break
+        diagram_file = next((file_name for file_name in os.listdir(diagram_folder_path) if file_name.endswith('.bpmn')), None)
 
         # Ensure a diagram file is found
         if not diagram_file:
@@ -551,14 +557,15 @@ def verify_diagram(request, project_id, diagram_id):
         shutil.copyfile(original_file_path, verified_file_path)
 
         # Perform verification on the copied file
+        err_contradiction = erreur_contradiction(verified_file_path)
         arts = message(verified_file_path, verified_file_path, os.path.join(settings.MEDIA_ROOT, 'loi.txt'))
         annotation = modify_bpmn_file(verified_file_path)
-        liste_finale = arts + annotation
+        liste_finale = arts + annotation + err_contradiction
 
         # Generate report
         report_name = 'report.docx'
         report_path = os.path.join(diagram_folder_path, report_name)
-        generer_rapport(liste_finale, report_path)
+        generer_rapport(liste_finale, report_path, diagram_file)
 
         # Save annotations to a file
         with open(os.path.join(diagram_folder_path, "diagram_annotations.txt"), 'a') as f:
@@ -575,19 +582,15 @@ def verify_diagram(request, project_id, diagram_id):
         verified_file_url = default_storage.url(os.path.join(user_folder, project_folder, diagram_folder, 'verified_diagram.bpmn'))
         report_file_url = default_storage.url(os.path.join(user_folder, project_folder, diagram_folder, report_name))
 
-        return JsonResponse({'filename': verified_file_url, 'report_url':report_file_url, 'annotations': liste_finale})
+        return JsonResponse({'filename': verified_file_url, 'report_url': report_file_url, 'annotations': liste_finale})
     
-    except Exception as e:
-        logger.error(f"Error verifying diagram: {e}")
-        return HttpResponse(status=500, content="Internal Server Error")
-
     except Diagram.DoesNotExist:
         logger.error(f"Diagram {diagram_id} does not exist for project {project_id}")
         return HttpResponse(status=404, content=f"Diagram {diagram_id} does not exist for project {project_id}")
 
     except Exception as e:
-        logger.error(f"Error verifying diagram: {str(e)}", exc_info=True)
-        return HttpResponse(status=500, content=str(e))
+        logger.error(f"Error verifying diagram: {e}", exc_info=True)
+        return HttpResponse(status=500, content="Internal Server Error")
     
 
 def get_diagram(request, project_id, diagram_id):
@@ -634,14 +637,15 @@ def upload_and_verify_diagram(request):
         shutil.copyfile(original_file_path, verified_file_path)
 
         # Perform verification on the copied file
+        err_contradiction  = erreur_contradiction(verified_file_path)
         arts = message(verified_file_path, verified_file_path, os.path.join(settings.MEDIA_ROOT, 'loi.txt'))
         annotation = modify_bpmn_file(verified_file_path)
-        liste_finale = arts + annotation
+        liste_finale = arts + annotation + err_contradiction
 
         # Generate report
         report_name = 'report.docx'
         report_path = os.path.join(upload_folder_path, report_name)
-        generer_rapport(liste_finale, report_path)
+        generer_rapport(liste_finale, report_path,file.name)
 
         # Save annotations to a file
         with open(os.path.join(upload_folder_path, "diagram_annotations.txt"), 'a') as f:

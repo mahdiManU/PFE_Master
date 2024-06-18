@@ -70,29 +70,32 @@ def get_gateway_paths(xml_file, start_gateway_id, end_gateway_id):
 
     return gateway_paths
 def get_all_exclusiveG(bpmnfile):
-    exclusive_gateways = []
-    tree = ET.parse(bpmnfile)
-    root = tree.getroot()
-    namespace = '{http://www.omg.org/spec/BPMN/20100524/MODEL}'
-    for exclusiveGateway in root.findall('.//{}exclusiveGateway'.format(namespace)):
-       exclusive_gateways.append(exclusiveGateway.get('id'))
-    return exclusive_gateways
+     my_list = []
+     with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+     for i in lines:
+         if ("<exclusiveGateway" in i):
+             match = re.search(r'id="([^"]+)"', i)
+             my_list.append(match.group(1))
+     return my_list
 def get_all_inclusiveG(bpmnfile):
-    exclusive_gateways = []
-    tree = ET.parse(bpmnfile)
-    root = tree.getroot()
-    namespace = '{http://www.omg.org/spec/BPMN/20100524/MODEL}'
-    for exclusiveGateway in root.findall('.//{}inclusiveGateway'.format(namespace)):
-       exclusive_gateways.append(exclusiveGateway.get('id'))
-    return exclusive_gateways
+     my_list = []
+     with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+     for i in lines:
+         if ("<inclusiveGateway" in i):
+             match = re.search(r'id="([^"]+)"', i)
+             my_list.append(match.group(1))
+     return my_list
 def get_all_parallelG(bpmnfile):
-    parallel_gateways = []
-    tree = ET.parse(bpmnfile)
-    root = tree.getroot()
-    namespace = '{http://www.omg.org/spec/BPMN/20100524/MODEL}'
-    for paraGateway in root.findall('.//{}parallelGateway'.format(namespace)):
-       parallel_gateways.append(paraGateway.get('id'))
-    return parallel_gateways
+     my_list = []
+     with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+     for i in lines:
+         if ("<parallelGateway" in i):
+             match = re.search(r'id="([^"]+)"', i)
+             my_list.append(match.group(1))
+     return my_list
 def count_distinct_values(lst):
     distinct_values = set(lst)
     return len(distinct_values)
@@ -352,14 +355,22 @@ def taches_dans_article(article,listedestaches):
         return True
     else:
         return False
+def supprimer_doublons(liste):
+    vue = []
+    resultat = []
+    for element in liste:
+        if element not in vue:
+            resultat.append(element)
+            vue.append(element)
+    return resultat
 def trouver_article(nom_fichier, nom_article ,typeErr,listeTaches):
     mesArticles = []
     
     for i in nom_article:
         if(i.__len__()>3):
          mesArticles.append(ramener_art(i,nom_fichier))
-    mesArticles = clean_list(mesArticles)
-    nom_article = clean_list(nom_article)
+    mesArticles = supprimer_doublons(mesArticles)
+    nom_article = supprimer_doublons(nom_article)
  
     if(("(Deterministic deadlock)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))): 
             return "probleme dans either // or dans les aticles suivants : "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__()
@@ -368,8 +379,10 @@ def trouver_article(nom_fichier, nom_article ,typeErr,listeTaches):
     if(("(Nondeterministic lack of synchronization)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
             return "probleme dans or // then dans les articles suivants: "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__()
     if(("(Nondeterministic deadlock)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
+            print(nom_article.__str__())
             return "problem in and // or in the following articles:"+mesArticles.__str__()+"#Reviser :"+nom_article.__str__()
-    return "Ambiguite dans l'article : "+mesArticles.__str__() 
+    
+    return "Ambiguite dans l'article : "+mesArticles.__str__()+"#Reviser : " +mesArticles.__str__()
 
 
 
