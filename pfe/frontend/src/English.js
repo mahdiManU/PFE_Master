@@ -6,7 +6,7 @@ const header = {
   
   const about = {
     // all the properties are optional - can be left empty or deleted
-    name:'Start, Verifying ',
+    name:'Legal BPMN Process, ',
     role: 'A tool for detecting legal errors in administrative processes',
     description:
       'The primary goal is to create a solution that can identify and highlight any legal inconsistencies or errors within administrative process models. The tool is designed to enhance the quality and reliability of legal administrative processes by providing a mechanism for automated error detection, ensuring compliance with legal requirements and minimizing the risk of legal issues in administrative procedures..',

@@ -21,25 +21,24 @@ const VerifFront = () => {
 
     const content = currentLanguage === 'en' ? {
         upload: "Upload",
-        verify:"Verify",
+        verify: "Verify",
         results: "Results",
         back: "Back",
         report: "Download Report",
-        mi: "Missing Informations :",
-        s: "Structural Errors :",
-        c: "Contradictory :"
-        
-      
+        mi: "Missing Information:",
+        s: "Structural Errors:",
+        c: "Contradictory:",
+        noErrors: "No errors found"
     } : {
-        
         upload: "Importer",
-        verify:"Vérifier",
-        results: "Resulats",
+        verify: "Vérifier",
+        results: "Résultats",
         back: "Retour",
-        report: "Télécharger Raport",
+        report: "Télécharger Rapport",
         mi: "Informations manquantes :",
         s: "Erreurs Structurelles :",
-        c: "Contradiction :"
+        c: "Contradictions :",
+        noErrors: "Pas d'erreur"
     };
 
     useEffect(() => {
@@ -74,7 +73,6 @@ const VerifFront = () => {
                 }
 
                 const data = await response.json();
-                //console.log('Fetched diagram data:', data); // Debugging log
                 setDiagramUrl(data.file);
                 setIsUploaded(false); // Set to false when diagram is fetched from database
                 setLoading(false);
@@ -91,7 +89,6 @@ const VerifFront = () => {
 
     useEffect(() => {
         if (diagramUrl) {
-            //console.log('Displaying BPMN diagram:', diagramUrl); // Debugging log
             const canvas = document.querySelector('#canvas');
             canvas.innerHTML = ''; 
             displayBPMNDiagram(diagramUrl);
@@ -132,8 +129,6 @@ const VerifFront = () => {
             }
 
             const data = await response.json();
-            //console.log('Verification response data:', data); // Debugging log
-            
             const canvas = document.querySelector('#canvas');
             canvas.innerHTML = ''; 
             displayBPMNDiagram('http://127.0.0.1:8000' + data.filename);
@@ -215,96 +210,103 @@ const VerifFront = () => {
                 return response.text();
             })
             .then(bpmnXML => {
-                console.log('Fetched BPMN XML:', bpmnXML); // Debugging log
                 openDiagram(bpmnXML);
             })
             .catch(error => {
                 console.error('Error fetching BPMN diagram:', error);
-           
             });
-        };
-    
-        const displayBPMNDiagramFromXML = (xml) => {
-            const bpmnViewer = new BpmnViewer({
-                container: '#canvas',
-            });
-    
-            const openDiagram = async (bpmnXML) => {
-                try {
-                    await bpmnViewer.importXML(bpmnXML);
-                    const canvas = bpmnViewer.get('canvas');
-                    canvas.zoom('fit-viewport');
-                } catch (err) {
-                    console.error('Could not import BPMN 2.0 diagram', err);
-                }
-            };
-    
-            openDiagram(xml);
-        };
-    
-        return (
-            <div className="project-details-container">
-                <div className="header">
-                    <Link to={`/dashboard/project/${projectId}`} className="back-arrow">&larr; {content.back}</Link>
-                    <h2><i>LegProV : Legal Process Verification</i></h2>
-                    <div className="button-container">
-                        <label htmlFor="file" className="custom-file-input">{content.upload} </label>
-                        <input type="file" id="file" name="document" className="file-input" onChange={handleFileUpload} />
-                        <button onClick={handleVerifyDiagram}>{content.verify}</button>
-                        
-                    </div>
-                </div>
-                <div className="content">
-                    <div className="diagram-container">
-                        <div id="canvas" className="canvas"></div>
-                    </div>
-                    <div className="sidebar">
-                        <h2>{content.results}</h2>
-                        {annotations.missingInformation.length > 0 && (
-                            <div className="result-item">
-                                <div className="color-square yellow"></div>
-                                <div>
-                                    <h5>{content.mi}</h5>
-                                    {annotations.missingInformation.map((item, index) => (
-                                        <p key={index}>{item}</p>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                        {annotations.structuralErrors.length > 0 && (
-                            <div className="result-item">
-                                <div className="color-square red"></div>
-                                <div>
-                                    <h5>{content.s}</h5>
-                                    {annotations.structuralErrors.map((item, index) => (
-                                        <p key={index}>{item}</p>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                        {annotations.contradictory.length > 0 && (
-                            <div className="result-item">
-                                <div className="color-square purple"></div>
-                                <div>
-                                    <h5>{content.c}</h5>
-                                    {annotations.contradictory.map((item, index) => (
-                                        <p key={index}>{item}</p>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                {verifyClicked && !loading && (
-                    <div className="view-report-container">
-                        <button className="view-report-btn" onClick={() => window.open(`http://127.0.0.1:8000${reportUrl}`, '_blank')}>
-            {content.report}
-        </button>
-                    </div>
-                )}
-            </div>
-        );
     };
-    
-    export default VerifFront;
-    
+
+    const displayBPMNDiagramFromXML = (xml) => {
+        const bpmnViewer = new BpmnViewer({
+            container: '#canvas',
+        });
+
+        const openDiagram = async (bpmnXML) => {
+            try {
+                await bpmnViewer.importXML(bpmnXML);
+                const canvas = bpmnViewer.get('canvas');
+                canvas.zoom('fit-viewport');
+            } catch (err) {
+                console.error('Could not import BPMN 2.0 diagram', err);
+            }
+        };
+
+        openDiagram(xml);
+    };
+
+    return (
+        <div className="project-details-container">
+            <div className="header">
+                <Link to={`/dashboard/project/${projectId}`} className="back-arrow">&larr; {content.back}</Link>
+                <h2><i>LegProV : Legal Process Verification</i></h2>
+                <div className="button-container">
+                    <label htmlFor="file" className="custom-file-input">{content.upload} </label>
+                    <input type="file" id="file" name="document" className="file-input" onChange={handleFileUpload} />
+                    <button onClick={handleVerifyDiagram}>{content.verify}</button>
+                </div>
+            </div>
+            <div className="content">
+                <div className="diagram-container">
+                    <div id="canvas" className="canvas"></div>
+                </div>
+                <div className="sidebar">
+    <h2>{content.results}</h2>
+    {verifyClicked && !loading ? (
+        <>
+            <div className="result-item">
+                <div className="color-square yellow"></div>
+                <div>
+                    <h5>{content.mi}</h5>
+                    {annotations.missingInformation.length > 0 ? (
+                        annotations.missingInformation.map((item, index) => (
+                            <p key={index}>{item}</p>
+                        ))
+                    ) : (
+                        <p>{content.noErrors}</p>
+                    )}
+                </div>
+            </div>
+            <div className="result-item">
+                <div className="color-square red"></div>
+                <div>
+                    <h5>{content.s}</h5>
+                    {annotations.structuralErrors.length > 0 ? (
+                        annotations.structuralErrors.map((item, index) => (
+                            <p key={index}>{item}</p>
+                        ))
+                    ) : (
+                        <p>{content.noErrors}</p>
+                    )}
+                </div>
+            </div>
+            <div className="result-item">
+                <div className="color-square purple"></div>
+                <div>
+                    <h5>{content.c}</h5>
+                    {annotations.contradictory.length > 0 ? (
+                        annotations.contradictory.map((item, index) => (
+                            <p key={index}>{item}</p>
+                        ))
+                    ) : (
+                        <p>{content.noErrors}</p>
+                    )}
+                </div>
+            </div>
+        </>
+    ) : null}
+</div>
+
+            </div>
+            {verifyClicked && !loading && (
+                <div className="view-report-container">
+                    <button className="view-report-btn" onClick={() => window.open(`http://127.0.0.1:8000${reportUrl}`, '_blank')}>
+                        {content.report}
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default VerifFront;

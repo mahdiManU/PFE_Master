@@ -47,7 +47,7 @@ const initialState = {
     message: "",
 }
 
-export const register = createAsyncThunk(
+export const createUser = createAsyncThunk(
     "auth/register",
     async (userData, thunkAPI) => {
         try {
@@ -160,15 +160,15 @@ export const authSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(register.pending, (state) => {
+            .addCase(createUser.pending, (state) => {
                 state.isLoading = true
             })
-            .addCase(register.fulfilled, (state, action) => {
+            .addCase(createUser.fulfilled, (state, action) => {
                 state.isLoading = false
                 state.isSuccess = true
                 state.user = action.payload
             })
-            .addCase(register.rejected, (state, action) => {
+            .addCase(createUser.rejected, (state, action) => {
                 state.isLoading = false
                 state.isSuccess = false
                 state.isError = true

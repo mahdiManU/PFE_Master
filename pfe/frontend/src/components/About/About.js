@@ -7,6 +7,11 @@ import './About.css'
 const About = () => {
   const { currentLanguage } = useContext(LanguageContext);
 
+  const cont = currentLanguage === 'en' ? {
+    verif: 'Verification'
+  } : {
+    verif: 'Vérification'
+  };
   // Dynamically select the content based on the current language
   const content = currentLanguage === 'en' ? EnglishContent : FrenchContent;
   const {name, role, description, resume, memoire } = content.about;
@@ -15,7 +20,7 @@ const About = () => {
     <div className='about center'>
       {name && (
         <h1>
-          {name}<span className='about__name'>BPMN.io</span>
+          {name}<span className='about__name'>{cont.verif}</span>
         </h1>
       )}
 

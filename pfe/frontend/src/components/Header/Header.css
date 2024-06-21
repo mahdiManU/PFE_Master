@@ -1,14 +1,31 @@
+/* Header.css */
+
 .header {
-    height: 8em;
-    max-width: 1100px;
-    width: 95%;
-    margin: 0 auto;
-    justify-content: space-between;
+  height: 8em;
+  max-width: 1100px;
+  width: 95%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+}
+
+.header-icon {
+  width: 5.5em; /* Adjust icon size as needed */
+}
+
+@media (max-width: 600px) {
+  .header {
+    height: 6em;
   }
-  
-  @media (max-width: 600px) {
-    .header {
-      height: 6em;
-    }
+
+  .header-icon {
+    width: 3em; /* Adjust icon size for smaller screens */
+    margin-left: 0.5em; /* Adjust spacing for smaller screens */
   }
-  
+}
