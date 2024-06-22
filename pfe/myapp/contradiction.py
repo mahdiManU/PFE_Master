@@ -7,6 +7,54 @@ import re
 # Assurez-vous que les ressources nécessaires de NLTK sont téléchargées
 #nltk.download('wordnet')
 #nltk.download('omw-1.4')
+def tout_chemin(xml_file, start_gateway_id, end_gateway_id):
+    graph = {}
+    with open(xml_file, 'r') as file:
+        lines = file.readlines()
+
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        
+        if line.startswith('<sequenceFlow') or line.startswith('<messageFlow'):
+            # Extract sourceRef and targetRef
+            sourceRef = extract_attribute(line, 'sourceRef')
+            targetRef = extract_attribute(line, 'targetRef')
+            
+            if sourceRef not in graph:
+                graph[sourceRef] = []
+            graph[sourceRef].append(targetRef)
+        
+        i += 1
+
+    all_paths = find_all_paths(graph, start_gateway_id, end_gateway_id)
+    return all_paths
+
+def extract_attribute(line, attribute_name):
+    start_index = line.find(attribute_name + '="') + len(attribute_name) + 2
+    end_index = line.find('"', start_index)
+    return line[start_index:end_index]
+
+def find_all_paths(graph, start, end):
+    all_paths = []
+    dfs([], graph, start, end, all_paths)
+    return all_paths
+
+def dfs(current_path, graph, node, end, all_paths):
+    current_path.append(node)
+    
+    if node == end:
+        all_paths.append(current_path[:])
+    else:
+        if node in graph:
+            for neighbor in graph[node]:
+                if neighbor not in current_path:  # Avoid cycles
+                    dfs(current_path, graph, neighbor, end, all_paths)
+    
+    current_path.pop()  # Backtrack
+
+    return all_paths
+
 def get_lane_id_from_flow_node(bpmn_file_path, flow_node_id):
     lane_id = ""
     with open(bpmn_file_path, 'r') as file:
@@ -215,14 +263,14 @@ def applatire(liste_taches):
     return finale
 
 def no_event_betwen(bpmnfile,task1,task2):
-    chemin = get_gateway_paths(bpmnfile,task1,task2)
+    chemin = tout_chemin(bpmnfile,task1,task2)
     for i in chemin:
         for j in i:
          if('Event' in j):
             return False
     return True
 def no_task_betwen(bpmnfile,event1,event2):
-    chemin = get_gateway_paths(bpmnfile,event1,event2)
+    chemin = tout_chemin(bpmnfile,event1,event2)
     for i in chemin:
         for j in i:
          if('Activity' in j):
@@ -230,7 +278,7 @@ def no_task_betwen(bpmnfile,event1,event2):
     return True
 def detect_between(bpmnfile,para1,para2):
     tache_col = []
-    liste_des_taches = get_gateway_paths(bpmnfile,para1,para2)  
+    liste_des_taches = tout_chemin(bpmnfile,para1,para2)  
     print("hello")
     finale = applatire(liste_des_taches)
     for i in finale:
@@ -239,42 +287,46 @@ def detect_between(bpmnfile,para1,para2):
                 if(detect_contradiction(get_task(bpmnfile,i),get_task(bpmnfile,j))):
                     tache_col.append(i)
                     tache_col.append(j)
-                    return  'Contradiction entre : '+get_task(bpmnfile,i)+get_task(bpmnfile,j)+"#Contradiction dans l'article : "+get_annotation_proxy(bpmnfile,i)+"#Reviser "+get_annotation_proxy(bpmnfile,i),tache_col
+                    return  'Contradiction entre : '+get_task(bpmnfile,i)+get_task(bpmnfile,j)+"#Contradiction dans l'article : "+get_annotation_proxy(bpmnfile,i)+"#Reviser "+get_annotation_proxy(bpmnfile,i),tache_col , 'Contradiction between : '+get_task(bpmnfile,i)+get_task(bpmnfile,j)+"#Contradiction in the article : "+get_annotation_proxy(bpmnfile,i)+"#Revise "+get_annotation_proxy(bpmnfile,i)
     return False   
                 
 def detecter_C1(bpmnfile):
     finale = []
+    finaleENG = []
     tache = []
     liste_parallel = get_all_parallelG(bpmnfile)
     for i in liste_parallel:
         for j in liste_parallel:
             if(i != j):
                 if(detect_between(bpmnfile,i,j)):
-                    message,tache_col = detect_between(bpmnfile,i,j)
+                    message,tache_col , messageENG = detect_between(bpmnfile,i,j)
                     for i in tache_col:
                         tache.append(i)
                     finale.append(message)
+                    finaleENG.append(messageENG)
     liste_inclusive = get_all_inclusiveG(bpmnfile)
     for i in liste_inclusive:
         for j in liste_inclusive:
             if(i != j):
                 if(detect_between(bpmnfile,i,j)):
-                     message,tache_col = detect_between(bpmnfile,i,j)
+                     message,tache_col ,messageENG = detect_between(bpmnfile,i,j)
                      for i in tache_col:
                         tache.append(i)
                      finale.append(message)
+                     finaleENG.append(messageENG)
     for i in tache:
         colorier_task(bpmnfile,i)
-    return finale
+    return finale ,finaleENG
 
 def detecter_C2(bpmnfile):
      finale = []
      tache = []
+     finaleENG = []
      liste_start = get_start_event_ids_from_file(bpmnfile)
      liste_end = get_end_event_ids_from_file(bpmnfile)
      for i in liste_start:
          for j in liste_end:
-             mes_chemin = get_gateway_paths(bpmnfile,i,j)
+             mes_chemin = tout_chemin(bpmnfile,i,j)
              for k in mes_chemin:
                  for tache1 in k:
                      for tache2 in k:
@@ -283,21 +335,24 @@ def detecter_C2(bpmnfile):
                              if(detect_contradiction(get_task(bpmnfile,tache1),get_task(bpmnfile,tache2))):
                                  tache.append(tache1)
                                  tache.append(tache2)
+                                 finaleENG.append("Contradiction between "+get_task(bpmnfile,tache1)+get_task(bpmnfile,tache2)+"#Contradiction in the following article : "+get_annotation_proxy(bpmnfile,tache1)+"#Revise the  article : "+get_annotation_proxy(bpmnfile,tache1))
                                  finale.append("contradiction entre "+get_task(bpmnfile,tache1)+get_task(bpmnfile,tache2)+"#Contradiction dans l'article : "+get_annotation_proxy(bpmnfile,tache1)+"#Reviser l'article : "+get_annotation_proxy(bpmnfile,tache1))
                          if((k.index(tache2) > k.index(tache1)) and (tache1 != tache2) and (no_task_betwen(bpmnfile,tache1,tache2)) and ("Event" in tache1) and ("Event" in tache2) and (avoir_type(bpmnfile,tache1)!="endEvent") and (avoir_type(bpmnfile,tache2)!="endEvent")):
                              if(detect_contradiction(get_event(bpmnfile,tache1),get_event(bpmnfile,tache2))):
                                  tache.append(tache1)
                                  tache.append(tache2)
+                                 finaleENG.append("Contradiction between "+get_task(bpmnfile,tache1)+get_task(bpmnfile,tache2)+"#Contradiction in the following article : "+get_annotation_proxy(bpmnfile,tache1)+"#Revise the  article : "+get_annotation_proxy(bpmnfile,tache1))
                                  finale.append("contradiction entre "+get_event(bpmnfile,tache1)+get_event(bpmnfile,tache2)+"#Contradiction dans l'article : "+get_annotation_proxy(bpmnfile,tache1)+"#Reviser l'article : "+get_annotation_proxy(bpmnfile,tache1))
      for i in tache:
          colorier_task(bpmnfile,i)
-     return finale 
+     return finale  , finaleENG
                                  
                           
 def detect_C3(bpmnfile):
     liste_exclu = get_all_exclusiveG(bpmnfile)
     exclu = []
     message = []
+    messageENG = []
     with open(bpmnfile, 'r') as file:
         lines = file.readlines()
     
@@ -316,10 +371,11 @@ def detect_C3(bpmnfile):
            for p in content:
                if(oppsite(k,p) and (my_dict[k]==my_dict[p])):
                    exclu.append(i)
+                   messageENG.append("Interval contradiction#Contradiction the article : "+get_annotation_proxy(bpmnfile,i)+"#Revise the article : "+get_annotation_proxy(bpmnfile,i))
                    message.append("Contradiction d'interval#Contradiction dans l'article : "+get_annotation_proxy(bpmnfile,i)+"#Reviser l'article : "+get_annotation_proxy(bpmnfile,i))
     for i in exclu:
         colorier_task(bpmnfile,i)
-    return message
+    return message , messageENG
 
 
 def detect_C4(bpmnfile):
@@ -327,10 +383,11 @@ def detect_C4(bpmnfile):
     liste_end = get_end_event_ids_from_file(bpmnfile)
     tache = []
     message = []
+    messageENG = []
     for i in liste_start:
         chemin = []
         for j in liste_end:
-           chemin = get_gateway_paths(bpmnfile,i,j)
+           chemin = tout_chemin(bpmnfile,i,j)
            chemin = supprimer_doublons(chemin)
            print(chemin.__str__())
            for t in chemin:
@@ -339,23 +396,40 @@ def detect_C4(bpmnfile):
                        print("mahdi" + actuel +" " +suivant )
                        tache.append(suivant)
                        tache.append(actuel)
-                       message.append("Contradiction la tache " +get_task(bpmnfile,suivant)+" se deroule avant "+get_task(bpmnfile,actuel)+"#Contradiction dans l'article "+get_annotation_proxy(bpmnfile,actuel).__str__()+"#Reviser "+get_annotation_proxy(bpmnfile,actuel).__str__())
+                       messageENG.append("Contradiction, the task " +get_task(bpmnfile,suivant)+" happens befor "+get_task(bpmnfile,actuel)+"#Contradiction in the article "+get_annotation_proxy(bpmnfile,actuel).__str__()+"#Revise "+get_annotation_proxy(bpmnfile,actuel).__str__())
+                       message.append("Contradiction, la tache " +get_task(bpmnfile,suivant)+" se deroule avant "+get_task(bpmnfile,actuel)+"#Contradiction dans l'article "+get_annotation_proxy(bpmnfile,actuel).__str__()+"#Reviser "+get_annotation_proxy(bpmnfile,actuel).__str__())
     for i in tache:
         colorier_task(bpmnfile,i)
-    return message
+    return message , messageENG
 
 def erreur_contradiction(bpmnfile):
     finale = []
+    finaleENG = []
     cpt=0
+    contradictionENG = []
     contradiction = []
-    contradiction = detecter_C1(bpmnfile)
-    contradiction += detecter_C2(bpmnfile)
-    contradiction += detect_C3(bpmnfile)
-    contradiction += detect_C4(bpmnfile)
+    contradiction, contradictionENG = detecter_C1(bpmnfile)
+
+# For the other functions, extend the lists appropriately
+    result1, result2 = detecter_C2(bpmnfile)
+    contradiction += result1
+    contradictionENG += result2
+
+    result1, result2 = detect_C3(bpmnfile)
+    contradiction += result1
+    contradictionENG += result2
+
+    result1, result2 = detect_C4(bpmnfile)
+    contradiction += result1
+    contradictionENG += result2
     for i in contradiction:
         cpt +=1
-        finale.append("Erreur C"+str(cpt)+"#"+i)
-    return finale
+        finale.append("Erreur C "+str(cpt)+"#"+i)
+    cpt = 0
+    for i in contradictionENG:
+        cpt +=1
+        finaleENG.append("Error C "+str(cpt)+"#"+i)
+    return finale , finaleENG
 
 #print(get_all_parallelG('last.bpmn').__str__())
 

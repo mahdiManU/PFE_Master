@@ -28,6 +28,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from .rapport import *
 from .contradiction import *
+from .rapportEng import *
+from .add import *
+
 @ensure_csrf_cookie
 def get_csrf_token(request):
     return JsonResponse({'csrfToken': request.META.get('CSRF_COOKIE')})
@@ -167,6 +170,62 @@ def get_nom_taches_role(bpmnfile,id):
      if("Activity" in i):
        taches.append(get_task(bpmnfile,i))
    return taches
+def get_participant_id_for_task(file_path, task_id):
+    # Lire le fichier XML ligne par ligne
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+        xml_content = ''.join(lines)
+    
+    # Fonction pour extraire la valeur d'un attribut XML
+    def extract_attribute(xml, attribute):
+        attr_start = f'{attribute}="'
+        start_idx = xml.find(attr_start)
+        if start_idx != -1:
+            start_idx += len(attr_start)
+            end_idx = xml.find('"', start_idx)
+            return xml[start_idx:end_idx]
+        return None
+
+    # Trouver la tâche avec l'ID donné
+    task_start = f'<task id="{task_id}"'
+    task_idx = xml_content.find(task_start)
+    if task_idx == -1:
+        return None
+    
+    # Trouver le processus contenant cette tâche
+    process_start = '<process '
+    process_end = '</process>'
+    
+    process_idx = xml_content.find(process_start)
+    while process_idx != -1:
+        process_end_idx = xml_content.find(process_end, process_idx) + len(process_end)
+        process_xml = xml_content[process_idx:process_end_idx]
+        
+        # Vérifier si le processus contient cette tâche
+        if task_start in process_xml:
+            process_id = extract_attribute(process_xml, 'id')
+            break
+        process_idx = xml_content.find(process_start, process_end_idx)
+    
+    if process_id is None:
+        return None
+    
+    # Trouver le participant contenant ce processus
+    participant_start = '<participant '
+    participant_end = '/>'
+    
+    participant_idx = xml_content.find(participant_start)
+    while participant_idx != -1:
+        participant_end_idx = xml_content.find(participant_end, participant_idx) + len(participant_end)
+        participant_xml = xml_content[participant_idx:participant_end_idx]
+        
+        # Vérifier si le participant contient ce processus
+        if f'processRef="{process_id}"' in participant_xml:
+            return extract_attribute(participant_xml, 'id')
+        
+        participant_idx = xml_content.find(participant_start, participant_end_idx)
+    
+    return None
 def get_flow_node_refs_from_lane(bpmn_file_path, lane_id):
     flow_node_refs = []
     with open(bpmn_file_path, 'r') as file:
@@ -229,7 +288,10 @@ def get_annotation_proxy(bpmnfile,id):
          id_list.append(re.search(r'targetRef="([^"]+)"', line).group(1))
       if((('targetRef="'+id) in line)):
          id_list.append(re.search(r'sourceRef="([^"]+)"', line).group(1))
-   
+   id_lane = get_participant_id_for_task(bpmnfile,id)
+   #print('basta' + id_lane)
+   loi.append(get_annotation_for_participant(bpmnfile,id_lane))
+    
    
 
    for i in id_list:
@@ -241,6 +303,7 @@ def get_annotation_role(bpmnfile,id):
    finale = []
    tache_liste = get_flow_node_refs_from_lane(bpmnfile,id)
    for i in tache_liste:
+       finale.append(get_annotation3(bpmnfile,i))
        finale.append(get_annotation2(bpmnfile,i))
    return clean_list(finale)
 def negative_event(bpmnfile):
@@ -261,7 +324,7 @@ def negative_event(bpmnfile):
       for i in target_list:
          
          type_target.append(get_element_type(i,bpmnfile))
-      if(("intermediateThrowEvent" in type_target) and ("intermediateCatchEvent" not in type_target)):
+      if(("intermediateCatchEvent" in type_target) and ("intermediateCatchEvent" not in type_target)):
          for i in target_list:
             
             if(get_element_type(i,bpmnfile) == "intermediateThrowEvent"):
@@ -327,6 +390,19 @@ def get_annotation2(bpmn_file_path,id):
                 if (msg):
                     return msg.group(1)
    return msg
+def colorier_task(bpmnfile,id_task):
+     new_lines = []
+     with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+     for i in lines:
+         if(("<bpmndi:BPMNShape" in i) and (id_task in i) and ("bioc:stroke" not in i)):
+             modified_line =i[:-2]+' bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">\n'
+             new_lines.append(modified_line)
+         else:
+             new_lines.append(i)
+     with open(bpmnfile, 'w') as file:
+         file.truncate(0)
+         file.writelines(new_lines)
 def colorier_picine(id,liste):
    for i in liste:
       if((id in i) and ("<bpmndi:BPMNShape" in i)):
@@ -335,6 +411,7 @@ def colorier_picine(id,liste):
 def getways_ids2(bpmn_file_path,err):
    ids_list = []
    content = []
+   messageENG = []
    with open(bpmn_file_path, 'r') as file:
         lines = file.readlines()
    ids_list = getids(bpmn_file_path)
@@ -348,17 +425,20 @@ def getways_ids2(bpmn_file_path,err):
        if(("&#62" in content.__str__()) or ("&#60" in content.__str__()) or ("=" in content.__str__()) or ("superieur" in content.__str__()) or ("inferieur" in content.__str__()) or ("egale" in content.__str__())):
           if("&#62" not in content.__str__() and ("superieur" not in content.__str__())):
             err += 1 
+            messageENG.append("Error MI"+err+"# the upper case is missing# see the article "+get_annotation(bpmn_file_path,i).__str__())
             message.append("erreur MI"+err+"# il manque le cas de superieur# voire l'article "+get_annotation(bpmn_file_path,i).__str__())
           if("&#60" not in content.__str__() and ("inferieur" not in content.__str__())):
-            err += 1 
+            err += 1
+            messageENG.append("Error MI"+err+"# the lower case is missing# see the article "+get_annotation(bpmn_file_path,i).__str__()) 
             message.append("erreur MI"+err+"#: il manque le cas de inferieur# voire l'article "+get_annotation(bpmn_file_path,i).__str__())
           if("=" not in content.__str__() and ("egale" not in content.__str__())):
             err += 1 
+            messageENG.append("Error MI"+err+"# the case of equal is missing# see the article "+get_annotation(bpmn_file_path,i).__str__()) 
             message.append("erreur MI"+err+"#: il manque le cas de egale# voire l'article "+get_annotation(bpmn_file_path,i).__str__())
        if(verif_logique(bpmn_file_path,content.__str__(),i)):
           message.append(verif_logique(bpmn_file_path,content.__str__(),i))
        content = []        
-   return message
+   return message , messageENG
 def getways_ids(bpmn_file_path):
    ids_list = []
    with open(bpmn_file_path, 'r') as file:
@@ -381,7 +461,26 @@ def get_annotation(bpmn_file_path,id):
              if temp in line2 and  '<textAnnotation' in line2:
                 msg.append("missing information : "+re.search(r'<text>(.*?)</text>', lines[lines.index(line2)+1]).group(1))
    return msg
- 
+def get_annotation3(bpmn_file_path,id):
+   msg = []
+   with open(bpmn_file_path, 'r') as file:
+        lines = file.readlines()
+   for line in lines:
+        if ("<association" in line) and (id in line):
+         match = re.search(r'targetRef="([^"]+)"', line)
+         temp = match.group(1)
+         for line2 in lines : 
+             if temp in line2 and  '<textAnnotation' in line2:
+                return re.search(r'<text>(.*?)</text>', lines[lines.index(line2)+1]).group(1)
+def get_all_tasks(bpmnfile):
+    allTasks = []
+    with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+    for i in lines:
+        if("<task" in i):
+            match = re.search(r'id="([^"]+)"', i)
+            allTasks.append(match.group(1))
+    return allTasks
 def modify_bpmn_file(bpmn_file_path):
     print('hello')
     err = 0
@@ -411,8 +510,10 @@ def modify_bpmn_file(bpmn_file_path):
            elif ("<exclusiveGateway" not in line) or (id not in line):
               modified_lines.append(line) 
        if(get_annotation_proxy(bpmn_file_path,id).__len__() > 0):
+          messageENG.append("Error MI " +str(err)+"# Missing condition #"+"Condition not specified in the article : "+get_annotation_proxy(bpmn_file_path,id).__str__()+"#Revise the article : "+get_annotation_proxy(bpmn_file_path,id).__str__()+" and Add the appropriate condition") 
           message.append("Erreur MI " +str(err)+"# Condition manquante #"+"Condition non preciser dans l'article : "+get_annotation_proxy(bpmn_file_path,id).__str__()+"#Reviser l'article : "+get_annotation_proxy(bpmn_file_path,id).__str__()+" et Ajouter la condition adéquate")  
        else:
+          messageENG.append("Error MI " +str(err)+"# Missing condition #This part is not annotated on the diagram#Add the correct condition")
           message.append("Erreur MI " +str(err)+"# Condition manquante #Cette partie est Non annoter sur le diagramme#Ajouter la condition adéquate")
        with open(bpmn_file_path, 'w') as file:
             file.truncate(0)
@@ -423,6 +524,9 @@ def modify_bpmn_file(bpmn_file_path):
     modified_lines = []
     if(ids_picine.__len__()>0):
       for i in ids_picine:
+            with open(bpmn_file_path, 'r') as file:
+                 lines2 = file.readlines()
+            modified_lines = []
             for j in lines2:
               if((i in j) and ("<bpmndi:BPMNShape" in j)):
                 err +=1
@@ -430,17 +534,19 @@ def modify_bpmn_file(bpmn_file_path):
                 
                 modified_lines.append(modified_line)
                 if(get_annotation_role(bpmn_file_path,i).__len__() >0):
+                 print("chikour" + get_annotation_role(bpmn_file_path,i).__str__() )
+                 messageENG.append("Error MI " +str(err)+"# Missing role # Role not specified in the article : "+get_annotation_role(bpmn_file_path,i).__str__()+"#Revise the article : "+get_annotation_role(bpmn_file_path,i).__str__()+" Add the appropriate role to these tasks :"+get_nom_taches_role(bpmn_file_path,i).__str__())
                  message.append("Erreur MI " +str(err)+"# Role manquant # Role non précisé dans l'article : "+get_annotation_role(bpmn_file_path,i).__str__()+"#Reviser l'article : "+get_annotation_role(bpmn_file_path,i).__str__()+" Ajouter le rôle adéquat a ces taches :"+get_nom_taches_role(bpmn_file_path,i).__str__())
                 else:
+                 messageENG.append("Error MI " +str(err)+"# Missing role #Cette partie est Non annoter sur le diagramme#Add the correct role" )
                  message.append("Erreur MI " +str(err)+"# Role manquant #Cette partie est Non annoter sur le diagramme#Ajouter le rôle adéquat" )
               else:
                 modified_lines.append(j)
       
-      with open(bpmn_file_path, 'w') as file:
-         file.truncate(0)
-         
-         file.writelines(modified_lines)
-    modified_lines = []
+            with open(bpmn_file_path, 'w') as file:
+              file.truncate(0)
+              file.writelines(modified_lines)
+              modified_lines = []
     with open(bpmn_file_path, 'r') as file:
       lines3 = file.readlines()
     negative = negative_event(bpmn_file_path)
@@ -460,8 +566,24 @@ def modify_bpmn_file(bpmn_file_path):
      with open(bpmn_file_path, 'w') as file:
          file.truncate(0)
          file.writelines(modified_lines)
-    message1 = getways_ids2(bpmn_file_path,err)
-    return message1 + message 
+    with open(bpmn_file_path, 'r') as file:
+        lines = file.readlines()
+    modified_lines = []
+    all_tasks = get_all_tasks(bpmn_file_path)
+    for i in all_tasks:
+        cpt = 0
+        for line in lines:
+            if(('sourceRef="'+i+'"') in line):
+                cpt += 1
+        if(cpt == 0):
+            err+=1
+            messageENG.append("Error MI " +str(err)+"# Legal vacuum #"+"Legal vacuum in the article : "+get_annotation_proxy(bpmn_file_path,i).__str__()+"#Revise the article : "+get_annotation_proxy(bpmn_file_path,i).__str__()+" and Add adequate information")  
+            message.append("Erreur MI " +str(err)+"# Vide juridique #"+"Vide juridique dans l'article : "+get_annotation_proxy(bpmn_file_path,i).__str__()+"#Reviser l'article : "+get_annotation_proxy(bpmn_file_path,i).__str__()+" et Ajouter des informations adéquates")  
+            #message.append("Erreur MI " +str(err)+"# Vide juridique # Vide juridique dans l'article : "+get_annotation_proxy(bpmn_file_path,i).__str__()+" # Reviser l'article : "+get_annotation_proxy(bpmn_file_path,i).__str__()+" Ajouter des information à :"+get_annotation_proxy(bpmn_file_path,i).__str__())
+            print(message.__str__())
+            colorier_task(bpmn_file_path,i)
+    message1 , message2= getways_ids2(bpmn_file_path,err)
+    return message1 + message , message2+messageENG 
 def home(request):
     return render(request ,"myapp/home.html")
 
@@ -473,15 +595,15 @@ def upload(request):
         fs.save(uploaded_file.name,uploaded_file)
         myfile =os.path.splitext(uploaded_file.name)[0]
         fs.save(myfile+'first.bpmn',uploaded_file)
-       # print(fs.path('loi.txt'))
+       # print(fs.path('loi3.txt'))
         #le fichier avec first a la fin c'est avant verification
         
-        arts = message(fs.path(uploaded_file.name).__str__(),fs.path(myfile+'first.bpmn'),fs.path('loi.txt').__str__())
+        arts = message(fs.path(uploaded_file.name).__str__(),fs.path(myfile+'first.bpmn'),fs.path('loi3.txt').__str__())
         
         with open(fs.path(uploaded_file.name+".txt"), 'a') as f:
             for i in arts:
              f.write(i+" \n")
-        annotation = modify_bpmn_file(fs.path(uploaded_file.name).__str__())
+        annotation ,annotationENG= modify_bpmn_file(fs.path(uploaded_file.name).__str__())
         liste_finale = arts + annotation
         report_name = uploaded_file.name + '.docx'
         #report_name_eng = uploaded_file.name +'ENG'+ '.docx'
@@ -557,15 +679,19 @@ def verify_diagram(request, project_id, diagram_id):
         shutil.copyfile(original_file_path, verified_file_path)
 
         # Perform verification on the copied file
-        err_contradiction = erreur_contradiction(verified_file_path)
-        arts = message(verified_file_path, verified_file_path, os.path.join(settings.MEDIA_ROOT, 'loi.txt'))
-        annotation = modify_bpmn_file(verified_file_path)
+        arts ,artsENG = message(verified_file_path, verified_file_path, os.path.join(settings.MEDIA_ROOT, 'loi3.txt'))
+        annotation ,annotationENG= modify_bpmn_file(verified_file_path)
+        err_contradiction , err_contradictionENG= erreur_contradiction(verified_file_path)
         liste_finale = arts + annotation + err_contradiction
+        liste_finaleENG = artsENG + annotationENG+ err_contradictionENG
 
         # Generate report
         report_name = 'report.docx'
+        report_nameENG = 'reportENG.docx'
         report_path = os.path.join(diagram_folder_path, report_name)
+        report_pathENG = os.path.join(diagram_folder_path, report_nameENG)
         generer_rapport(liste_finale, report_path, diagram_file)
+        generer_rapportENG(liste_finaleENG, report_pathENG, diagram_file)
 
         # Save annotations to a file
         with open(os.path.join(diagram_folder_path, "diagram_annotations.txt"), 'a') as f:
@@ -637,15 +763,19 @@ def upload_and_verify_diagram(request):
         shutil.copyfile(original_file_path, verified_file_path)
 
         # Perform verification on the copied file
-        err_contradiction  = erreur_contradiction(verified_file_path)
-        arts = message(verified_file_path, verified_file_path, os.path.join(settings.MEDIA_ROOT, 'loi.txt'))
-        annotation = modify_bpmn_file(verified_file_path)
+        arts ,artsENG= message(verified_file_path, verified_file_path, os.path.join(settings.MEDIA_ROOT, 'loi3.txt'))
+        annotation ,annotationENG= modify_bpmn_file(verified_file_path)
+        err_contradiction , erreur_contradictionENG= erreur_contradiction(verified_file_path)
         liste_finale = arts + annotation + err_contradiction
+        liste_finaleENG = artsENG+annotationENG+erreur_contradictionENG
 
         # Generate report
         report_name = 'report.docx'
         report_path = os.path.join(upload_folder_path, report_name)
+        report_nameENG = 'report.docx'
+        report_pathENG = os.path.join(upload_folder_path, report_nameENG)
         generer_rapport(liste_finale, report_path,file.name)
+        generer_rapportENG(liste_finaleENG, report_pathENG,file.name)
 
         # Save annotations to a file
         with open(os.path.join(upload_folder_path, "diagram_annotations.txt"), 'a') as f:

@@ -1,8 +1,18 @@
 import spacy
-
+from googletrans import Translator
 # Charger le modèle de langue anglais de spaCy
 nlp = spacy.load("en_core_web_sm")
 
+
+def translate_if_french(text):
+    translator = Translator()
+    detected_lang = translator.detect(text).lang
+    
+    if detected_lang == 'fr':
+        translated = translator.translate(text, src='fr', dest='en')
+        return translated.text
+    else:
+        return text
 # Dictionnaire des relations temporelles des verbes
 temporal_relations = {
     "write": ["send", "submit", "publish", "review"],
@@ -42,6 +52,8 @@ temporal_relations = {
     "decide": ["plan", "execute", "complete"],
     "train": ["execute", "evaluate"],
     "learn": ["apply", "review"],
+    "fill out" : ["submit","Publish"],
+    "complete" : ["submit"],
     "apply": ["review", "execute"],
     "negotiate": ["finalize", "agree"],
     "agree": ["execute", "complete"],
@@ -49,8 +61,54 @@ temporal_relations = {
     "notify": ["receive", "acknowledge"],
     "consult": ["decide", "execute"],
     "communicate": ["acknowledge", "act"],
-    "act": ["review", "complete"]
+    "act": ["review", "complete"],
+    "écrire": ["envoyer", "soumettre", "publier", "réviser"],
+    "rédiger": ["écrire", "éditer", "finaliser", "approuver"],
+    "planifier": ["exécuter", "implémenter", "compléter", "réviser"],
+    "préparer": ["démarrer", "exécuter", "terminer", "réviser"],
+    "démarrer": ["continuer", "terminer", "compléter", "réviser"],
+    "initier": ["démarrer", "procéder", "compléter", "réviser"],
+    "commencer": ["continuer", "terminer", "compléter", "réviser"],
+    "continuer": ["terminer", "compléter", "réviser"],
+    "exécuter": ["compléter", "réviser"],
+    "implémenter": ["compléter", "réviser"],
+    "terminer": ["réviser", "soumettre", "publier"],
+    "compléter": ["réviser", "soumettre", "publier"],
+    "réviser": ["approuver", "soumettre", "publier"],
+    "approuver": ["soumettre", "publier"],
+    "soumettre": ["publier"],
+    "publier": [],
+    "remplir" : ["déposer"],
+    "envoyer": ["recevoir", "accuser réception"],
+    "recevoir": ["accuser réception", "traiter", "réviser"],
+    "accuser réception": ["traiter", "réviser"],
+    "traiter": ["réviser", "compléter"],
+    "éditer": ["finaliser", "approuver", "soumettre"],
+    "finaliser": ["approuver", "soumettre", "publier"],
+    "rechercher": ["rédiger", "écrire", "publier"],
+    "analyser": ["rapporter", "publier", "réviser"],
+    "rapporter": ["réviser", "publier"],
+    "organiser": ["planifier", "exécuter", "compléter"],
+    "construire": ["compléter", "réviser"],
+    "concevoir": ["rédiger", "finaliser", "approuver"],
+    "tester": ["réviser", "approuver", "déployer"],
+    "déployer": ["surveiller", "réviser"],
+    "surveiller": ["réviser", "ajuster"],
+    "ajuster": ["réviser", "finaliser"],
+    "évaluer": ["réviser", "finaliser", "rapporter"],
+    "décider": ["planifier", "exécuter", "compléter"],
+    "former": ["exécuter", "évaluer"],
+    "apprendre": ["appliquer", "réviser"],
+    "appliquer": ["réviser", "exécuter"],
+    "négocier": ["finaliser", "accepter"],
+    "accepter": ["exécuter", "compléter"],
+    "confirmer": ["exécuter", "compléter"],
+    "notifier": ["recevoir", "accuser réception"],
+    "consulter": ["décider", "exécuter"],
+    "communiquer": ["accuser réception", "agir"],
+    "agir": ["réviser", "compléter"]
 }
+
 
 def extract_svo(doc):
     """Extract the subject, verb, and object/adverb from a given spaCy doc."""
@@ -74,8 +132,8 @@ def happens_before(sent1, sent2):
     :param sent2: str - The second sentence
     :return: bool - True if sent1 happens before sent2, False otherwise
     """
-    doc1 = nlp(sent1)
-    doc2 = nlp(sent2)
+    doc1 = nlp(translate_if_french(sent1))
+    doc2 = nlp(translate_if_french(sent2))
 
     # Extraire le sujet, le verbe et l'objet/adverbe de chaque phrase
     subject1, verb1, obj1 = extract_svo(doc1)

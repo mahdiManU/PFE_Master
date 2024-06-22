@@ -121,6 +121,18 @@ def verif(bpmnfile):
         list_finale = []
          
     return listef , exclu , para , inclu
+def get_valide(bpmnfile,id):
+     cpt1 = 0 
+     cpt2 = 0
+     with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+     for i in lines:
+         if(("sourceRef=" +'"'+id) in i):
+             cpt1 +=1
+         if(("targetRef=" +'"'+id) in i):
+             cpt2 +=1
+     return cpt2 > cpt1
+           
 def verif2(bpmnfile):
     listef = []
     exclu = get_all_exclusiveG(bpmnfile)
@@ -129,8 +141,14 @@ def verif2(bpmnfile):
     for i in exclu:
         for j in para:
             list_finale = get_gateway_paths(bpmnfile,j,i)
-            if((list_finale.__len__() >= 2) and (chemin_valide(list_finale))):
-              listef.append(list_finale)
+            nb = 0
+            if((list_finale.__len__() >= 2) and (chemin_valide(list_finale)) and get_valide(bpmnfile,i)):
+              for t in list_finale:
+                  for k in t:
+                     if(get_element_type(k,bpmnfile) == "parallelGateway"):
+                         nb +=1
+              if(not(nb%2 == 0)):   
+                listef.append(list_finale)
         list_finale = []
               
     return listef
@@ -264,6 +282,7 @@ def message(bpmnfile,bpmnfile2,fichier_loi):
     mesmessage , exclu, para ,inclu = colorier_chemin(bpmnfile)
     
     nvmsg = []
+    nvmsgENG = []
     acti = []
     temp = []
     test = []
@@ -273,16 +292,20 @@ def message(bpmnfile,bpmnfile2,fichier_loi):
         trr+=1
         if((i[0][0] in exclu) and (i[0][-1] in para)):
           nvmsg.append("Erreur S "+str(trr)+"# (Deterministic deadlock)")
+          nvmsgENG.append("Error S "+str(trr)+"# (Deterministic deadlock)")
         if((i[0][-1] in exclu) and (i[0][0] in para)):
           nvmsg.append("Erreur S "+str(trr)+"# (Deterministic lack of synchronization)")
+          nvmsgENG.append("Error S "+str(trr)+"# (Deterministic lack of synchronization)")
         if((i[0][-1] in exclu) and (i[0][0] in inclu)):
           nvmsg.append("Erreur S "+str(trr)+"# (Nondeterministic lack of synchronization)")
+          nvmsgENG.append("Error S "+str(trr)+"# (Nondeterministic lack of synchronization)")
         if((i[0][-1] in para) and (i[0][0] in inclu)):
           nvmsg.append("Erreur S "+str(trr)+"# (Nondeterministic deadlock)")
+          nvmsgENG.append("Error S "+str(trr)+"# (Nondeterministic deadlock)")
     for i in mesmessage:
         err+=1
         for j in i:
-            modifier_noms(bpmnfile,j,"erreur S "+str(err))
+            modifier_noms(bpmnfile,j,"Erreur S "+str(err))
     with open(bpmnfile, 'r') as file:
         lines = file.readlines()
     for line in lines:
@@ -299,7 +322,8 @@ def message(bpmnfile,bpmnfile2,fichier_loi):
             temp.append(id)
             modifier_noms(bpmnfile,temp,"Erreur S "+str(trr))
             
-            nvmsg.append("Erreur S "+str(trr)+"# tache sans source#"+get_annotation2(bpmnfile,id))
+            nvmsg.append("Erreur S "+str(trr)+"# tache sans source#"+get_annotation2(bpmnfile,id).__str__())
+            nvmsgENG.append("Error S "+str(trr)+"# dead task#"+get_annotation2(bpmnfile,id).__str__())
             temp = []
     
     taches = []
@@ -314,12 +338,17 @@ def message(bpmnfile,bpmnfile2,fichier_loi):
         taches.append(tache)
         test.append(loi)
     arts = []
+    artsENG = []
     for i in range(len(nvmsg)):
         if ('tache sans source' not in nvmsg[i]):
-            arts.append(nvmsg[i]+"#"+trouver_article(fichier_loi,test[i],nvmsg[i],taches[i])) 
+            fr , eng = trouver_article(fichier_loi,test[i],nvmsg[i],taches[i])
+            arts.append(nvmsg[i]+"#"+fr) 
+            artsENG.append(nvmsgENG[i]+"#"+eng)
+
         else:
-            arts.append(nvmsg[i])   
-    return arts
+            arts.append(nvmsg[i]) 
+            artsENG.append(nvmsgENG[i])  
+    return arts , artsENG
 def valide_type_err(typeErr,articles):
     if("(Deterministic deadlock)" in typeErr):
         if((("either" in articles) and ("or" in articles)) or (("soit" in articles) and ("et" in articles))):
@@ -373,16 +402,16 @@ def trouver_article(nom_fichier, nom_article ,typeErr,listeTaches):
     nom_article = supprimer_doublons(nom_article)
  
     if(("(Deterministic deadlock)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))): 
-            return "probleme dans either // or dans les aticles suivants : "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__()
+            return "probleme dans either // or dans les aticles suivants : "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__(),"problem in either // or in the following articles : "+mesArticles.__str__()+"#Revise :"+nom_article.__str__()
     if(("(Deterministic lack of synchronization)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
-            return "problem in and // or in the following articles:: "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__()
+            return "problem in and // or in the following articles:: "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__(),"problem in and // or in the following articles:: "+mesArticles.__str__()+"#Revise :"+nom_article.__str__()
     if(("(Nondeterministic lack of synchronization)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
-            return "probleme dans or // then dans les articles suivants: "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__()
+            return "probleme dans or // then dans les articles suivants: "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__(),"problem in or // then in the following articles : "+mesArticles.__str__()+"#Revise :"+nom_article.__str__()
     if(("(Nondeterministic deadlock)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
             print(nom_article.__str__())
-            return "problem in and // or in the following articles:"+mesArticles.__str__()+"#Reviser :"+nom_article.__str__()
+            return "probleme dans and // or dans l'article suivant:"+mesArticles.__str__()+"#Reviser :"+nom_article.__str__(),"problem in and // or in the following articles:"+mesArticles.__str__()+"#Revise :"+nom_article.__str__()
     
-    return "Ambiguite dans l'article : "+mesArticles.__str__()+"#Reviser : " +mesArticles.__str__()
+    return "Ambiguite dans l'article : "+mesArticles.__str__()+"#Reviser : " +mesArticles.__str__(),"Ambiguity in the article : "+mesArticles.__str__()+"#Revise : " +mesArticles.__str__()
 
 
 

@@ -92,6 +92,8 @@ def generer_rapport(erreurs, nom_fichier, name):
                     row_cells[2].text = "Cela se produit lorsque la condition n’est mentionnée dans aucun des textes légaux. C'est le problème de l'incomplétude juridique. Précisément l’absence de condition." + val[2]
                 if val[1] == " Role manquant ":
                     row_cells[2].text = "Cela se produit lorsque le rôle/l’unité organisationnelle n’est mentionné dans aucun des textes juridiques. C'est le problème de l'incomplétude juridique. Justement l’absence de rôle." + val[2]
+                if val[1] == " Vide juridique ":
+                     row_cells[2].text = "Cela se produit lors d'un manques d'informations ," + val[2]
                 row_cells[3].text = val[3]
                 row_cells[0].width = Cm(1)
             else:

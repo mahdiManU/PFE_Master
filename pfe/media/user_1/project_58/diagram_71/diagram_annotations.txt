@@ -1,0 +1,3 @@
+Erreur MI 1# Condition manquante #Condition non preciser dans l'article : ['Decret n 08-04/Art. 73', '']#Reviser l'article : ['Decret n 08-04/Art. 73', ''] et Ajouter la condition adéquate
+Erreur MI 2# Role manquant # Role non précisé dans l'article : ['Decret n 08-04/Art. 73']#Reviser l'article : ['Decret n 08-04/Art. 73'] Ajouter le rôle adéquat a ces taches :['Identification des BÃ©nÃ©ficiaires', 'Inscription', 'envoi du dossier']
+Erreur MI 3# Role manquant #Cette partie est Non annoter sur le diagramme#Ajouter le rôle adéquat
