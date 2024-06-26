@@ -1,20 +1,22 @@
-
 import About from './components/About/About'
 import Projects from './components/Projects/Projects'
-import Skills from './components/Skills/Skills'
 import Contact from './components/Contact/Contact'
-import './App.css'
+
 
 const HomePage = () => {
-  
-  
-    return (
-      <div>
+  return (
+    <div>
+      <section id="about">
         <About />
+      </section>
+      <section id="projects">
         <Projects />
+      </section>
+      <section id="contact">
         <Contact />
-      </div>
-    )
-  }
-  
-  export default HomePage
+      </section>
+    </div>
+  )
+}
+
+export default HomePage

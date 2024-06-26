@@ -4,6 +4,7 @@ import Dashboard from './Dashboard';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ProjectDetailsPage from './ProjectDetailsPage';
 import VerifFront from '../VerifFront/VerifFront';
+import UserManagement from '../UserManagement/UserManagement';
 
 const Principale = () => {
     return (
@@ -13,6 +14,7 @@ const Principale = () => {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/project/:projectId" element={<ProjectDetailsPage />} />
                 <Route path="/project/:projectId/verify/:diagramId" element={<VerifFront />} />
+                <Route path="/user-management" element={<UserManagement />} />
             </Routes>
         </div>
     );

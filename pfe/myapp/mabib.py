@@ -132,7 +132,12 @@ def get_valide(bpmnfile,id):
          if(("targetRef=" +'"'+id) in i):
              cpt2 +=1
      return cpt2 > cpt1
-           
+def remove_duplicates(list_of_lists):
+    # Convert each sublist to a tuple so it can be added to a set
+    set_of_tuples = {tuple(sublist) for sublist in list_of_lists}
+    # Convert the set of tuples back to a list of lists
+    return [list(t) for t in set_of_tuples]
+        
 def verif2(bpmnfile):
     listef = []
     exclu = get_all_exclusiveG(bpmnfile)
@@ -141,14 +146,18 @@ def verif2(bpmnfile):
     for i in exclu:
         for j in para:
             list_finale = get_gateway_paths(bpmnfile,j,i)
+            print(get_gateway_paths(bpmnfile,j,i).__str__())
             nb = 0
             if((list_finale.__len__() >= 2) and (chemin_valide(list_finale)) and get_valide(bpmnfile,i)):
+              print("hello lala")
+              
               for t in list_finale:
                   for k in t:
                      if(get_element_type(k,bpmnfile) == "parallelGateway"):
                          nb +=1
-              if(not(nb%2 == 0)):   
-                listef.append(list_finale)
+                  if(not(nb%2 == 0)): 
+                    print("chaima")  
+                    listef.append(list_finale)
         list_finale = []
               
     return listef
@@ -278,6 +287,19 @@ def get_task(bpmnfile,id_tache):
         if (("<task" in line) or ("<sendTask" in line) or ("<receiveTask" in line)) and (id_tache in line):
             msg = re.search(r'name="([^"]+)"', line)
    return msg.group(1)
+def colorier_task(bpmnfile,id_task):
+     new_lines = []
+     with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+     for i in lines:
+         if(("<bpmndi:BPMNShape" in i) and (id_task in i) and ("bioc:stroke" not in i)):
+             modified_line =i[:-2]+' bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">\n'
+             new_lines.append(modified_line)
+         else:
+             new_lines.append(i)
+     with open(bpmnfile, 'w') as file:
+         file.truncate(0)
+         file.writelines(new_lines)
 def message(bpmnfile,bpmnfile2,fichier_loi):
     mesmessage , exclu, para ,inclu = colorier_chemin(bpmnfile)
     
@@ -323,6 +345,7 @@ def message(bpmnfile,bpmnfile2,fichier_loi):
             modifier_noms(bpmnfile,temp,"Erreur S "+str(trr))
             
             nvmsg.append("Erreur S "+str(trr)+"# tache sans source#"+get_annotation2(bpmnfile,id).__str__())
+            colorier_task(bpmnfile,id)
             nvmsgENG.append("Error S "+str(trr)+"# dead task#"+get_annotation2(bpmnfile,id).__str__())
             temp = []
     

@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
-import { useEffect, useState } from "react";
+import React, { useContext, useState } from 'react';
+import { useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from "react-router-dom";
-import { login, reset, getUserInfo } from '../../features/authSlice';
+import { login, reset, getUserInfo, resetPassword } from '../../features/authSlice'; // Import resetPassword action
 import './Login.css';
 import { LanguageContext } from '../../contexts/language';
 
@@ -12,7 +12,7 @@ const Login = () => {
     login: 'Login',
     emailLabel: 'E-mail',
     passwordLabel: 'Password',
-    forgetPasswordLink: 'Forget Password ?',
+    forgetPasswordLink: 'Forget Password ?', // Ensure this matches with the link text below
     signInButton: 'Sign In',
     errors: {
       emailRequired: 'Please provide your email.',
@@ -23,7 +23,7 @@ const Login = () => {
     login: 'Se Connecter',
     emailLabel: 'E-mail',
     passwordLabel: 'Mot de passe',
-    forgetPasswordLink: 'Mot de passe oublié ?',
+    forgetPasswordLink: 'Mot de passe oublié ?', // Ensure this matches with the link text below
     signInButton: 'Connexion',
     errors: {
       emailRequired: 'Veuillez fournir votre adresse e-mail.',
@@ -74,6 +74,12 @@ const Login = () => {
     dispatch(login(userData));
   };
 
+  // Handle forget password link click
+  const handleForgetPassword = () => {
+    dispatch(reset()); // Reset auth state
+    navigate("/reset-password"); // Navigate to reset password page
+  };
+
   useEffect(() => {
     if (isError) {
       setUserError(content.errors.invalidCredentials);
@@ -112,6 +118,7 @@ const Login = () => {
         <input type='password' id='password' name='password' onChange={handleChange}
           value={password} required autoComplete="off" />
         {passwordError && <span className="error">{passwordError}</span>}
+        {/*<Link to="#" onClick={handleForgetPassword}>{content.forgetPasswordLink}</Link>  Link to reset password page */}
         <button type='submit' onClick={handleSubmit}>{content.signInButton}</button>
       </form>
     </div>

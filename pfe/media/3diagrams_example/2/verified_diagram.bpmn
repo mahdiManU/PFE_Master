@@ -56,31 +56,31 @@
         <flowNodeRef>Event_1xbldxo</flowNodeRef>
       </lane>
     </laneSet>
-    <task id="Activity_1yxgp32" name="Identification des Bénéficiaires">
+    <task id="Activity_1yxgp32" name="Identifier les Bénéficiaires">
       <incoming>Flow_1gkcjef</incoming>
       <outgoing>Flow_1uwuvdm</outgoing>
     </task>
-    <exclusiveGateway id="Gateway_1sddybq">
+    <exclusiveGateway id="Gateway_1sddybq" name="erreur MI1">
       <incoming>Flow_1uwuvdm</incoming>
       <outgoing>Flow_1q2k238</outgoing>
       <outgoing>Flow_08jvc1w</outgoing>
     </exclusiveGateway>
-    <task id="Activity_1j8sf5l" name="Inscription">
+    <task id="Activity_1j8sf5l" name="Fair l&#39;inscription">
       <incoming>Flow_1q2k238</incoming>
       <outgoing>Flow_16rx1rl</outgoing>
     </task>
-    <sendTask id="Activity_1xp0trs" name="envoi du dossier">
+    <sendTask id="Activity_1xp0trs" name="envoyer  le dossier">
       <incoming>Flow_16rx1rl</incoming>
       <outgoing>Flow_0tf3v8z</outgoing>
     </sendTask>
-    <receiveTask id="Activity_0bw4jcv" name="Réception du dossier">
+    <receiveTask id="Activity_0bw4jcv" name="Recevoir le dossier">
       <incoming>Flow_0tf3v8z</incoming>
       <outgoing>Flow_00jg1zz</outgoing>
     </receiveTask>
     <endEvent id="Event_1ilyrcq">
       <incoming>Flow_08jvc1w</incoming>
     </endEvent>
-    <task id="Activity_10s9z3l" name="Préparation aux examens et concours">
+    <task id="Activity_10s9z3l" name="Préparer les examens et concours">
       <incoming>Flow_0kzb31m</incoming>
       <outgoing>Flow_13zcojd</outgoing>
     </task>
@@ -102,18 +102,18 @@
     <endEvent id="Event_0o65no6">
       <incoming>Flow_1ddlacz</incoming>
     </endEvent>
-    <receiveTask id="Activity_0607ept" name="Reception du programme">
+    <receiveTask id="Activity_0607ept" name="Recevoir le programme">
       <incoming>Flow_0rf8ctx</incoming>
       <outgoing>Flow_18hdfne</outgoing>
     </receiveTask>
-    <task id="Activity_0bkm2xl" name="Mise en place des institutions">
+    <task id="Activity_0bkm2xl" name="Metre en place les institutions">
       <incoming>Flow_17u3dty</incoming>
       <outgoing>Flow_1gkcjef</outgoing>
     </task>
     <startEvent id="Event_11j9zef">
       <outgoing>Flow_17u3dty</outgoing>
     </startEvent>
-    <task id="Activity_003owf7" name="Élaboration des Programmes Pédagogiques">
+    <task id="Activity_003owf7" name="Élaborer les Programmes Pédagogiques">
       <incoming>Flow_026e4hv</incoming>
       <outgoing>Flow_16umkwf</outgoing>
     </task>
@@ -154,7 +154,7 @@
     <endEvent id="Event_1iimrzd">
       <incoming>Flow_0kdbulg</incoming>
     </endEvent>
-    <task id="Activity_0zfrb06" name="Gestion et Supervision">
+    <task id="Activity_0zfrb06" name="Gérer et Superviser">
       <incoming>Flow_01az8b5</incoming>
       <outgoing>Flow_0kdbulg</outgoing>
     </task>
@@ -171,21 +171,21 @@
         <omgdc:Bounds x="190" y="160" width="840" height="180" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Lane_04dw1ou_di" bpmnElement="Lane_04dw1ou" isHorizontal="true">
+      <bpmndi:BPMNShape id="Lane_04dw1ou_di" bpmnElement="Lane_04dw1ou" isHorizontal="true" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
         <omgdc:Bounds x="190" y="340" width="840" height="140" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_1mdwuwb_di" bpmnElement="Lane_1mdwuwb" isHorizontal="true">
         <omgdc:Bounds x="190" y="735" width="840" height="265" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Lane_1rwx93g_di" bpmnElement="Lane_1rwx93g" isHorizontal="true">
+      <bpmndi:BPMNShape id="Lane_1rwx93g_di" bpmnElement="Lane_1rwx93g" isHorizontal="true" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
         <omgdc:Bounds x="190" y="480" width="840" height="255" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1yxgp32_di" bpmnElement="Activity_1yxgp32">
         <omgdc:Bounds x="330" y="550" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_1sddybq_di" bpmnElement="Gateway_1sddybq" isMarkerVisible="true">
+      <bpmndi:BPMNShape id="Gateway_1sddybq_di" bpmnElement="Gateway_1sddybq" isMarkerVisible="true" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
         <omgdc:Bounds x="495" y="565" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1j8sf5l_di" bpmnElement="Activity_1j8sf5l">

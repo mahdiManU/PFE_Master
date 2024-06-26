@@ -1,0 +1,43 @@
+.diagram-details {
+    text-align: center;
+    margin: 2em;
+  }
+  
+  .diagram-buttons {
+    margin-bottom: 1em;
+  }
+  
+  .diagram-buttons button {
+    margin: 0 0.5em;
+    padding: 0.5em 1em;
+    font-size: 1em;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s, text-decoration 0.3s, background-color 0.3s;
+  }
+  
+  .diagram-buttons button:hover {
+    color: var(--clr-primary);
+    text-decoration: underline;
+  }
+  
+  .diagram-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  
+  .diagram-container {
+    width: 100%;
+    height: 600px;
+    border: 2px solid var(--clr-fg);
+    background-color: var(--clr-primary);
+  }
+  
+  iframe {
+    width: 100%;
+    height: 600px;
+    border: none;
+  }
+  

@@ -287,7 +287,7 @@ def detect_between(bpmnfile,para1,para2):
                 if(detect_contradiction(get_task(bpmnfile,i),get_task(bpmnfile,j))):
                     tache_col.append(i)
                     tache_col.append(j)
-                    return  'Contradiction entre : '+get_task(bpmnfile,i)+get_task(bpmnfile,j)+"#Contradiction dans l'article : "+get_annotation_proxy(bpmnfile,i)+"#Reviser "+get_annotation_proxy(bpmnfile,i),tache_col , 'Contradiction between : '+get_task(bpmnfile,i)+get_task(bpmnfile,j)+"#Contradiction in the article : "+get_annotation_proxy(bpmnfile,i)+"#Revise "+get_annotation_proxy(bpmnfile,i)
+                    return  'Contradiction entre : '+get_task(bpmnfile,i)+get_task(bpmnfile,j)+"#Contradiction dans l'article : "+get_annotation_proxy(bpmnfile,i).__str__()+"#Reviser "+get_annotation_proxy(bpmnfile,i).__str__(),tache_col , 'Contradiction between : '+get_task(bpmnfile,i)+get_task(bpmnfile,j)+"#Contradiction in the article : "+get_annotation_proxy(bpmnfile,i).__str__()+"#Revise "+get_annotation_proxy(bpmnfile,i).__str__()
     return False   
                 
 def detecter_C1(bpmnfile):
@@ -369,12 +369,15 @@ def detect_C3(bpmnfile):
        for k in content:
            print(my_dict)
            for p in content:
-               if(oppsite(k,p) and (my_dict[k]==my_dict[p])):
+               t = oppsite(k,p) and (my_dict[k]==my_dict[p])
+               if(t):
                    exclu.append(i)
-                   messageENG.append("Interval contradiction#Contradiction the article : "+get_annotation_proxy(bpmnfile,i)+"#Revise the article : "+get_annotation_proxy(bpmnfile,i))
-                   message.append("Contradiction d'interval#Contradiction dans l'article : "+get_annotation_proxy(bpmnfile,i)+"#Reviser l'article : "+get_annotation_proxy(bpmnfile,i))
-    for i in exclu:
-        colorier_task(bpmnfile,i)
+                   messageENG.append("Interval contradiction#Contradiction the article : "+get_annotation_proxy(bpmnfile,i).__str__()+"#Revise the article : "+get_annotation_proxy(bpmnfile,i).__str__())
+                   message.append("Contradiction d'interval#Contradiction dans l'article : "+get_annotation_proxy(bpmnfile,i).__str__()+"#Reviser l'article : "+get_annotation_proxy(bpmnfile,i).__str__())
+                   colorier_task(bpmnfile,i)
+                   break 
+           if(t):
+               break   
     return message , messageENG
 
 

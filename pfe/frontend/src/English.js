@@ -10,7 +10,7 @@ const header = {
     role: 'A tool for detecting legal errors in administrative processes',
     description:
       'The primary goal is to create a solution that can identify and highlight any legal inconsistencies or errors within administrative process models. The tool is designed to enhance the quality and reliability of legal administrative processes by providing a mechanism for automated error detection, ensuring compliance with legal requirements and minimizing the risk of legal issues in administrative procedures..',
-    resume: 'https://drive.google.com/file/d/1lptHKG35TLhTgnnzbZpk5fm1iLYGb_3T/view?usp=sharing',
+    resume: 'https://drive.google.com/file/d/1IBiMTWhAx35wgCvrkxI9Kne-wt94nL82/view?usp=sharing',
     memoire:'view memoire'
   }
   
@@ -22,21 +22,21 @@ const header = {
       description:
         'C\'est juste un description temporaire elle sera modifer une fois on met des vrai exemples ',
       stack: ['BPMN.io', 'Python', 'Django', 'React'],
-      livePreview: 'https://github.com',
+      livePreview: '/diagrams/1',
     },
     {
       name: 'Diagram 2',
       description:
         'C\'est juste un description temporaire elle sera modifer une fois on met des vrai exemples ',
       stack: ['BPMN.io', 'Python', 'Django', 'React'],
-      livePreview: 'https://github.com',
+      livePreview: '/diagrams/2',
     },
     {
       name: 'Diagram 3',
       description:
         'C\'est juste un description temporaire elle sera modifer une fois on met des vrai exemples ',
       stack: ['BPMN.io', 'Python', 'Django', 'React'],
-      livePreview: 'https://github.com',
+      livePreview: '/diagrams/3',
     },
   ]
   

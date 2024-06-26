@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="sid-38422fae-e03e-43a3-bef4-bd33b32041b2" targetNamespace="http://bpmn.io/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="17.7.1">
   <collaboration id="Collaboration_1gc2382">
-    <participant id="Participant_1fqf8ce" name="Insured" processRef="Process_1" />
-    <participant id="Participant_1covxfy" name="Insured&#39;s doctor" processRef="Process_01njie6" />
-    <participant id="Participant_1vgdnny" name="Social Security Administration (SSA)" processRef="Process_0toq28b" />
+    <participant id="Participant_1fqf8ce" name="Assuré" processRef="Process_1" />
+    <participant id="Participant_1covxfy" name="Médecin de l&#39;assuré" processRef="Process_01njie6" />
+    <participant id="Participant_1vgdnny" name="Administration de la sécurité sociale (ASS)" processRef="Process_0toq28b" />
     <messageFlow id="Flow_1fzmnnn" sourceRef="Activity_18bybon" targetRef="Activity_1v0n2bk" />
     <messageFlow id="Flow_1n387hu" sourceRef="Activity_15dgrw4" targetRef="Event_06zqfvm" />
     <textAnnotation id="TextAnnotation_0p13ihi">
@@ -32,8 +32,8 @@
     <association id="Association_1t2g6dp" associationDirection="None" sourceRef="TextAnnotation_1p97o2w" targetRef="Activity_13sa3dz" />
   </collaboration>
   <process id="Process_1" isExecutable="false">
-    <receiveTask id="Activity_1v0n2bk" name="Receive convocation" />
-    <sendTask id="Activity_15dgrw4" name="Send confirmation" />
+    <receiveTask id="Activity_1v0n2bk" name="Recevoir la convocation" />
+    <sendTask id="Activity_15dgrw4" name="Envoyer une confirmation" />
   </process>
   <process id="Process_01njie6">
     <startEvent id="Event_0ezn8z1">
@@ -44,7 +44,7 @@
     <endEvent id="Event_122fou4">
       <incoming>Flow_0kkgjjm</incoming>
     </endEvent>
-    <task id="Activity_0isfvxj" name="Assist medical control">
+    <task id="Activity_0isfvxj" name="Assister au contrôle médical">
       <incoming>Flow_1x0fsi2</incoming>
       <outgoing>Flow_0kkgjjm</outgoing>
     </task>
@@ -62,7 +62,7 @@
         <flowNodeRef>Event_0qdk3f3</flowNodeRef>
         <flowNodeRef>Gateway_0brfery</flowNodeRef>
       </lane>
-      <lane id="Lane_1tgtmtt" name="Practionner Concil (PC)">
+      <lane id="Lane_1tgtmtt" name="Conseil des praticiens (CP)">
         <flowNodeRef>Event_1xjw4eq</flowNodeRef>
         <flowNodeRef>Gateway_0e3y7ix</flowNodeRef>
         <flowNodeRef>Gateway_05qstr8</flowNodeRef>
@@ -74,7 +74,7 @@
         <flowNodeRef>Activity_1mefz2v</flowNodeRef>
         <flowNodeRef>Event_0x8e2he</flowNodeRef>
       </lane>
-      <lane id="Lane_1m8bfzd" name="Practionner Specialist (P5)">
+      <lane id="Lane_1m8bfzd" name="Spécialiste praticien (P5)">
         <flowNodeRef>Activity_02cdufw</flowNodeRef>
       </lane>
     </laneSet>
@@ -93,15 +93,15 @@
       <outgoing>Flow_1ybvp5g</outgoing>
       <outgoing>Flow_18rlros</outgoing>
     </inclusiveGateway>
-    <task id="Activity_13sa3dz" name="Conduct medical exam">
+    <task id="Activity_13sa3dz" name="erreur Erreur S 1">
       <incoming>Flow_0f1ymnn</incoming>
       <outgoing>Flow_02lk5fc</outgoing>
     </task>
-    <task id="Activity_1hnffaw" name="Request medical exam">
+    <task id="Activity_1hnffaw" name="erreur Erreur S 1">
       <incoming>Flow_1ybvp5g</incoming>
       <outgoing>Flow_1rtefrk</outgoing>
     </task>
-    <task id="Activity_1cwz1h8" name="Analyse any medical documents">
+    <task id="Activity_1cwz1h8" name="erreur Erreur S 1">
       <incoming>Flow_18rlros</incoming>
       <outgoing>Flow_03zgnh9</outgoing>
     </task>
@@ -115,7 +115,7 @@
       <incoming>Flow_0zrmang</incoming>
       <outgoing>Flow_1pafq7w</outgoing>
     </inclusiveGateway>
-    <task id="Activity_1mefz2v" name="Give opinion">
+    <task id="Activity_1mefz2v" name="Donner un avis">
       <incoming>Flow_1pafq7w</incoming>
       <incoming>Flow_143aana</incoming>
       <outgoing>Flow_1dskpk1</outgoing>
@@ -123,7 +123,7 @@
     <endEvent id="Event_0x8e2he">
       <incoming>Flow_1dskpk1</incoming>
     </endEvent>
-    <intermediateCatchEvent id="Event_0utofhu" name="15 days">
+    <intermediateCatchEvent id="Event_0utofhu" name="15 jours">
       <incoming>Flow_0rokrde</incoming>
       <outgoing>Flow_0ehqsdv</outgoing>
       <timerEventDefinition id="TimerEventDefinition_0qjnoyk" />
@@ -133,14 +133,14 @@
       <outgoing>Flow_01wr40h</outgoing>
       <messageEventDefinition id="MessageEventDefinition_08yg39t" />
     </intermediateCatchEvent>
-    <intermediateCatchEvent id="Event_1ije4xd" name="2 times">
+    <intermediateCatchEvent id="Event_1ije4xd" name="2 fois">
       <incoming>Flow_14y663d</incoming>
       <outgoing>Flow_0ihkle6</outgoing>
       <conditionalEventDefinition id="ConditionalEventDefinition_0wsbp5i">
         <condition xsi:type="tFormalExpression" />
       </conditionalEventDefinition>
     </intermediateCatchEvent>
-    <sendTask id="Activity_18bybon" name="Send convocation">
+    <sendTask id="Activity_18bybon" name="Envoyer une convocation">
       <incoming>Flow_1trme7j</incoming>
       <incoming>Flow_0ehqsdv</incoming>
       <outgoing>Flow_0dcpm3c</outgoing>
@@ -149,11 +149,11 @@
       <incoming>Flow_0ihkle6</incoming>
       <terminateEventDefinition id="TerminateEventDefinition_1od3ar2" />
     </endEvent>
-    <receiveTask id="Activity_09yqqrh" name="Rceive confirmation">
+    <receiveTask id="Activity_09yqqrh" name="Recevoir confirmation">
       <incoming>Flow_01wr40h</incoming>
       <outgoing>Flow_1ouebff</outgoing>
     </receiveTask>
-    <task id="Activity_02cdufw" name="Give another opinion">
+    <task id="Activity_02cdufw" name="Donner un autre avis">
       <incoming>Flow_0sog5aq</incoming>
       <outgoing>Flow_143aana</outgoing>
     </task>
@@ -241,7 +241,7 @@
         <omgdc:Bounds x="340" y="520" width="1110" height="330" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Lane_0fy55rl_di" bpmnElement="Lane_0fy55rl" isHorizontal="true">
+      <bpmndi:BPMNShape id="Lane_0fy55rl_di" bpmnElement="Lane_0fy55rl" isHorizontal="true" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
         <omgdc:Bounds x="340" y="310" width="1110" height="210" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1xjw4eq_di" bpmnElement="Event_1xjw4eq">
@@ -250,22 +250,22 @@
       <bpmndi:BPMNShape id="Gateway_1j2po3y_di" bpmnElement="Gateway_0e3y7ix">
         <omgdc:Bounds x="445" y="585" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0munjk2" bpmnElement="Gateway_05qstr8">
+      <bpmndi:BPMNShape id="BPMNShape_0munjk2" bpmnElement="Gateway_05qstr8" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
         <omgdc:Bounds x="525" y="585" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_13sa3dz_di" bpmnElement="Activity_13sa3dz">
+      <bpmndi:BPMNShape id="Activity_13sa3dz_di" bpmnElement="Activity_13sa3dz" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
         <omgdc:Bounds x="630" y="520" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1hnffaw_di" bpmnElement="Activity_1hnffaw">
+      <bpmndi:BPMNShape id="Activity_1hnffaw_di" bpmnElement="Activity_1hnffaw" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
         <omgdc:Bounds x="630" y="610" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1cwz1h8_di" bpmnElement="Activity_1cwz1h8">
+      <bpmndi:BPMNShape id="Activity_1cwz1h8_di" bpmnElement="Activity_1cwz1h8" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
         <omgdc:Bounds x="630" y="710" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_147ny33_di" bpmnElement="Gateway_147ny33">
+      <bpmndi:BPMNShape id="Gateway_147ny33_di" bpmnElement="Gateway_147ny33" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
         <omgdc:Bounds x="825" y="605" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0tq7hcu" bpmnElement="Gateway_0t0x2ee">
@@ -281,7 +281,7 @@
       <bpmndi:BPMNShape id="Event_0utofhu_di" bpmnElement="Event_0utofhu">
         <omgdc:Bounds x="662" y="322" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="660" y="365" width="40" height="14" />
+          <omgdc:Bounds x="661" y="365" width="40" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_06zqfvm_di" bpmnElement="Event_06zqfvm">
@@ -293,7 +293,7 @@
       <bpmndi:BPMNShape id="Event_1ije4xd_di" bpmnElement="Event_1ije4xd">
         <omgdc:Bounds x="662" y="462" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="662" y="505" width="36" height="14" />
+          <omgdc:Bounds x="667" y="505" width="27" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0p5s58j_di" bpmnElement="Activity_18bybon">

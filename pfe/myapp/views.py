@@ -18,9 +18,6 @@ from rest_framework.decorators import api_view
 from rest_framework import generics, permissions
 from .models import Project,Diagram
 from .serializers import ProjectSerializer, DiagramSerializer
-from django.db.models import Count
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.exceptions import PermissionDenied
 import logging
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.middleware.csrf import get_token
@@ -30,10 +27,33 @@ from .rapport import *
 from .contradiction import *
 from .rapportEng import *
 from .add import *
+from django.contrib.auth import get_user_model
+from rest_framework import viewsets, permissions
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from .serializers import CreateUserSerializer
 
-@ensure_csrf_cookie
-def get_csrf_token(request):
-    return JsonResponse({'csrfToken': request.META.get('CSRF_COOKIE')})
+User = get_user_model()
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = CreateUserSerializer
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data['password'] = User.objects.make_random_password()
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @action(detail=True, methods=['delete'])
+    def delete_user(self, request, pk=None):
+        user = self.get_object()
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class ProjectListCreateAPIView(generics.ListCreateAPIView):
     queryset = Project.objects.all()
@@ -324,10 +344,10 @@ def negative_event(bpmnfile):
       for i in target_list:
          
          type_target.append(get_element_type(i,bpmnfile))
-      if(("intermediateCatchEvent" in type_target) and ("intermediateCatchEvent" not in type_target)):
+      if(("intermediateCatchEvent" in type_target) and ("intermediateThrowEvent" not in type_target)):
          for i in target_list:
             
-            if(get_element_type(i,bpmnfile) == "intermediateThrowEvent"):
+            if(get_element_type(i,bpmnfile) == "intermediateCatchEvent"):
                list_finale.append(i)
       target_list = []
       type_target = []
@@ -425,17 +445,20 @@ def getways_ids2(bpmn_file_path,err):
        if(("&#62" in content.__str__()) or ("&#60" in content.__str__()) or ("=" in content.__str__()) or ("superieur" in content.__str__()) or ("inferieur" in content.__str__()) or ("egale" in content.__str__())):
           if("&#62" not in content.__str__() and ("superieur" not in content.__str__())):
             err += 1 
-            messageENG.append("Error MI"+err+"# the upper case is missing# see the article "+get_annotation(bpmn_file_path,i).__str__())
-            message.append("erreur MI"+err+"# il manque le cas de superieur# voire l'article "+get_annotation(bpmn_file_path,i).__str__())
+            messageENG.append("Error MI"+str(err)+"# the upper case is missing# see the article "+get_annotation(bpmn_file_path,i).__str__())
+            message.append("erreur MI"+str(err)+"# il manque le cas de superieur# voire l'article "+get_annotation(bpmn_file_path,i).__str__())
           if("&#60" not in content.__str__() and ("inferieur" not in content.__str__())):
             err += 1
-            messageENG.append("Error MI"+err+"# the lower case is missing# see the article "+get_annotation(bpmn_file_path,i).__str__()) 
-            message.append("erreur MI"+err+"#: il manque le cas de inferieur# voire l'article "+get_annotation(bpmn_file_path,i).__str__())
+            messageENG.append("Error MI"+str(err)+"# the lower case is missing# see the article "+get_annotation(bpmn_file_path,i).__str__()) 
+            message.append("erreur MI"+str(err)+"#: il manque le cas de inferieur# voire l'article "+get_annotation(bpmn_file_path,i).__str__())
           if("=" not in content.__str__() and ("egale" not in content.__str__())):
             err += 1 
-            messageENG.append("Error MI"+err+"# the case of equal is missing# see the article "+get_annotation(bpmn_file_path,i).__str__()) 
-            message.append("erreur MI"+err+"#: il manque le cas de egale# voire l'article "+get_annotation(bpmn_file_path,i).__str__())
+            print("belkacem")
+            messageENG.append("Error MI "+str(err)+"# the case of equal is missing# see the article "+get_annotation(bpmn_file_path,i).__str__()) 
+            message.append("Erreur MI "+str(err)+"# il manque le cas de egale# voire l'article "+get_annotation(bpmn_file_path,i).__str__())
+            colorier_task(bpmn_file_path,i)
        if(verif_logique(bpmn_file_path,content.__str__(),i)):
+          
           message.append(verif_logique(bpmn_file_path,content.__str__(),i))
        content = []        
    return message , messageENG
@@ -550,12 +573,15 @@ def modify_bpmn_file(bpmn_file_path):
     with open(bpmn_file_path, 'r') as file:
       lines3 = file.readlines()
     negative = negative_event(bpmn_file_path)
+    print(negative)
     for id in negative:
        for line in lines3:
-          if(("<intermediateThrowEvent" in line)and(id in line)):
+          if(("<intermediateCatchEvent" in line)and(id in line)):
+             print("hahahaha")
              err += 1
              modified_line = re.sub(r'name=""', r'name="erreur MI'+str(err)+'"', line)
-             message.append("erreur MI " +str(err)+" negative event")
+             #message.append("erreur MI #" +str(err)+" negative event")
+             message.append("Erreur MI " +str(err)+"# Negative event #"+"negative event dans l'article : "+get_annotation_proxy(bpmn_file_path,id).__str__()+"#Reviser l'article : "+get_annotation_proxy(bpmn_file_path,id).__str__())  
              modified_lines.append(modified_line)
           elif ("<bpmndi:BPMNShape" in line) and (id in line):
                 line = line[:-2]+' bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">\n'
@@ -598,7 +624,7 @@ def upload(request):
        # print(fs.path('loi3.txt'))
         #le fichier avec first a la fin c'est avant verification
         
-        arts = message(fs.path(uploaded_file.name).__str__(),fs.path(myfile+'first.bpmn'),fs.path('loi3.txt').__str__())
+        arts = message(fs.path(uploaded_file.name).__str__(),fs.path(myfile+'first.bpmn'),fs.path('loi.txt').__str__())
         
         with open(fs.path(uploaded_file.name+".txt"), 'a') as f:
             for i in arts:
