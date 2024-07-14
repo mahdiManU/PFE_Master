@@ -1,3 +1,6 @@
 Erreur MI 1# Condition manquante #Condition non preciser dans l'article : [None, 'Decret n 08-04/Art. 73', '']#Reviser l'article : [None, 'Decret n 08-04/Art. 73', ''] et Ajouter la condition adéquate
 Erreur MI 2# Role manquant # Role non précisé dans l'article : ['Decret n 08-04/Art. 73']#Reviser l'article : ['Decret n 08-04/Art. 73'] Ajouter le rôle adéquat a ces taches :['Identifier les BÃ©nÃ©ficiaires', 'Fair l&#39;inscription', 'envoyerÂ\xa0 le dossier']
 Erreur MI 3# Role manquant # Role non précisé dans l'article : ['Decret n 08-04/Art. 74']#Reviser l'article : ['Decret n 08-04/Art. 74'] Ajouter le rôle adéquat a ces taches :['Metre en place les institutions']
+Erreur MI 1# Condition manquante #Condition non preciser dans l'article : [None, 'Decret n 08-04/Art. 73', '']#Reviser l'article : [None, 'Decret n 08-04/Art. 73', ''] et Ajouter la condition adéquate
+Erreur MI 2# Role manquant # Role non précisé dans l'article : ['Decret n 08-04/Art. 73']#Reviser l'article : ['Decret n 08-04/Art. 73'] Ajouter le rôle adéquat a ces taches :['Identifier les BÃ©nÃ©ficiaires', 'Fair l&#39;inscription', 'envoyerÂ\xa0 le dossier']
+Erreur MI 3# Role manquant # Role non précisé dans l'article : ['Decret n 08-04/Art. 74']#Reviser l'article : ['Decret n 08-04/Art. 74'] Ajouter le rôle adéquat a ces taches :['Metre en place les institutions']

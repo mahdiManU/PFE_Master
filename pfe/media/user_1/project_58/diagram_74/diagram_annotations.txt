@@ -1,1 +1,2 @@
 Erreur MI 1# Role manquant # Role non précisé dans l'article : ['Decree nÂ°.05-171/Article 8']#Reviser l'article : ['Decree nÂ°.05-171/Article 8'] Ajouter le rôle adéquat a ces taches :['Envoyer une convocation', 'Recevoir confirmation']
+Erreur MI 1# Role manquant # Role non précisé dans l'article : ['Decree nÂ°.05-171/Article 8']#Reviser l'article : ['Decree nÂ°.05-171/Article 8'] Ajouter le rôle adéquat a ces taches :['Envoyer une convocation', 'Recevoir confirmation']

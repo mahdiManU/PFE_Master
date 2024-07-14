@@ -242,7 +242,7 @@ const VerifFront = () => {
                 <h2><i>LegProV : Legal Process Verification</i></h2>
                 <div className="button-container">
                     <label htmlFor="file" className="custom-file-input">{content.upload} </label>
-                    <input type="file" id="file" name="document" className="file-input" onChange={handleFileUpload} />
+                    <input type="file" id="file" accept=".bpmn" name="document" className="file-input" onChange={handleFileUpload} />
                     <button onClick={handleVerifyDiagram}>{content.verify}</button>
                 </div>
             </div>

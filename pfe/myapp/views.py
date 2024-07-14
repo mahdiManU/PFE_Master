@@ -621,7 +621,7 @@ def upload(request):
         fs.save(uploaded_file.name,uploaded_file)
         myfile =os.path.splitext(uploaded_file.name)[0]
         fs.save(myfile+'first.bpmn',uploaded_file)
-       # print(fs.path('loi3.txt'))
+       # print(fs.path('loi.txt'))
         #le fichier avec first a la fin c'est avant verification
         
         arts = message(fs.path(uploaded_file.name).__str__(),fs.path(myfile+'first.bpmn'),fs.path('loi.txt').__str__())
@@ -705,7 +705,7 @@ def verify_diagram(request, project_id, diagram_id):
         shutil.copyfile(original_file_path, verified_file_path)
 
         # Perform verification on the copied file
-        arts ,artsENG = message(verified_file_path, verified_file_path, os.path.join(settings.MEDIA_ROOT, 'loi3.txt'))
+        arts ,artsENG = message(verified_file_path, verified_file_path, os.path.join(settings.MEDIA_ROOT, 'loi.txt'))
         annotation ,annotationENG= modify_bpmn_file(verified_file_path)
         err_contradiction , err_contradictionENG= erreur_contradiction(verified_file_path)
         liste_finale = arts + annotation + err_contradiction
@@ -789,7 +789,7 @@ def upload_and_verify_diagram(request):
         shutil.copyfile(original_file_path, verified_file_path)
 
         # Perform verification on the copied file
-        arts ,artsENG= message(verified_file_path, verified_file_path, os.path.join(settings.MEDIA_ROOT, 'loi3.txt'))
+        arts ,artsENG= message(verified_file_path, verified_file_path, os.path.join(settings.MEDIA_ROOT, 'loi.txt'))
         annotation ,annotationENG= modify_bpmn_file(verified_file_path)
         err_contradiction , erreur_contradictionENG= erreur_contradiction(verified_file_path)
         liste_finale = arts + annotation + err_contradiction
