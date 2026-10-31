@@ -1,4 +1,21 @@
-# contradiction.py
+"""
+contradiction.py - detection of contradictions (error family "C" in the thesis).
+
+Four detectors, each returning (french_messages, english_messages):
+
+    C1  detect_C1  two tasks inside parallel/inclusive gateways contradict each other
+    C2  detect_C2  two tasks (or two events) on the same start-to-end path contradict each other
+    C3  detect_C3  an exclusive gateway has opposite conditions leading to the same target
+    C4  detect_C4  a task is placed before another one although their verbs say the opposite order
+
+erreur_contradiction() runs the four detectors and numbers the results
+("Erreur C 1", "Error C 1", ...). Every element involved is coloured purple in
+the diagram. Messages use "#" as a separator: error # type # legal part #
+recommendation (rapport.py splits on it).
+
+To add a new kind of contradiction: write a detect_Cx(bpmnfile) function that
+returns (french_list, english_list), then call it in erreur_contradiction().
+"""
 import spacy
 from nltk.corpus import wordnet
 import nltk
@@ -9,6 +26,8 @@ import re
 # Assurez-vous que les ressources nécessaires de NLTK sont téléchargées
 #nltk.download('wordnet')
 #nltk.download('omw-1.4')
+
+# --- graph helpers -------------------------------------------------------
 def tout_chemin(xml_file, start_gateway_id, end_gateway_id):
     graph = {}
     with open(xml_file, 'r') as file:
@@ -57,7 +76,7 @@ def dfs(current_path, graph, node, end, all_paths):
 
     return all_paths
 
-
+# --- BPMN reading helpers ------------------------------------------------
 def get_annotation_proxy(bpmnfile,id):
    loi = []
    id_list = []
@@ -76,6 +95,7 @@ def get_annotation_proxy(bpmnfile,id):
    loi.append(get_annotation2(bpmnfile,id))
    loi.append(get_annotation2(bpmnfile,get_lane_id_from_flow_node(bpmnfile,id)))
    return clean_list(supprimer_doublons(loi))
+
 def avoir_type(bpmnfile,id):
     with open(bpmnfile, 'r') as file:
         lines = file.readlines()
@@ -86,7 +106,51 @@ def avoir_type(bpmnfile,id):
               return match.group(1)
     return None
 
-# Charger le modèle spaCy en anglais
+def get_event(bpmnfile,id_event):
+   msg = None
+   print(id_event)
+   with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+   for line in lines:
+        if (('id="Event' in line) and ('name="' in line)and (id_event in line)):
+            print(id_event)
+            msg = re.search(r'name="([^"]+)"', line)
+   if msg:
+     return msg.group(1)
+   
+def get_start_event_ids_from_file(bpmnfile):
+    # Read the file
+    with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+    
+    # Join lines to create a single string
+    bpmn_xml = ''.join(lines)
+    
+    # Define the regex pattern to find startEvent elements and their ids
+    pattern = re.compile(r'<startEvent[^>]*\sid="([^"]+)"')
+    
+    # Find all matches
+    matches = pattern.findall(bpmn_xml)
+    
+    return matches
+
+def get_end_event_ids_from_file(bpmnfile):
+    # Read the file
+    with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+    
+    # Join lines to create a single string
+    bpmn_xml = ''.join(lines)
+    
+    # Define the regex pattern to find startEvent elements and their ids
+    pattern = re.compile(r'<endEvent[^>]*\sid="([^"]+)"')
+    
+    # Find all matches
+    matches = pattern.findall(bpmn_xml)
+    
+    return matches
+
+# --- text comparison -----------------------------------------------------
 def oppsite(chaine1,chaine2):
    opposites = {
     "=": ["!=", "différent de", "not equal to"],
@@ -122,52 +186,6 @@ def oppsite(chaine1,chaine2):
              return True
    return False
 
-def colorier_task(bpmnfile, id_task):
-    """Colour an element purple (contradiction)."""
-    color_task(bpmnfile, id_task, PALETTE_CONTRADICTION)
-    
-nlp = spacy.load("en_core_web_sm")
-def get_event(bpmnfile,id_event):
-   msg = None
-   print(id_event)
-   with open(bpmnfile, 'r') as file:
-        lines = file.readlines()
-   for line in lines:
-        if (('id="Event' in line) and ('name="' in line)and (id_event in line)):
-            print(id_event)
-            msg = re.search(r'name="([^"]+)"', line)
-   if msg:
-     return msg.group(1)
-def get_start_event_ids_from_file(bpmnfile):
-    # Read the file
-    with open(bpmnfile, 'r') as file:
-        lines = file.readlines()
-    
-    # Join lines to create a single string
-    bpmn_xml = ''.join(lines)
-    
-    # Define the regex pattern to find startEvent elements and their ids
-    pattern = re.compile(r'<startEvent[^>]*\sid="([^"]+)"')
-    
-    # Find all matches
-    matches = pattern.findall(bpmn_xml)
-    
-    return matches
-def get_end_event_ids_from_file(bpmnfile):
-    # Read the file
-    with open(bpmnfile, 'r') as file:
-        lines = file.readlines()
-    
-    # Join lines to create a single string
-    bpmn_xml = ''.join(lines)
-    
-    # Define the regex pattern to find startEvent elements and their ids
-    pattern = re.compile(r'<endEvent[^>]*\sid="([^"]+)"')
-    
-    # Find all matches
-    matches = pattern.findall(bpmn_xml)
-    
-    return matches
 def get_antonyms(word):
     if not word:
         return []
@@ -238,6 +256,7 @@ def no_event_betwen(bpmnfile,task1,task2):
          if('Event' in j):
             return False
     return True
+
 def no_task_betwen(bpmnfile,event1,event2):
     chemin = tout_chemin(bpmnfile,event1,event2)
     for i in chemin:
@@ -245,6 +264,18 @@ def no_task_betwen(bpmnfile,event1,event2):
          if('Activity' in j):
             return False
     return True
+
+def colorier_task(bpmnfile, id_task):
+    """Colour an element purple (contradiction)."""
+    color_task(bpmnfile, id_task, PALETTE_CONTRADICTION)
+
+# English language model of spaCy, loaded once when the module is imported
+# (takes a moment). Used by detect_contradiction() to find subject, verb,
+# object and negation in task labels.
+nlp = spacy.load("en_core_web_sm")    
+nlp = spacy.load("en_core_web_sm")
+
+# --- detectors -----------------------------------------------------------
 def detect_between(bpmnfile,para1,para2):
     tache_col = []
     liste_des_taches = tout_chemin(bpmnfile,para1,para2)  
@@ -259,7 +290,7 @@ def detect_between(bpmnfile,para1,para2):
                     return  'Contradiction entre : '+get_task(bpmnfile,i)+get_task(bpmnfile,j)+"#Contradiction dans l'article : "+get_annotation_proxy(bpmnfile,i).__str__()+"#Reviser "+get_annotation_proxy(bpmnfile,i).__str__(),tache_col , 'Contradiction between : '+get_task(bpmnfile,i)+get_task(bpmnfile,j)+"#Contradiction in the article : "+get_annotation_proxy(bpmnfile,i).__str__()+"#Revise "+get_annotation_proxy(bpmnfile,i).__str__()
     return False   
                 
-def detecter_C1(bpmnfile):
+def detect_C1(bpmnfile):
     finale = []
     finaleENG = []
     tache = []
@@ -287,7 +318,7 @@ def detecter_C1(bpmnfile):
         colorier_task(bpmnfile,i)
     return finale ,finaleENG
 
-def detecter_C2(bpmnfile):
+def detect_C2(bpmnfile):
      finale = []
      tache = []
      finaleENG = []
@@ -314,8 +345,7 @@ def detecter_C2(bpmnfile):
                                  finale.append("contradiction entre "+get_event(bpmnfile,tache1)+get_event(bpmnfile,tache2)+"#Contradiction dans l'article : "+get_annotation_proxy(bpmnfile,tache1)+"#Reviser l'article : "+get_annotation_proxy(bpmnfile,tache1))
      for i in tache:
          colorier_task(bpmnfile,i)
-     return finale  , finaleENG
-                                 
+     return finale  , finaleENG                                
                           
 def detect_C3(bpmnfile):
     liste_exclu = get_all_exclusiveG(bpmnfile)
@@ -349,7 +379,6 @@ def detect_C3(bpmnfile):
                break   
     return message , messageENG
 
-
 def detect_C4(bpmnfile):
     liste_start = get_start_event_ids_from_file(bpmnfile)
     liste_end = get_end_event_ids_from_file(bpmnfile)
@@ -380,10 +409,10 @@ def erreur_contradiction(bpmnfile):
     cpt=0
     contradictionENG = []
     contradiction = []
-    contradiction, contradictionENG = detecter_C1(bpmnfile)
+    contradiction, contradictionENG = detect_C1(bpmnfile)
 
 # For the other functions, extend the lists appropriately
-    result1, result2 = detecter_C2(bpmnfile)
+    result1, result2 = detect_C2(bpmnfile)
     contradiction += result1
     contradictionENG += result2
 
