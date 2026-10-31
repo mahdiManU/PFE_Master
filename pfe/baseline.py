@@ -16,7 +16,38 @@ django.setup()
 from django.conf import settings
 from myapp.mabib import message
 from myapp.views import modify_bpmn_file
-from myapp.contradiction import erreur_contradiction
+from myapp.verification.contradiction import erreur_contradiction
+import myapp.verification.temporal as temporal
+
+# ---------------------------------------------------------------------------
+# Translation cache: googletrans is an online service and fails randomly.
+# The first successful translation of each sentence is stored in
+# tests/baseline/translations.json and reused on every later run, so
+# `check` gives the same result with or without internet.
+# ---------------------------------------------------------------------------
+CACHE_FILE = os.path.join("tests", "baseline", "translations.json")
+_real_translate = temporal.translate_if_french
+_cache = {}
+if os.path.exists(CACHE_FILE):
+    with open(CACHE_FILE, encoding="utf-8") as f:
+        _cache = json.load(f)
+
+
+def _cached_translate(text):
+    if text not in _cache:
+        try:
+            _cache[text] = _real_translate(text)
+        except Exception as e:
+            sys.exit(f"Translation service failed for {text!r}: {e}\n"
+                     "Wait a minute and run the command again; "
+                     "successful translations are already saved.")
+        os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
+        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(_cache, f, ensure_ascii=False, indent=2)
+    return _cache[text]
+
+
+temporal.translate_if_french = _cached_translate
 
 SAMPLES = os.path.join("tests", "samples")
 BASELINE = os.path.join("tests", "baseline")

@@ -25,7 +25,7 @@ from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from .rapport import *
-from .contradiction import *
+from .verification.contradiction import *
 from .rapportEng import *
 from .add import *
 from django.contrib.auth import get_user_model
@@ -33,6 +33,7 @@ from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from .serializers import CreateUserSerializer
+from .verification.bpmn_utils import supprimer_doublons, get_lane_id_from_flow_node, color_task, PALETTE_MISSING_INFO
 
 User = get_user_model()
 
@@ -273,32 +274,8 @@ def get_flow_node_refs_from_lane(bpmn_file_path, lane_id):
 def clean_list(string_list):
     # Utiliser un ensemble pour éliminer les doublons, puis filtrer les chaînes vides
     return list({s for s in string_list if s})
-def supprimer_doublons(liste):
-    vue = []
-    resultat = []
-    for element in liste:
-        if element not in vue:
-            resultat.append(element)
-            vue.append(element)
-    return resultat
-def get_lane_id_from_flow_node(bpmn_file_path, flow_node_id):
-    lane_id = ""
-    with open(bpmn_file_path, 'r') as file:
-        lines = file.readlines()
-    
-    for line in lines:
-        if "<lane id=" in line:
-            lane_match = re.search(r'<lane id="([^"]+)"', line)
-            if lane_match:
-                current_lane_id = lane_match.group(1)
-        
-        if "<flowNodeRef>" in line and flow_node_id in line:
-            flow_node_match = re.search(r'<flowNodeRef>(.*?)</flowNodeRef>', line)
-            if flow_node_match and flow_node_match.group(1) == flow_node_id:
-                lane_id = current_lane_id
-                break
-    
-    return lane_id
+
+
 def get_annotation_proxy(bpmnfile,id):
    loi = []
    id_list = []
@@ -411,19 +388,11 @@ def get_annotation2(bpmn_file_path,id):
                 if (msg):
                     return msg.group(1)
    return msg
-def colorier_task(bpmnfile,id_task):
-     new_lines = []
-     with open(bpmnfile, 'r') as file:
-        lines = file.readlines()
-     for i in lines:
-         if(("<bpmndi:BPMNShape" in i) and (id_task in i) and ("bioc:stroke" not in i)):
-             modified_line =i[:-2]+' bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">\n'
-             new_lines.append(modified_line)
-         else:
-             new_lines.append(i)
-     with open(bpmnfile, 'w') as file:
-         file.truncate(0)
-         file.writelines(new_lines)
+
+def colorier_task(bpmnfile, id_task):
+    """Colour an element orange (missing information)."""
+    color_task(bpmnfile, id_task, PALETTE_MISSING_INFO)
+
 def colorier_picine(id,liste):
    for i in liste:
       if((id in i) and ("<bpmndi:BPMNShape" in i)):

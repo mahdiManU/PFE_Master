@@ -5,7 +5,7 @@ missing information (MI), structural errors (S) and contradictions (C), maps
 them to the legal texts and generates a verification report (.docx).
 
 ## Requirements
-Python 3.11, Node.js LTS, Git.
+Python 3.11 or 3.12, Node.js LTS, Git.
 
 ## Backend
 ```bash

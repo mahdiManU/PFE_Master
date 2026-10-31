@@ -1,6 +1,7 @@
 # mabib.py
 import xml.etree.ElementTree as ET
 import re
+from .verification.bpmn_utils import supprimer_doublons, color_task, PALETTE_STRUCTURAL
 def clean_list(mixed_list):
     # Utiliser une compréhension de liste pour filtrer les éléments vides (listes vides et chaînes vides)
     return [item for item in mixed_list if item]
@@ -288,19 +289,7 @@ def get_task(bpmnfile,id_tache):
         if (("<task" in line) or ("<sendTask" in line) or ("<receiveTask" in line)) and (id_tache in line):
             msg = re.search(r'name="([^"]+)"', line)
    return msg.group(1)
-def colorier_task(bpmnfile,id_task):
-     new_lines = []
-     with open(bpmnfile, 'r') as file:
-        lines = file.readlines()
-     for i in lines:
-         if(("<bpmndi:BPMNShape" in i) and (id_task in i) and ("bioc:stroke" not in i)):
-             modified_line =i[:-2]+' bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">\n'
-             new_lines.append(modified_line)
-         else:
-             new_lines.append(i)
-     with open(bpmnfile, 'w') as file:
-         file.truncate(0)
-         file.writelines(new_lines)
+
 def message(bpmnfile,bpmnfile2,fichier_loi):
     mesmessage , exclu, para ,inclu = colorier_chemin(bpmnfile)
     
@@ -408,14 +397,7 @@ def taches_dans_article(article,listedestaches):
         return True
     else:
         return False
-def supprimer_doublons(liste):
-    vue = []
-    resultat = []
-    for element in liste:
-        if element not in vue:
-            resultat.append(element)
-            vue.append(element)
-    return resultat
+
 def trouver_article(nom_fichier, nom_article ,typeErr,listeTaches):
     mesArticles = []
     
@@ -437,5 +419,7 @@ def trouver_article(nom_fichier, nom_article ,typeErr,listeTaches):
     
     return "Ambiguite dans l'article : "+mesArticles.__str__()+"#Reviser : " +mesArticles.__str__(),"Ambiguity in the article : "+mesArticles.__str__()+"#Revise : " +mesArticles.__str__()
 
-
+def colorier_task(bpmnfile, id_task):
+    """Colour an element red (structural error)."""
+    color_task(bpmnfile, id_task, PALETTE_STRUCTURAL)
 

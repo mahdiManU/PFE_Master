@@ -2,8 +2,9 @@
 import spacy
 from nltk.corpus import wordnet
 import nltk
-from .mabib import *
-from .happensB import *
+from ..mabib import *
+from .temporal import happens_before
+from .bpmn_utils import supprimer_doublons, get_lane_id_from_flow_node, color_task, PALETTE_CONTRADICTION
 import re
 # Assurez-vous que les ressources nécessaires de NLTK sont téléchargées
 #nltk.download('wordnet')
@@ -56,24 +57,7 @@ def dfs(current_path, graph, node, end, all_paths):
 
     return all_paths
 
-def get_lane_id_from_flow_node(bpmn_file_path, flow_node_id):
-    lane_id = ""
-    with open(bpmn_file_path, 'r') as file:
-        lines = file.readlines()
-    
-    for line in lines:
-        if "<lane id=" in line:
-            lane_match = re.search(r'<lane id="([^"]+)"', line)
-            if lane_match:
-                current_lane_id = lane_match.group(1)
-        
-        if "<flowNodeRef>" in line and flow_node_id in line:
-            flow_node_match = re.search(r'<flowNodeRef>(.*?)</flowNodeRef>', line)
-            if flow_node_match and flow_node_match.group(1) == flow_node_id:
-                lane_id = current_lane_id
-                break
-    
-    return lane_id
+
 def get_annotation_proxy(bpmnfile,id):
    loi = []
    id_list = []
@@ -101,14 +85,7 @@ def avoir_type(bpmnfile,id):
             if match:
               return match.group(1)
     return None
-def supprimer_doublons(liste):
-    vue = []
-    resultat = []
-    for element in liste:
-        if element not in vue:
-            resultat.append(element)
-            vue.append(element)
-    return resultat
+
 # Charger le modèle spaCy en anglais
 def oppsite(chaine1,chaine2):
    opposites = {
@@ -145,19 +122,10 @@ def oppsite(chaine1,chaine2):
              return True
    return False
 
-def colorier_task(bpmnfile,id_task):
-     new_lines = []
-     with open(bpmnfile, 'r') as file:
-        lines = file.readlines()
-     for i in lines:
-         if(("<bpmndi:BPMNShape" in i) and (id_task in i) and ("bioc:stroke" not in i)):
-             modified_line =i[:-2]+' bioc:stroke="#5b176d" bioc:fill="#e1bee7" color:background-color="#e1bee7" color:border-color="#5b176d">\n'
-             new_lines.append(modified_line)
-         else:
-             new_lines.append(i)
-     with open(bpmnfile, 'w') as file:
-         file.truncate(0)
-         file.writelines(new_lines)
+def colorier_task(bpmnfile, id_task):
+    """Colour an element purple (contradiction)."""
+    color_task(bpmnfile, id_task, PALETTE_CONTRADICTION)
+    
 nlp = spacy.load("en_core_web_sm")
 def get_event(bpmnfile,id_event):
    msg = None
