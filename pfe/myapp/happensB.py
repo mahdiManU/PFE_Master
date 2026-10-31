@@ -1,3 +1,4 @@
+# happensB.py
 import spacy
 from googletrans import Translator
 # Charger le modèle de langue anglais de spaCy

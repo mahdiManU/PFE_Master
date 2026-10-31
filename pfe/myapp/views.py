@@ -1,3 +1,4 @@
+# views.py
 from django.shortcuts import render , HttpResponse
 from django.core.files.storage import FileSystemStorage
 from rest_framework.decorators import api_view

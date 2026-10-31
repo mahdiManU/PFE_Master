@@ -10,10 +10,9 @@ from django.conf.urls.static import static
 urlpatterns = [
   path("upload/",views.upload,name="upload"),
   path("", views.home, name="home"),
-  path("upload/",views.upload,name="upload"),
   path('api/upload/verify/', views.upload_and_verify_diagram, name="upload_and_verify_diagram"),
   path("api/projects/<int:project_id>/diagrams/<int:diagram_id>/verify/", views.verify_diagram, name="verify_diagram"),
-    path("api/diagram/", views.diagram, name="verify_diagram"),
+    path("api/diagram/", views.diagram, name="diagram_upload"),
     path("api/projects/", views.ProjectListCreateAPIView.as_view(), name="project-list-create"),
     path("api/projects/<int:project_id>/create-diagrams/", views.DiagramListCreateAPIView.as_view(), name='diagram-list-create'),
     path("api/projects/<int:project_id>/diagrams/<int:id>/", views.DiagramDetailAPIView.as_view(), name="diagram-detail"),

@@ -1,0 +1,17 @@
+{
+  "structural_fr": [
+    "Erreur S 1# (Nondeterministic deadlock)#Ambiguite dans l'article : ['Decret n 05-171Art. 5. — Medical examination of insured persons andbeneficiaries is exercised by the caisse consulting practitionersocial security, entitled to Request medical examthe beneficiary and/or any related medical documentswith the state of health for which it is requestedsocial security benefits.']#Reviser : ['Decret n 05-171Art. 5. — Medical examination of insured persons andbeneficiaries is exercised by the caisse consulting practitionersocial security, entitled to Request medical examthe beneficiary and/or any related medical documentswith the state of health for which it is requestedsocial security benefits.']"
+  ],
+  "structural_en": [
+    "Error S 1# (Nondeterministic deadlock)#Ambiguity in the article : ['Decret n 05-171Art. 5. — Medical examination of insured persons andbeneficiaries is exercised by the caisse consulting practitionersocial security, entitled to Request medical examthe beneficiary and/or any related medical documentswith the state of health for which it is requestedsocial security benefits.']#Revise : ['Decret n 05-171Art. 5. — Medical examination of insured persons andbeneficiaries is exercised by the caisse consulting practitionersocial security, entitled to Request medical examthe beneficiary and/or any related medical documentswith the state of health for which it is requestedsocial security benefits.']"
+  ],
+  "missing_fr": [
+    "Erreur MI 1# Role manquant # Role non précisé dans l'article : ['Decree nÂ°.05-171/Article 8']#Reviser l'article : ['Decree nÂ°.05-171/Article 8'] Ajouter le rôle adéquat a ces taches :['Envoyer une convocation', 'Recevoir confirmation']"
+  ],
+  "missing_en": [
+    "Error MI 1# Missing role # Role not specified in the article : ['Decree nÂ°.05-171/Article 8']#Revise the article : ['Decree nÂ°.05-171/Article 8'] Add the appropriate role to these tasks :['Envoyer une convocation', 'Recevoir confirmation']"
+  ],
+  "contradiction_fr": [],
+  "contradiction_en": [],
+  "colored_xml_sha256": "580f34d8b3bb89de73d87df03c7ea1fe455c883c8c934edec3b6bfbe84714f6f"
+}

@@ -24,12 +24,10 @@ router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include('myapp.urls')),
-    path('api/', include(router.urls)),
-    path("api/v1/auth/", include('djoser.urls')),
-    path("api/v1/auth/", include('djoser.urls.jwt')),
-    path('api/', include('myapp.urls')),
-    path("api/token/", TokenObtainPairView.as_view(), name="get_token"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="refresh"),
-    
+    path('', include('myapp.urls')),        
+    path('api/', include(router.urls)),      
+    path('api/v1/auth/', include('djoser.urls')),
+    path('api/v1/auth/', include('djoser.urls.jwt')),
+    path('api/token/', TokenObtainPairView.as_view(), name='get_token'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='refresh'),
 ]

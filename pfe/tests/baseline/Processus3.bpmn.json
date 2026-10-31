@@ -1,0 +1,13 @@
+{
+  "structural_fr": [],
+  "structural_en": [],
+  "missing_fr": [
+    "Erreur MI 1# Vide juridique #Vide juridique dans l'article : ['Decret n 501Â\\xa0 de MHESR', '']#Reviser l'article : ['Decret n 501Â\\xa0 de MHESR', ''] et Ajouter des informations adéquates"
+  ],
+  "missing_en": [
+    "Error MI 1# Legal vacuum #Legal vacuum in the article : ['Decret n 501Â\\xa0 de MHESR', '']#Revise the article : ['Decret n 501Â\\xa0 de MHESR', ''] and Add adequate information"
+  ],
+  "contradiction_fr": [],
+  "contradiction_en": [],
+  "colored_xml_sha256": "a201957c952bc394651cc0c8f74cd936a23c17813a22be094bc7a96d9968427c"
+}

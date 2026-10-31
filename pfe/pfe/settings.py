@@ -17,22 +17,19 @@ from datetime import timedelta
 
 
 
+# ---------------------------------------------------------------------------
+# Environment variables
+# All secrets and machine-specific values live in the .env file (see .env.example).
+# ---------------------------------------------------------------------------
 env = environ.Env(DEBUG=(bool, False))
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(BASE_DIR / ".env")
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = []
+# Hosts allowed to serve the app. Add your domain here (or in .env) for deployment.
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 
 
 # Application definition
@@ -148,10 +145,6 @@ USE_I18N = True
 USE_TZ = True
 APPEND_SLASH = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
-STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -209,15 +202,19 @@ DJOSER = {
     },
 }
 
+# ---------------------------------------------------------------------------
+# Email (account activation and password reset, sent through Djoser)
+# For local development, a Mailtrap sandbox account is enough.
+# ---------------------------------------------------------------------------
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_USE_TLS = True
-EMAIL_PORT = env("EMAIL_PORT")
+EMAIL_PORT = env.int("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = "info@journal-bullet.com"
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@localhost")
 DOMAIN = env("DOMAIN")
-SITE_NAME = "Journal Bullet"
+SITE_NAME = env("SITE_NAME", default="BPMN Process Verifier")
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',

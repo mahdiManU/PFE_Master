@@ -1,0 +1,20 @@
+# Python
+venv/
+djangoenv/
+__pycache__/
+*.pyc
+*.bak
+
+# Secrets (keep .env.example, never .env)
+.env
+
+# Node
+node_modules/
+frontend/build/
+
+# User-generated media (keep media/loi.txt, it is required by the verification)
+media/user_*/
+media/uploads/
+
+# Editor
+.vscode/

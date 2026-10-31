@@ -1,0 +1,17 @@
+{
+  "structural_fr": [],
+  "structural_en": [],
+  "missing_fr": [
+    "Erreur MI 1# Condition manquante #Condition non preciser dans l'article : [None, 'Decret n 08-04/Art. 73', '']#Reviser l'article : [None, 'Decret n 08-04/Art. 73', ''] et Ajouter la condition adéquate",
+    "Erreur MI 2# Role manquant # Role non précisé dans l'article : ['Decret n 08-04/Art. 73']#Reviser l'article : ['Decret n 08-04/Art. 73'] Ajouter le rôle adéquat a ces taches :['Identifier les BÃ©nÃ©ficiaires', 'Fair l&#39;inscription', 'envoyerÂ\\xa0 le dossier']",
+    "Erreur MI 3# Role manquant # Role non précisé dans l'article : ['Decret n 08-04/Art. 74']#Reviser l'article : ['Decret n 08-04/Art. 74'] Ajouter le rôle adéquat a ces taches :['Metre en place les institutions']"
+  ],
+  "missing_en": [
+    "Error MI 1# Missing condition #Condition not specified in the article : [None, 'Decret n 08-04/Art. 73', '']#Revise the article : [None, 'Decret n 08-04/Art. 73', ''] and Add the appropriate condition",
+    "Error MI 2# Missing role # Role not specified in the article : ['Decret n 08-04/Art. 73']#Revise the article : ['Decret n 08-04/Art. 73'] Add the appropriate role to these tasks :['Identifier les BÃ©nÃ©ficiaires', 'Fair l&#39;inscription', 'envoyerÂ\\xa0 le dossier']",
+    "Error MI 3# Missing role # Role not specified in the article : ['Decret n 08-04/Art. 74']#Revise the article : ['Decret n 08-04/Art. 74'] Add the appropriate role to these tasks :['Metre en place les institutions']"
+  ],
+  "contradiction_fr": [],
+  "contradiction_en": [],
+  "colored_xml_sha256": "320df179bbd8664848f783d75ae2662fe509f90b0bd6c48c0d4131cb1317218a"
+}
