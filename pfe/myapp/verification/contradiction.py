@@ -271,8 +271,7 @@ def colorier_task(bpmnfile, id_task):
 
 # English language model of spaCy, loaded once when the module is imported
 # (takes a moment). Used by detect_contradiction() to find subject, verb,
-# object and negation in task labels.
-nlp = spacy.load("en_core_web_sm")    
+# object and negation in task labels.    
 nlp = spacy.load("en_core_web_sm")
 
 # --- detectors -----------------------------------------------------------
