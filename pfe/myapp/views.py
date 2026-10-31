@@ -12,8 +12,8 @@ import os
 from rest_framework import serializers
 import shutil
 from django.conf import settings
-from .mabib import *
-from .mabib import trouver_article
+from .verification.structural import *
+from .verification.structural import trouver_article
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework import generics, permissions

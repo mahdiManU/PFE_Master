@@ -14,7 +14,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pfe.settings")
 django.setup()
 
 from django.conf import settings
-from myapp.mabib import message
+from myapp.verification.structural import message
 from myapp.views import modify_bpmn_file
 from myapp.verification.contradiction import erreur_contradiction
 import myapp.verification.temporal as temporal

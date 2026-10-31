@@ -1,7 +1,31 @@
-# mabib.py
+"""
+structural.py - structural errors (family "S" in the thesis) and legal-text lookup.
+
+Structural errors are anti-patterns in how gateways are combined:
+
+    Deterministic deadlock                   exclusive gateway -> parallel gateway
+    Deterministic lack of synchronization    parallel gateway  -> exclusive gateway
+    Nondeterministic lack of synchronization inclusive gateway -> exclusive gateway
+    Nondeterministic deadlock                inclusive gateway -> parallel gateway
+
+Also detected: "dead tasks" (tasks that nothing leads to).
+
+The main entry point is message(bpmnfile, bpmnfile2, fichier_loi): it finds the
+errors, colours the faulty paths red, renames the tasks involved, then looks up
+the legal articles concerned (trouver_article) and returns
+(french_messages, english_messages).
+
+The file has three parts:
+    1. Legal text helpers   - lire_decrets, extract_articles, ramener_art, ...
+    2. BPMN reading helpers - get_element_type, get_task, get_annotation2, ...
+    3. S detectors          - verif, verif2, verif3, verif4, colorier_chemin, message
+"""
 import xml.etree.ElementTree as ET
 import re
-from .verification.bpmn_utils import supprimer_doublons, color_task, PALETTE_STRUCTURAL
+from .bpmn_utils import supprimer_doublons, color_task, PALETTE_STRUCTURAL
+
+# --- 1. legal text helpers -----------------------------------------------
+
 def clean_list(mixed_list):
     # Utiliser une compréhension de liste pour filtrer les éléments vides (listes vides et chaînes vides)
     return [item for item in mixed_list if item]
@@ -17,6 +41,7 @@ def lire_decrets(fichier):
     decrets = ["Decret n" + decree.replace("\n", "") for decree in decrets]
     
     return decrets
+
 def extract_articles(decret_text):
     # Define the pattern to match each article
     pattern = r'Art. \d+\..*?(?=Art. \d+\.|$)'
@@ -25,6 +50,67 @@ def extract_articles(decret_text):
     articles = re.findall(pattern, decret_text, re.DOTALL)
     
     return articles
+
+def ramener_art(nom_article,nom_fichier):
+    
+    liste_decrees = lire_decrets(nom_fichier)
+    
+    for i in liste_decrees:
+        temp = extract_articles(i)
+        
+        for j in temp:
+            
+            if(nom_article.__str__().split('/')[1] in j):
+                return nom_article.split('/')[0]+j
+    return ''
+
+def taches_dans_article(article,listedestaches):
+    cpt = 0
+    for i in listedestaches:
+        if (i.lower() in article.lower()):
+            cpt +=1
+    if(cpt <= len(listedestaches) and cpt >=1):
+        return True
+    else:
+        return False
+
+def valide_type_err(typeErr,articles):
+    if("(Deterministic deadlock)" in typeErr):
+        if((("either" in articles) and ("or" in articles)) or (("soit" in articles) and ("et" in articles))):
+            return True
+    if("(Deterministic lack of synchronization)" in typeErr):
+        if((("and" in articles) and ("or" in articles)) or (("et" in articles) and ("ou" in articles))):
+            return True
+    if("(Nondeterministic lack of synchronization)" in typeErr):
+        if((("or" in articles) and ("then" in articles)) or (("ou" in articles) and ("puis" in articles))):
+            return True
+    if("(Nondeterministic deadlock)" in typeErr):
+        if((("and" in articles) and ("or" in articles)) or (("et" in articles) and ("puis" in articles))):
+            return True
+    return False
+
+def trouver_article(nom_fichier, nom_article ,typeErr,listeTaches):
+    mesArticles = []
+    
+    for i in nom_article:
+        if(i.__len__()>3):
+         mesArticles.append(ramener_art(i,nom_fichier))
+    mesArticles = supprimer_doublons(mesArticles)
+    nom_article = supprimer_doublons(nom_article)
+ 
+    if(("(Deterministic deadlock)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))): 
+            return "probleme dans either // or dans les aticles suivants : "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__(),"problem in either // or in the following articles : "+mesArticles.__str__()+"#Revise :"+nom_article.__str__()
+    if(("(Deterministic lack of synchronization)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
+            return "problem in and // or in the following articles:: "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__(),"problem in and // or in the following articles:: "+mesArticles.__str__()+"#Revise :"+nom_article.__str__()
+    if(("(Nondeterministic lack of synchronization)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
+            return "probleme dans or // then dans les articles suivants: "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__(),"problem in or // then in the following articles : "+mesArticles.__str__()+"#Revise :"+nom_article.__str__()
+    if(("(Nondeterministic deadlock)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
+            print(nom_article.__str__())
+            return "probleme dans and // or dans l'article suivant:"+mesArticles.__str__()+"#Reviser :"+nom_article.__str__(),"problem in and // or in the following articles:"+mesArticles.__str__()+"#Revise :"+nom_article.__str__()
+    
+    return "Ambiguite dans l'article : "+mesArticles.__str__()+"#Reviser : " +mesArticles.__str__(),"Ambiguity in the article : "+mesArticles.__str__()+"#Revise : " +mesArticles.__str__()
+
+# --- 2. BPMN reading helpers ---------------------------------------------
 def get_element_type(id,bpmnfile):
      with open(bpmnfile, 'r') as file:
        lines = file.readlines()
@@ -33,6 +119,91 @@ def get_element_type(id,bpmnfile):
              match = re.match(r'^\s*<(\w+)', i)
              if(match):
               return match.group(1)
+
+def get_task(bpmnfile,id_tache):
+   with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+   for line in lines:
+        if (("<task" in line) or ("<sendTask" in line) or ("<receiveTask" in line)) and (id_tache in line):
+            msg = re.search(r'name="([^"]+)"', line)
+   return msg.group(1)
+
+def get_annotation2(bpmn_file_path,id):
+   msg = []
+   with open(bpmn_file_path, 'r') as file:
+        lines = file.readlines()
+   for line in lines:
+        if ("<association" in line) and (id in line):
+         match = re.search(r'targetRef="([^"]+)"', line)
+         temp = match.group(1)
+         for line2 in lines : 
+             if temp in line2 and  '<textAnnotation' in line2:
+                msg = re.search(r'<text>(.*?)</text>', lines[lines.index(line2)+1])
+                if (msg):
+                    return msg.group(1)
+   return msg
+
+def has_no_next(bpmnfile,id):
+    with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+    for i in lines:
+        if(('sourceRef="'+id) in i):
+            return True
+    return False
+
+def get_valide(bpmnfile,id):
+     cpt1 = 0 
+     cpt2 = 0
+     with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+     for i in lines:
+         if(("sourceRef=" +'"'+id) in i):
+             cpt1 +=1
+         if(("targetRef=" +'"'+id) in i):
+             cpt2 +=1
+     return cpt2 > cpt1
+
+def get_all_exclusiveG(bpmnfile):
+     my_list = []
+     with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+     for i in lines:
+         if ("<exclusiveGateway" in i):
+             match = re.search(r'id="([^"]+)"', i)
+             my_list.append(match.group(1))
+     return my_list
+
+def get_all_inclusiveG(bpmnfile):
+     my_list = []
+     with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+     for i in lines:
+         if ("<inclusiveGateway" in i):
+             match = re.search(r'id="([^"]+)"', i)
+             my_list.append(match.group(1))
+     return my_list
+
+def get_all_parallelG(bpmnfile):
+     my_list = []
+     with open(bpmnfile, 'r') as file:
+        lines = file.readlines()
+     for i in lines:
+         if ("<parallelGateway" in i):
+             match = re.search(r'id="([^"]+)"', i)
+             my_list.append(match.group(1))
+     return my_list
+
+def count_distinct_values(lst):
+    distinct_values = set(lst)
+    return len(distinct_values)
+
+def remove_duplicates(list_of_lists):
+    # Convert each sublist to a tuple so it can be added to a set
+    set_of_tuples = {tuple(sublist) for sublist in list_of_lists}
+    # Convert the set of tuples back to a list of lists
+    return [list(t) for t in set_of_tuples]
+    
+# --- 3. S detectors ------------------------------------------------------    
 def dfs(bpmnfile,graph, start, end, path=[], paths=[]):
     path = path + [start]
     
@@ -46,13 +217,6 @@ def dfs(bpmnfile,graph, start, end, path=[], paths=[]):
             if neighbor not in path:
                 paths = dfs(bpmnfile,graph, neighbor, end, path, paths)
     return paths
-def has_no_next(bpmnfile,id):
-    with open(bpmnfile, 'r') as file:
-        lines = file.readlines()
-    for i in lines:
-        if(('sourceRef="'+id) in i):
-            return True
-    return False
 
 def get_gateway_paths(xml_file, start_gateway_id, end_gateway_id):
     tree = ET.parse(xml_file)
@@ -71,36 +235,7 @@ def get_gateway_paths(xml_file, start_gateway_id, end_gateway_id):
     gateway_paths = [path for path in all_paths if path[0] == start_gateway_id and path[-1] == end_gateway_id]
 
     return gateway_paths
-def get_all_exclusiveG(bpmnfile):
-     my_list = []
-     with open(bpmnfile, 'r') as file:
-        lines = file.readlines()
-     for i in lines:
-         if ("<exclusiveGateway" in i):
-             match = re.search(r'id="([^"]+)"', i)
-             my_list.append(match.group(1))
-     return my_list
-def get_all_inclusiveG(bpmnfile):
-     my_list = []
-     with open(bpmnfile, 'r') as file:
-        lines = file.readlines()
-     for i in lines:
-         if ("<inclusiveGateway" in i):
-             match = re.search(r'id="([^"]+)"', i)
-             my_list.append(match.group(1))
-     return my_list
-def get_all_parallelG(bpmnfile):
-     my_list = []
-     with open(bpmnfile, 'r') as file:
-        lines = file.readlines()
-     for i in lines:
-         if ("<parallelGateway" in i):
-             match = re.search(r'id="([^"]+)"', i)
-             my_list.append(match.group(1))
-     return my_list
-def count_distinct_values(lst):
-    distinct_values = set(lst)
-    return len(distinct_values)
+
 def chemin_valide(maliste):
     liste2 = []
     for i in maliste:
@@ -108,6 +243,7 @@ def chemin_valide(maliste):
     if(count_distinct_values(liste2)>=2):
         return True
     return False
+
 def verif(bpmnfile):
     listef = []
     exclu = get_all_exclusiveG(bpmnfile)
@@ -123,23 +259,7 @@ def verif(bpmnfile):
         list_finale = []
          
     return listef , exclu , para , inclu
-def get_valide(bpmnfile,id):
-     cpt1 = 0 
-     cpt2 = 0
-     with open(bpmnfile, 'r') as file:
-        lines = file.readlines()
-     for i in lines:
-         if(("sourceRef=" +'"'+id) in i):
-             cpt1 +=1
-         if(("targetRef=" +'"'+id) in i):
-             cpt2 +=1
-     return cpt2 > cpt1
-def remove_duplicates(list_of_lists):
-    # Convert each sublist to a tuple so it can be added to a set
-    set_of_tuples = {tuple(sublist) for sublist in list_of_lists}
-    # Convert the set of tuples back to a list of lists
-    return [list(t) for t in set_of_tuples]
-        
+    
 def verif2(bpmnfile):
     listef = []
     exclu = get_all_exclusiveG(bpmnfile)
@@ -163,6 +283,7 @@ def verif2(bpmnfile):
         list_finale = []
               
     return listef
+
 def verif3(bpmnfile):
     listef = []
     exclu = get_all_exclusiveG(bpmnfile)
@@ -176,6 +297,7 @@ def verif3(bpmnfile):
         list_finale = []
               
     return listef 
+
 def verif4(bpmnfile):
     listef = []
     para = get_all_parallelG(bpmnfile)
@@ -189,6 +311,7 @@ def verif4(bpmnfile):
         list_finale = []
               
     return listef 
+
 def modifier_noms(bpmnfile, id_liste, nouveau_nom):
    with open(bpmnfile, 'r') as file:
      lines = file.readlines()
@@ -237,6 +360,7 @@ def color_elements_in_xml(file_path, element_ids):
 
     # Enregistrer les modifications dans le fichier XML
     tree.write(file_path)
+
 def colorier_chemin(bpmnfile):
     chemin  , exclu, para , inclu= verif(bpmnfile)
 
@@ -268,27 +392,6 @@ def colorier_chemin(bpmnfile):
                 with open(bpmnfile, 'r') as file:
                    lines = file.readlines()
     return chemin ,exclu ,para , inclu 
-def get_annotation2(bpmn_file_path,id):
-   msg = []
-   with open(bpmn_file_path, 'r') as file:
-        lines = file.readlines()
-   for line in lines:
-        if ("<association" in line) and (id in line):
-         match = re.search(r'targetRef="([^"]+)"', line)
-         temp = match.group(1)
-         for line2 in lines : 
-             if temp in line2 and  '<textAnnotation' in line2:
-                msg = re.search(r'<text>(.*?)</text>', lines[lines.index(line2)+1])
-                if (msg):
-                    return msg.group(1)
-   return msg
-def get_task(bpmnfile,id_tache):
-   with open(bpmnfile, 'r') as file:
-        lines = file.readlines()
-   for line in lines:
-        if (("<task" in line) or ("<sendTask" in line) or ("<receiveTask" in line)) and (id_tache in line):
-            msg = re.search(r'name="([^"]+)"', line)
-   return msg.group(1)
 
 def message(bpmnfile,bpmnfile2,fichier_loi):
     mesmessage , exclu, para ,inclu = colorier_chemin(bpmnfile)
@@ -362,62 +465,6 @@ def message(bpmnfile,bpmnfile2,fichier_loi):
             arts.append(nvmsg[i]) 
             artsENG.append(nvmsgENG[i])  
     return arts , artsENG
-def valide_type_err(typeErr,articles):
-    if("(Deterministic deadlock)" in typeErr):
-        if((("either" in articles) and ("or" in articles)) or (("soit" in articles) and ("et" in articles))):
-            return True
-    if("(Deterministic lack of synchronization)" in typeErr):
-        if((("and" in articles) and ("or" in articles)) or (("et" in articles) and ("ou" in articles))):
-            return True
-    if("(Nondeterministic lack of synchronization)" in typeErr):
-        if((("or" in articles) and ("then" in articles)) or (("ou" in articles) and ("puis" in articles))):
-            return True
-    if("(Nondeterministic deadlock)" in typeErr):
-        if((("and" in articles) and ("or" in articles)) or (("et" in articles) and ("puis" in articles))):
-            return True
-    return False
-def ramener_art(nom_article,nom_fichier):
-    
-    liste_decrees = lire_decrets(nom_fichier)
-    
-    for i in liste_decrees:
-        temp = extract_articles(i)
-        
-        for j in temp:
-            
-            if(nom_article.__str__().split('/')[1] in j):
-                return nom_article.split('/')[0]+j
-    return ''
-def taches_dans_article(article,listedestaches):
-    cpt = 0
-    for i in listedestaches:
-        if (i.lower() in article.lower()):
-            cpt +=1
-    if(cpt <= len(listedestaches) and cpt >=1):
-        return True
-    else:
-        return False
-
-def trouver_article(nom_fichier, nom_article ,typeErr,listeTaches):
-    mesArticles = []
-    
-    for i in nom_article:
-        if(i.__len__()>3):
-         mesArticles.append(ramener_art(i,nom_fichier))
-    mesArticles = supprimer_doublons(mesArticles)
-    nom_article = supprimer_doublons(nom_article)
- 
-    if(("(Deterministic deadlock)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))): 
-            return "probleme dans either // or dans les aticles suivants : "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__(),"problem in either // or in the following articles : "+mesArticles.__str__()+"#Revise :"+nom_article.__str__()
-    if(("(Deterministic lack of synchronization)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
-            return "problem in and // or in the following articles:: "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__(),"problem in and // or in the following articles:: "+mesArticles.__str__()+"#Revise :"+nom_article.__str__()
-    if(("(Nondeterministic lack of synchronization)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
-            return "probleme dans or // then dans les articles suivants: "+mesArticles.__str__()+"#Reviser :"+nom_article.__str__(),"problem in or // then in the following articles : "+mesArticles.__str__()+"#Revise :"+nom_article.__str__()
-    if(("(Nondeterministic deadlock)" in typeErr) and (taches_dans_article(mesArticles.__str__(),listeTaches)) and (valide_type_err(typeErr,mesArticles.__str__()))):
-            print(nom_article.__str__())
-            return "probleme dans and // or dans l'article suivant:"+mesArticles.__str__()+"#Reviser :"+nom_article.__str__(),"problem in and // or in the following articles:"+mesArticles.__str__()+"#Revise :"+nom_article.__str__()
-    
-    return "Ambiguite dans l'article : "+mesArticles.__str__()+"#Reviser : " +mesArticles.__str__(),"Ambiguity in the article : "+mesArticles.__str__()+"#Revise : " +mesArticles.__str__()
 
 def colorier_task(bpmnfile, id_task):
     """Colour an element red (structural error)."""

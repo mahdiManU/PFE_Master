@@ -19,7 +19,7 @@ returns (french_list, english_list), then call it in erreur_contradiction().
 import spacy
 from nltk.corpus import wordnet
 import nltk
-from ..mabib import *
+from .structural import *
 from .temporal import happens_before
 from .bpmn_utils import supprimer_doublons, get_lane_id_from_flow_node, color_task, PALETTE_CONTRADICTION
 import re
