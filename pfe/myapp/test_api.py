@@ -72,4 +72,25 @@ class OwnershipTests(APITestCase):
         self.client.force_authenticate(self.bob)
         response = self.client.get(f"/api/projects/{self.project.id}/diagrams/")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])    
+        self.assertEqual(response.json(), [])   
+
+    def test_owner_cannot_transfer_project(self):
+        self.client.force_authenticate(self.alice)
+        response = self.client.put(
+            f"/api/projects/{self.project.id}/",
+            {"name": "n", "description": "d", "owner": self.bob.id}, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.project.refresh_from_db()
+        self.assertEqual(self.project.owner, self.alice)
+
+
+class RegistrationSecurityTests(APITestCase):
+    def test_cannot_register_as_staff(self):
+        response = self.client.post("/api/v1/auth/users/", {
+            "email": "x@test.com", "first_name": "X", "last_name": "Y",
+            "password": "Str0ng-pass-987", "re_password": "Str0ng-pass-987",
+            "is_staff": True, "is_active": True}, format="json")
+        self.assertEqual(response.status_code, 201, response.content)
+        user = get_user_model().objects.get(email="x@test.com")
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_active)  # must wait for activation

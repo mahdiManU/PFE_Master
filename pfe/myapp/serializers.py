@@ -22,9 +22,22 @@ class CreateUserSerializer(UserCreateSerializer):
             if all(diagram.verified for diagram in project.diagrams.all()):
                 completed_projects += 1
         return completed_projects
+    
     class Meta(UserCreateSerializer.Meta):
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'password', 'is_active', 'num_projects', 'num_completed_projects']
+        fields = [
+            'id',
+            'email',
+            'first_name',
+            'last_name',
+            'password',
+            'is_active',
+            'is_staff',
+            'num_projects',
+            'num_completed_projects'
+        ]
+
+        read_only_fields = ['is_active', 'is_staff']
 
 class ProjectSerializer(serializers.ModelSerializer):
     num_diagrams = serializers.SerializerMethodField()
@@ -34,7 +47,17 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'description', 'owner', 'created_at', 'updated_at', 'num_diagrams']
+        fields = [
+            'id',
+            'name',
+            'description',
+            'owner',
+            'created_at',
+            'updated_at',
+            'num_diagrams'
+        ]
+
+        read_only_fields = ['owner']
         
 
 class DiagramSerializer(serializers.ModelSerializer):

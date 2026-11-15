@@ -29,10 +29,15 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
 
     def create(self, request, *args, **kwargs):
+        """Admin creates a user. Uses the given password, or a random one if none."""
         data = request.data.copy()
-        data['password'] = get_random_string(12)
+        data['password'] = data.get('password') or get_random_string(12)
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        # Accounts created by an admin are active at once (no activation email).
+        user.is_active = True
+        user.save(update_fields=['is_active'])
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
