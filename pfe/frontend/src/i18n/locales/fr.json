@@ -1,0 +1,111 @@
+{
+  "common": {
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "details": "Détails",
+    "view": "Voir",
+    "loading": "Chargement..."
+  },
+  "nav": {
+    "samples": "exemples de processus",
+    "login": "se connecter",
+    "contact": "contact",
+    "dashboard": "Accueil",
+    "projects": "Projets",
+    "newProject": "Nouveau projet",
+    "logout": "Déconnexion",
+    "toggleNav": "Afficher le menu",
+    "toggleTheme": "Changer de thème"
+  },
+  "home": {
+    "title": "Processus BPMN, ",
+    "highlight": "Vérification",
+    "role": "Détection des erreurs juridiques dans les processus administratifs",
+    "description": "Le but principal est de créer une solution capable d'identifier et de mettre en évidence les incohérences ou erreurs juridiques dans les modèles de processus administratifs. L'outil améliore la qualité et la fiabilité des processus administratifs juridiques grâce à une détection automatique des erreurs, garantissant la conformité aux exigences légales et minimisant le risque de problèmes juridiques dans les procédures administratives.",
+    "thesis": "Consulter le mémoire",
+    "samplesTitle": "Exemples de processus",
+    "contactTitle": "Contactez-nous",
+    "emailMe": "Envoyez un e-mail"
+  },
+  "samples": {
+    "1": { "name": "Exemple 1", "description": "Processus d'exemple avec sa version vérifiée et son rapport de vérification." },
+    "2": { "name": "Exemple 2", "description": "Processus d'exemple avec sa version vérifiée et son rapport de vérification." },
+    "3": { "name": "Exemple 3", "description": "Processus d'exemple avec sa version vérifiée et son rapport de vérification." },
+    "viewDiagram": "Voir le diagramme",
+    "viewVerified": "Voir le diagramme vérifié",
+    "viewReport": "Télécharger le rapport"
+  },
+  "footer": { "createdBy": "Créé par" },
+  "login": {
+    "title": "Se connecter",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "signIn": "Connexion",
+    "errors": {
+      "emailRequired": "Veuillez fournir votre adresse e-mail.",
+      "passwordRequired": "Veuillez fournir votre mot de passe.",
+      "invalidCredentials": "E-mail ou mot de passe incorrect. Veuillez réessayer."
+    }
+  },
+  "dashboard": {
+    "welcome": "Bienvenue",
+    "manageUsers": "Gérer les utilisateurs"
+  },
+  "projects": {
+    "mine": "Mes projets",
+    "none": "Aucun projet trouvé.",
+    "diagramCount": "Nombre de diagrammes :",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce projet ?",
+    "createTitle": "Créer un nouveau projet",
+    "nameLabel": "Nom du projet :",
+    "descriptionLabel": "Description :",
+    "submit": "Créer le projet",
+    "errorFetch": "Échec du chargement des projets."
+  },
+  "project": {
+    "diagrams": "Diagrammes",
+    "name": "Nom",
+    "description": "Description",
+    "verified": "Vérifié",
+    "file": "Fichier",
+    "download": "Télécharger",
+    "createNew": "Créer un nouveau diagramme",
+    "diagramName": "Nom du diagramme",
+    "diagramDescription": "Description du diagramme",
+    "create": "Créer le diagramme",
+    "loading": "Chargement des diagrammes...",
+    "errorFetch": "Erreur lors du chargement des diagrammes.",
+    "errorCreate": "Échec de la création du diagramme.",
+    "errorDelete": "Échec de la suppression du diagramme.",
+    "selectFile": "Veuillez sélectionner un fichier.",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce diagramme ?"
+  },
+  "verif": {
+    "title": "LegProV : vérification de processus légaux",
+    "back": "Retour",
+    "upload": "Importer",
+    "verify": "Vérifier",
+    "results": "Résultats",
+    "report": "Télécharger le rapport",
+    "mi": "Informations manquantes :",
+    "s": "Erreurs structurelles :",
+    "c": "Contradictions :",
+    "noErrors": "Aucune erreur"
+  },
+  "users": {
+    "title": "Gestion des utilisateurs",
+    "email": "E-mail",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "projects": "Projets",
+    "completed": "Projets terminés",
+    "createNew": "Créer un nouvel utilisateur",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "create": "Créer l'utilisateur",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?"
+  }
+}

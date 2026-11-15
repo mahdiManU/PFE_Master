@@ -1,0 +1,111 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "details": "Details",
+    "view": "View",
+    "loading": "Loading..."
+  },
+  "nav": {
+    "samples": "sample workflows",
+    "login": "login",
+    "contact": "contact",
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "newProject": "New Project",
+    "logout": "Logout",
+    "toggleNav": "Toggle navigation",
+    "toggleTheme": "Toggle theme"
+  },
+  "home": {
+    "title": "Legal BPMN Process, ",
+    "highlight": "Verification",
+    "role": "A tool for detecting legal errors in administrative processes",
+    "description": "The primary goal is to create a solution that can identify and highlight legal inconsistencies or errors within administrative process models. The tool improves the quality and reliability of legal administrative processes by detecting errors automatically, ensuring compliance with legal requirements and minimizing the risk of legal issues in administrative procedures.",
+    "thesis": "View thesis",
+    "samplesTitle": "Sample Workflows",
+    "contactTitle": "Contact",
+    "emailMe": "Email me"
+  },
+  "samples": {
+    "1": { "name": "Sample 1", "description": "Example process with its verified version and verification report." },
+    "2": { "name": "Sample 2", "description": "Example process with its verified version and verification report." },
+    "3": { "name": "Sample 3", "description": "Example process with its verified version and verification report." },
+    "viewDiagram": "View Diagram",
+    "viewVerified": "View Verified Diagram",
+    "viewReport": "Download Report"
+  },
+  "footer": { "createdBy": "Created By" },
+  "login": {
+    "title": "Login",
+    "email": "E-mail",
+    "password": "Password",
+    "signIn": "Sign In",
+    "errors": {
+      "emailRequired": "Please provide your email.",
+      "passwordRequired": "Please provide your password.",
+      "invalidCredentials": "Invalid email or password. Please try again."
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "manageUsers": "Manage Users"
+  },
+  "projects": {
+    "mine": "My Projects",
+    "none": "No projects found.",
+    "diagramCount": "Number of diagrams:",
+    "confirmDelete": "Are you sure you want to delete this project?",
+    "createTitle": "Create a New Project",
+    "nameLabel": "Name of project:",
+    "descriptionLabel": "Description:",
+    "submit": "Create project",
+    "errorFetch": "Failed to fetch projects."
+  },
+  "project": {
+    "diagrams": "Diagrams",
+    "name": "Name",
+    "description": "Description",
+    "verified": "Verified",
+    "file": "File",
+    "download": "Download",
+    "createNew": "Create a New Diagram",
+    "diagramName": "Diagram Name",
+    "diagramDescription": "Diagram Description",
+    "create": "Create Diagram",
+    "loading": "Loading diagrams...",
+    "errorFetch": "Error fetching diagrams.",
+    "errorCreate": "Failed to create diagram.",
+    "errorDelete": "Failed to delete diagram.",
+    "selectFile": "Please select a file.",
+    "confirmDelete": "Are you sure you want to delete this diagram?"
+  },
+  "verif": {
+    "title": "LegProV: Legal Process Verification",
+    "back": "Back",
+    "upload": "Upload",
+    "verify": "Verify",
+    "results": "Results",
+    "report": "Download Report",
+    "mi": "Missing Information:",
+    "s": "Structural Errors:",
+    "c": "Contradictions:",
+    "noErrors": "No errors found"
+  },
+  "users": {
+    "title": "User Management",
+    "email": "Email",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "projects": "Projects",
+    "completed": "Completed Projects",
+    "createNew": "Create New User",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "create": "Create User",
+    "confirmDelete": "Are you sure you want to delete this user?"
+  }
+}
