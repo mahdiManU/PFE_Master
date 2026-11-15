@@ -1,40 +1,24 @@
 # views.py
-from django.shortcuts import render , HttpResponse
-from django.core.files.storage import FileSystemStorage
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from django.core.files.storage import default_storage
-import re
-from django.http import JsonResponse
-from rest_framework.parsers import JSONParser
-import uuid
-import os
-from rest_framework import serializers
-import shutil
-from django.conf import settings
-from .verification.structural import *
-from .verification.structural import trouver_article
-from rest_framework import generics, status
-from rest_framework.decorators import api_view
-from rest_framework import generics, permissions
-from .models import Project,Diagram
-from .serializers import ProjectSerializer, DiagramSerializer
 import logging
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.middleware.csrf import get_token
-from django.shortcuts import get_object_or_404
-from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
-from .rapport import *
-from .verification.contradiction import *
-from .rapportEng import *
-from .add import *
+import os
+import shutil
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from rest_framework import viewsets, permissions
+from django.core.files.storage import FileSystemStorage, default_storage
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+from rest_framework import generics, permissions, status, viewsets
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
-from rest_framework.decorators import action
-from .serializers import CreateUserSerializer
-from .verification.bpmn_utils import supprimer_doublons, get_lane_id_from_flow_node, color_task, PALETTE_MISSING_INFO
+
+from .models import Project, Diagram
+from .serializers import ProjectSerializer, DiagramSerializer, CreateUserSerializer
+from .verification.structural import message
 from .verification.missing_info import modify_bpmn_file
+from .verification.contradiction import erreur_contradiction
+from .rapport import generer_rapport
+from .rapportEng import generer_rapportENG
 
 User = get_user_model()
 
@@ -48,7 +32,6 @@ class UserViewSet(viewsets.ModelViewSet):
         data['password'] = User.objects.make_random_password()
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -123,7 +106,6 @@ class DiagramListCreateAPIView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         project_id = self.kwargs['project_id']
         project = Project.objects.get(id=project_id)
-        diagram = serializer.save(project=project)
 
         # Ensure no `diagram_None` folder is left behind
         project_directory = os.path.join(settings.MEDIA_ROOT, f'user_{project.owner.id}', f'project_{project.id}')
