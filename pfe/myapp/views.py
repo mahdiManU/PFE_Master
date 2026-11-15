@@ -167,63 +167,6 @@ def get_project_diagrams(request, project_id):
     return JsonResponse(serialized_diagrams, safe=False)
 
 
-
-def home(request):
-    return render(request ,"myapp/home.html")
-
-def upload(request):
-    if request.method == 'POST':
-       # testPDF()
-        uploaded_file = request.FILES['document']
-        fs = FileSystemStorage()
-        fs.save(uploaded_file.name,uploaded_file)
-        myfile =os.path.splitext(uploaded_file.name)[0]
-        fs.save(myfile+'first.bpmn',uploaded_file)
-       # print(fs.path('loi.txt'))
-        #le fichier avec first a la fin c'est avant verification
-        
-        arts = message(fs.path(uploaded_file.name).__str__(),fs.path(myfile+'first.bpmn'),fs.path('loi.txt').__str__())
-        
-        with open(fs.path(uploaded_file.name+".txt"), 'a') as f:
-            for i in arts:
-             f.write(i+" \n")
-        annotation ,annotationENG= modify_bpmn_file(fs.path(uploaded_file.name).__str__())
-        liste_finale = arts + annotation
-        report_name = uploaded_file.name + '.docx'
-        #report_name_eng = uploaded_file.name +'ENG'+ '.docx'
-        report_path = os.path.join(settings.MEDIA_ROOT, report_name)
-        #report_pathENG = os.path.join(settings.MEDIA_ROOT, report_name_eng)
-        generer_rapport(liste_finale, report_path,uploaded_file.name)
-        #generer_rapportENG(liste_finale,report_pathENG)
-        with open(fs.path(uploaded_file.name+".txt"), 'a') as f:
-            for i in annotation:
-             f.write(i+" \n")
-        return render(request, 'myapp/new.html',{'file_name': uploaded_file.name,'file_name2' : myfile+'first.bpmn','annotation': annotation.__str__()})
-    return render(request ,"myapp/upload.html")
-
-
-
-
-
-
-@api_view(['POST'])
-def diagram(request):
-    if request.method == 'POST' and 'document' in request.FILES:
-        uploaded_file = request.FILES['document']
-
-       # Save the uploaded file to a specific location
-        fs = FileSystemStorage()
-        
-        myfile =os.path.splitext(uploaded_file.name)[0]
-        fs.save(myfile+'first.bpmn',uploaded_file)
-        #le fichier avec first a la fin c'est avant verification
-        
-
-       
-        return JsonResponse({'filename': myfile+'first.bpmn'})
-    else:
-        return HttpResponse(status=400)
-
 logger = logging.getLogger(__name__)
 
 
