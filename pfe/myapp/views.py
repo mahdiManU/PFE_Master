@@ -7,10 +7,11 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.storage import FileSystemStorage, default_storage
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
+from django.utils.crypto import get_random_string
 
 from .models import Project, Diagram
 from .serializers import ProjectSerializer, DiagramSerializer, CreateUserSerializer
@@ -29,7 +30,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
-        data['password'] = User.objects.make_random_password()
+        data['password'] = get_random_string(12)
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         headers = self.get_success_headers(serializer.data)
@@ -75,12 +76,6 @@ class ProjectDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         user = self.request.user
         return self.queryset.filter(owner=user)
 
-    def dispatch(self, request, *args, **kwargs):
-        project_id = kwargs.get('pk')
-        if not Project.objects.filter(id=project_id).exists():
-            return Response({'error': 'Project not found'}, status=status.HTTP_404_NOT_FOUND)
-        return super().dispatch(request, *args, **kwargs)
-
     def delete(self, request, *args, **kwargs):
         project = self.get_object()
         project_id = project.id
@@ -100,12 +95,16 @@ class DiagramListCreateAPIView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        project_id = self.kwargs['project_id']
-        return Diagram.objects.filter(project_id=project_id)
+        # Only diagrams of this project AND of a project owned by the current user.
+        return Diagram.objects.filter(
+            project_id=self.kwargs['project_id'],
+            project__owner=self.request.user,
+        )
 
     def perform_create(self, serializer):
-        project_id = self.kwargs['project_id']
-        project = Project.objects.get(id=project_id)
+        # 404 if the project does not exist or belongs to someone else.
+        project = get_object_or_404(
+            Project, id=self.kwargs['project_id'], owner=self.request.user)
 
         # Ensure no `diagram_None` folder is left behind
         project_directory = os.path.join(settings.MEDIA_ROOT, f'user_{project.owner.id}', f'project_{project.id}')
@@ -134,10 +133,12 @@ class DiagramDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'id'
 
     def get_queryset(self):
-        project_id = self.kwargs['project_id']
-        diagram_id = self.kwargs['id']
-        return Diagram.objects.filter(project_id=project_id, id=diagram_id)
-
+        return Diagram.objects.filter(
+            project_id=self.kwargs['project_id'],
+            id=self.kwargs['id'],
+            project__owner=self.request.user,
+        )
+    
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         project_id = instance.project_id
@@ -232,7 +233,8 @@ def verify_diagram(request, project_id, diagram_id):
         logger.info(f"Verifying diagram {diagram_id} for project {project_id}")
 
         # Fetch the diagram object
-        diagram = Diagram.objects.get(id=diagram_id, project_id=project_id)
+        diagram = Diagram.objects.get(
+            id=diagram_id, project_id=project_id, project__owner=request.user)
 
         # Construct paths
         user_folder = f'user_{request.user.id}'
@@ -355,7 +357,7 @@ def upload_and_verify_diagram(request):
         # Generate report
         report_name = 'report.docx'
         report_path = os.path.join(upload_folder_path, report_name)
-        report_nameENG = 'report.docx'
+        report_nameENG = 'reportENG.docx'
         report_pathENG = os.path.join(upload_folder_path, report_nameENG)
         generer_rapport(liste_finale, report_path,file.name)
         generer_rapportENG(liste_finaleENG, report_pathENG,file.name)
