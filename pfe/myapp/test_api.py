@@ -63,3 +63,13 @@ class OwnershipTests(APITestCase):
         response = self.client.get(
             f"/api/projects/{self.project.id}/diagrams/{self.diagram.id}/")
         self.assertEqual(response.status_code, 200)
+
+    def test_diagram_list_requires_login(self):
+        response = self.client.get(f"/api/projects/{self.project.id}/diagrams/")
+        self.assertEqual(response.status_code, 401)
+
+    def test_other_user_gets_empty_diagram_list(self):
+        self.client.force_authenticate(self.bob)
+        response = self.client.get(f"/api/projects/{self.project.id}/diagrams/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])    

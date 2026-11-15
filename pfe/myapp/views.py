@@ -155,16 +155,16 @@ class DiagramDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "Project ID is missing for the diagram."})
     
+@api_view(['GET'])
 def get_project_diagrams(request, project_id):
-    try:
-        # Retrieve diagrams associated with the specified project ID
-        diagrams = Diagram.objects.filter(project_id=project_id)
-        # Serialize the diagrams data
-        serialized_diagrams = [{'id': diagram.id, 'name': diagram.name, 'description':diagram.description, 'file': diagram.file.url, 'verified': diagram.verified} for diagram in diagrams]
-        # Return the serialized diagrams data as JSON response
-        return JsonResponse(serialized_diagrams, safe=False)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+    """List the diagrams of one project. Only the owner of the project gets results."""
+    diagrams = Diagram.objects.filter(project_id=project_id, project__owner=request.user)
+    serialized_diagrams = [
+        {'id': d.id, 'name': d.name, 'description': d.description,
+         'file': d.file.url, 'verified': d.verified}
+        for d in diagrams
+    ]
+    return JsonResponse(serialized_diagrams, safe=False)
 
 
 
@@ -304,23 +304,25 @@ def verify_diagram(request, project_id, diagram_id):
         return HttpResponse(status=500, content="Internal Server Error")
     
 
+@api_view(['GET'])
 def get_diagram(request, project_id, diagram_id):
-    try:
-        diagram = Diagram.objects.get(id=diagram_id, project_id=project_id)
-        diagram_folder_path = os.path.join(settings.MEDIA_ROOT, f'user_{request.user.id}', f'project_{project_id}', f'diagram_{diagram_id}')
-        
-        if diagram.verified:
-            diagram_path = os.path.join(diagram_folder_path, 'verified_diagram.bpmn')
-        else:
-            diagram_path = os.path.join(diagram_folder_path, 'diagram.bpmn')
-        
-        if os.path.exists(diagram_path):
-            file_url = f"/media/user_{request.user.id}/project_{project_id}/diagram_{diagram_id}/{os.path.basename(diagram_path)}"
-            return JsonResponse({'filename': file_url})
-        else:
-            return HttpResponse(status=404)
-    except Diagram.DoesNotExist:
-        return HttpResponse(status=404)
+    """Return the URL of the original (or verified) .bpmn file of a diagram."""
+    diagram = get_object_or_404(
+        Diagram, id=diagram_id, project_id=project_id, project__owner=request.user)
+    diagram_folder_path = os.path.join(
+        settings.MEDIA_ROOT, f'user_{request.user.id}',
+        f'project_{project_id}', f'diagram_{diagram_id}')
+
+    if diagram.verified:
+        diagram_path = os.path.join(diagram_folder_path, 'verified_diagram.bpmn')
+    else:
+        diagram_path = os.path.join(diagram_folder_path, 'diagram.bpmn')
+
+    if os.path.exists(diagram_path):
+        file_url = (f"/media/user_{request.user.id}/project_{project_id}/"
+                    f"diagram_{diagram_id}/{os.path.basename(diagram_path)}")
+        return JsonResponse({'filename': file_url})
+    return HttpResponse(status=404)
 
 @api_view(['POST'])
 def upload_and_verify_diagram(request):
