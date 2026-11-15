@@ -1,27 +1,17 @@
-import React, { useContext } from 'react';
-import { LanguageContext } from '../../contexts/language';
-import { contact as EnglishContact } from '../../English';
-import { contact as FrenchContact } from '../../Frensh';
+import { useTranslation } from 'react-i18next';
+import { CONTACT_EMAIL } from '../../config';
 import './Contact.css';
 
 const Contact = () => {
-  const { currentLanguage } = useContext(LanguageContext);
-  const contactInfo = currentLanguage === 'en' ? EnglishContact : FrenchContact;
-
-  if (!contactInfo.email) return null;
-
+  const { t } = useTranslation();
   return (
     <section className='section contact center' id='contact'>
-      <h2 className='section__title'>
-        {currentLanguage === 'en' ? 'Contact' : 'Contactez Nous'}
-      </h2>
-      <a href={`mailto:${contactInfo.email}`}>
-        <span type='button' className='btn btn--outline'>
-          {currentLanguage === 'en' ? 'Email me' : 'Envoyez un email'}
-        </span>
+      <h2 className='section__title'>{t('home.contactTitle')}</h2>
+      <a href={`mailto:${CONTACT_EMAIL}`}>
+        <span className='btn btn--outline'>{t('home.emailMe')}</span>
       </a>
     </section>
   );
-}
+};
 
 export default Contact;

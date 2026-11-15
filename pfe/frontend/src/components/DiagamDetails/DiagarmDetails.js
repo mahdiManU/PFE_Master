@@ -1,25 +1,20 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer';
 import './DiagramDetails.css';
-import { LanguageContext } from '../../contexts/language';
 import { API_BASE_URL } from '../../config';
+import { useTranslation } from 'react-i18next';
 
 const DiagramDetails = () => {
   const { id } = useParams();
   const [view, setView] = useState('diagram');
   const diagramContainerRef = useRef(null);
 
-  const { currentLanguage } = useContext(LanguageContext);
-
-  const content = currentLanguage === 'en' ? {
-    viewDiagram: 'View Diagram',
-    viewVerifiedDiagram: 'View Verified Diagram',
-    viewReport: 'Download Report'
-  } : {
-    viewDiagram: 'Voir le diagramme',
-    viewVerifiedDiagram: 'Voir le diagramme vérifié',
-    viewReport: 'Télécharger le rapport'
+  const { t } = useTranslation();
+  const content = {
+    viewDiagram: t('samples.viewDiagram'),
+    viewVerifiedDiagram: t('samples.viewVerified'),
+    viewReport: t('samples.viewReport'),
   };
 
   const diagramPath = `${API_BASE_URL}/media/3diagrams_example/${id}/Processus.bpmn`;

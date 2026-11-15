@@ -1,43 +1,24 @@
-import React, { useContext } from 'react';
-import { LanguageContext } from '../../contexts/language';
-import * as EnglishContent from '../../English';
-import * as FrenchContent from '../../Frensh';
-import './About.css'
+import { useTranslation } from 'react-i18next';
+import { THESIS_URL } from '../../config';
+import './About.css';
 
+/** Presentation block of the home page. */
 const About = () => {
-  const { currentLanguage } = useContext(LanguageContext);
-
-  const cont = currentLanguage === 'en' ? {
-    verif: 'Verification'
-  } : {
-    verif: 'Vérification'
-  };
-  // Dynamically select the content based on the current language
-  const content = currentLanguage === 'en' ? EnglishContent : FrenchContent;
-  const {name, role, description, resume, memoire } = content.about;
-
+  const { t } = useTranslation();
   return (
     <div className='about center'>
-      {name && (
-        <h1>
-          {name}<span className='about__name'>{cont.verif}</span>
-        </h1>
-      )}
-
-      {role && <h2 className='about__role'>{role}.</h2>}
-      <p className='about__desc'>{description && description}</p>
-
+      <h1>
+        {t('home.title')}<span className='about__name'>{t('home.highlight')}</span>
+      </h1>
+      <h2 className='about__role'>{t('home.role')}.</h2>
+      <p className='about__desc'>{t('home.description')}</p>
       <div className='about__contact center'>
-        {resume && (
-          <a href={resume} target="_blank">
-            <span type='button' className='btn btn--outline'>
-            {memoire}
-            </span>
-          </a>
-        )}
+        <a href={THESIS_URL} target='_blank' rel='noopener noreferrer'>
+          <span className='btn btn--outline'>{t('home.thesis')}</span>
+        </a>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default About
+export default About;

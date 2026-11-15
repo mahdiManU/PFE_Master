@@ -1,21 +1,16 @@
-import React, { useContext } from 'react';
-import { LanguageContext } from '../../contexts/language';
+import { useTranslation } from 'react-i18next';
+import { REPO_URL } from '../../config';
 import './Footer.css';
 
 const Footer = () => {
-  const { currentLanguage } = useContext(LanguageContext);
-  const createdByText = currentLanguage === 'en' ? 'Created By' : 'Créé Par';
-
+  const { t } = useTranslation();
   return (
     <footer className='footer'>
-      <a
-        href='https://github.com/mahdiManU/PFE_Master'
-        className='link footer__link'
-      >
-        {`${createdByText} RABAHI & BADAOUI`}
+      <a href={REPO_URL} className='link footer__link' target='_blank' rel='noopener noreferrer'>
+        {`${t('footer.createdBy')} RABAHI & BADAOUI`}
       </a>
     </footer>
   );
-}
+};
 
 export default Footer;

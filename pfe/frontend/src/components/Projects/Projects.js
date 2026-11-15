@@ -1,29 +1,21 @@
-import React, { useContext } from 'react';
-import { LanguageContext } from '../../contexts/language';
-import { projects as EnglishProjects } from '../../English';
-import { projects as FrenchProjects } from '../../Frensh';
+import { useTranslation } from 'react-i18next';
+import { SAMPLES } from '../../samples';
 import ProjectContainer from '../ProjectContainer/ProjectContainer';
 import './Projects.css';
 
+/** Grid of the example diagrams on the home page (data in src/samples.js). */
 const Projects = () => {
-  const { currentLanguage } = useContext(LanguageContext);
-  const projects = currentLanguage === 'en' ? EnglishProjects : FrenchProjects;
-
-  if (!projects.length) return null;
-
+  const { t } = useTranslation();
   return (
     <section id='samples' className='section projects'>
-      <h2 className='section__title'>
-        {currentLanguage === 'en' ? 'Sample Workflows' : 'Exemples de processus'}
-      </h2>
-
+      <h2 className='section__title'>{t('home.samplesTitle')}</h2>
       <div className='projects__grid'>
-        {projects.map((project) => (
-          <ProjectContainer key={project.name} project={project} />
+        {SAMPLES.map((sample) => (
+          <ProjectContainer key={sample.id} sample={sample} />
         ))}
       </div>
     </section>
   );
-}
+};
 
 export default Projects;

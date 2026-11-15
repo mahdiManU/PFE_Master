@@ -1,128 +1,67 @@
-import React, { useContext, useState } from 'react';
-import { useEffect } from "react";
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from "react-router-dom";
-import { login, reset, getUserInfo, resetPassword } from '../../features/authSlice'; // Import resetPassword action
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { login, reset, getUserInfo } from '../../features/authSlice';
 import './Login.css';
-import { LanguageContext } from '../../contexts/language';
 
 const Login = () => {
-  const { currentLanguage } = useContext(LanguageContext);
-  const content = currentLanguage === 'en' ? {
-    login: 'Login',
-    emailLabel: 'E-mail',
-    passwordLabel: 'Password',
-    forgetPasswordLink: 'Forget Password ?', // Ensure this matches with the link text below
-    signInButton: 'Sign In',
-    errors: {
-      emailRequired: 'Please provide your email.',
-      passwordRequired: 'Please provide your password.',
-      invalidCredentials: 'Invalid email or password. Please try again.'
-    }
-  } : {
-    login: 'Se Connecter',
-    emailLabel: 'E-mail',
-    passwordLabel: 'Mot de passe',
-    forgetPasswordLink: 'Mot de passe oublié ?', // Ensure this matches with the link text below
-    signInButton: 'Connexion',
-    errors: {
-      emailRequired: 'Veuillez fournir votre adresse e-mail.',
-      passwordRequired: 'Veuillez fournir votre mot de passe.',
-      invalidCredentials: 'E-mail ou mot de passe incorrect. Veuillez réessayer.'
-    }
-  };
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
-  const { email, password } = formData;
-
+  const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { user, isError } = useSelector((state) => state.auth);
 
-  const { user, isError, isSuccess, message } = useSelector((state) => state.auth);
-
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [userError, setUserError] = useState('');
+  const { email, password } = formData;
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-    if (e.target.name === 'email') setEmailError(''); setUserError('');
-    if (e.target.name === 'password') setPasswordError(''); setUserError('');
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear the error of the edited field and the general error.
+    if (name === 'email') setEmailError('');
+    if (name === 'password') setPasswordError('');
+    setUserError('');
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email) {
-      setEmailError(content.errors.emailRequired);
-      return;
-    }
-    if (!password) {
-      setPasswordError(content.errors.passwordRequired);
-      return;
-    }
-    const userData = {
-      email,
-      password,
-    };
-    dispatch(login(userData));
-  };
-
-  // Handle forget password link click
-  const handleForgetPassword = () => {
-    dispatch(reset()); // Reset auth state
-    navigate("/reset-password"); // Navigate to reset password page
+    if (!email) return setEmailError(t('login.errors.emailRequired'));
+    if (!password) return setPasswordError(t('login.errors.passwordRequired'));
+    dispatch(login({ email, password }));
   };
 
   useEffect(() => {
-    if (isError) {
-      setUserError(content.errors.invalidCredentials);
+    if (isError) setUserError(t('login.errors.invalidCredentials'));
+    if (user) {
+      dispatch(getUserInfo()); // loads first name / email for the dashboard
+      navigate('/dashboard');
     }
-
-    if (isSuccess || user) {
-      if (user.email === 'imenerabahi25@gmail.com' && user.password === 'admin') {
-        navigate("/admin-dashboard");
-      } else {
-        navigate("/dashboard");
-      }
-    }
-
     dispatch(reset());
-    dispatch(getUserInfo());
-  }, [isError, isSuccess, user, message, navigate, dispatch, content.errors.invalidCredentials]);
+  }, [isError, user, navigate, dispatch, t, i18n.language]);
 
   return (
-    <div className={`login ${currentLanguage} `}>
-      <button type='button' className='btn btn--outline reset-button' onClick={() => {
-        setFormData({ email: '', password: '' });
-        setEmailError('');
-        setPasswordError('');
-        setUserError('');
-      }}>
+    <div className={`login ${i18n.language}`}>
+      <button type='button' className='btn btn--outline reset-button'
+        onClick={() => { setFormData({ email: '', password: '' }); setEmailError(''); setPasswordError(''); setUserError(''); }}>
         X
       </button>
-      <h2>{content.login}</h2>
-      <form>
-        {userError && <span className="error">{userError}</span>}
-        <label htmlFor='email'>{content.emailLabel}</label>
-        <input type='text' id='email' name='email' onChange={handleChange}
-          value={email} required />
-        {emailError && <span className="error">{emailError}</span>}
-        <label htmlFor='password'>{content.passwordLabel}</label>
+      <h2>{t('login.title')}</h2>
+      <form onSubmit={handleSubmit}>
+        {userError && <span className='error'>{userError}</span>}
+        <label htmlFor='email'>{t('login.email')}</label>
+        <input type='email' id='email' name='email' onChange={handleChange} value={email} required />
+        {emailError && <span className='error'>{emailError}</span>}
+        <label htmlFor='password'>{t('login.password')}</label>
         <input type='password' id='password' name='password' onChange={handleChange}
-          value={password} required autoComplete="off" />
-        {passwordError && <span className="error">{passwordError}</span>}
-        {/*<Link to="#" onClick={handleForgetPassword}>{content.forgetPasswordLink}</Link>  Link to reset password page */}
-        <button type='submit' onClick={handleSubmit}>{content.signInButton}</button>
+          value={password} required autoComplete='current-password' />
+        {passwordError && <span className='error'>{passwordError}</span>}
+        <button type='submit'>{t('login.signIn')}</button>
       </form>
     </div>
   );
-}
+};
 
 export default Login;
