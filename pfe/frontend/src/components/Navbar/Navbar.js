@@ -1,8 +1,5 @@
 import { useContext, useState } from 'react';
-import Brightness2Icon from '@material-ui/icons/Brightness2';
-import WbSunnyRoundedIcon from '@material-ui/icons/WbSunnyRounded';
-import MenuIcon from '@material-ui/icons/Menu';
-import CloseIcon from '@material-ui/icons/Close';
+import { FaMoon, FaSun, FaBars, FaTimes } from 'react-icons/fa';
 import { ThemeContext } from '../../contexts/theme';
 import { LanguageContext } from '../../contexts/language';
 import * as EnglishContent from '../../English';
@@ -79,7 +76,7 @@ const Navbar = () => {
         className='btn btn--icon nav__hamburger'
         aria-label='toggle navigation'
       >
-        {showNavList ? <CloseIcon /> : <MenuIcon />}
+        {showNavList ? <FaTimes /> : <FaBars />}
       </button>
       <div className='language-switcher' onClick={switchLanguage}>
         {currentLanguage === 'en' ? 'EN' : 'FR'}
@@ -91,7 +88,7 @@ const Navbar = () => {
         className='btn btn--icon nav__theme'
         aria-label='toggle theme'
       >
-        {themeName === 'dark' ? <WbSunnyRoundedIcon /> : <Brightness2Icon />}
+        {themeName === 'dark' ? <FaSun /> : <FaMoon />}
       </button>
     </nav>
   );

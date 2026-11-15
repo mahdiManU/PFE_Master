@@ -7,7 +7,7 @@ import { API_BASE_URL } from '../../config';
 
 const CreateProjectForm = ({ onSuccess,fetchProjects }) => {
   const [formData, setFormData] = useState({ name: '', description: '' });
-  const [setError] = useState(null);
+  const [, setError] = useState(null);
   const { userInfo } = useSelector((state) => state.auth)
   const { currentLanguage } = useContext(LanguageContext);
 
