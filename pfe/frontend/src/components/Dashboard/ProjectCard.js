@@ -4,6 +4,7 @@ import './CardAndPage.css';
 import { LanguageContext } from '../../contexts/language';
 import { Link } from 'react-router-dom';
 import { FaEllipsisV } from 'react-icons/fa';
+import { API_BASE_URL } from '../../config';
 
 const ProjectCard = ({ project, onProjectUpdated, onProjectDeleted }) => {
   const { currentLanguage } = useContext(LanguageContext);
@@ -31,7 +32,7 @@ const ProjectCard = ({ project, onProjectUpdated, onProjectDeleted }) => {
     console.log('Updating project with data:', editFormData);
 
     try {
-      const response = await axios.put(`http://127.0.0.1:8000/api/projects/${project.id}/`, editFormData, {
+      const response = await axios.put(`${API_BASE_URL}/api/projects/${project.id}/`, editFormData, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -56,7 +57,7 @@ const ProjectCard = ({ project, onProjectUpdated, onProjectDeleted }) => {
     }
 
     try {
-      axios.delete(`http://127.0.0.1:8000/api/projects/${project.id}/`, {
+      axios.delete(`${API_BASE_URL}/api/projects/${project.id}/`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

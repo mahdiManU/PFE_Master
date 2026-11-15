@@ -4,6 +4,7 @@ import ProjectCard from './ProjectCard'; // Import the ProjectCard component
 import './CardAndPage.css';
 import CreateProjectForm from './CreateProjectForm';
 import { LanguageContext } from '../../contexts/language';
+import { API_BASE_URL } from '../../config';
 
 const ProjectListPage = () => {
   const [projects, setProjects] = useState([]);
@@ -29,7 +30,7 @@ const ProjectListPage = () => {
         throw new Error('Access token not found.');
       }
 
-      const response = await axios.get('http://127.0.0.1:8000/api/projects/', {
+      const response = await axios.get(`${API_BASE_URL}/api/projects/`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

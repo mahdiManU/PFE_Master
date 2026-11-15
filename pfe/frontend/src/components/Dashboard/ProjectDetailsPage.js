@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ProjectDetailsPage.css';
 import { LanguageContext } from '../../contexts/language';
+import { API_BASE_URL } from '../../config';
 
 const ProjectDetailsPage = () => {
     const [diagrams, setDiagrams] = useState([]);
@@ -91,7 +92,7 @@ const ProjectDetailsPage = () => {
                 throw new Error('Access token not found.');
             }
 
-            const response = await axios.get(`http://127.0.0.1:8000/api/projects/${projectId}`, {
+            const response = await axios.get(`${API_BASE_URL}/api/projects/${projectId}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
@@ -113,7 +114,7 @@ const ProjectDetailsPage = () => {
                 throw new Error('Access token not found.');
             }
 
-            const response = await axios.get(`http://127.0.0.1:8000/api/projects/${projectId}/diagrams`, {
+            const response = await axios.get(`${API_BASE_URL}/api/projects/${projectId}/diagrams`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
@@ -151,7 +152,7 @@ const ProjectDetailsPage = () => {
             formData.append('description', newDiagram.description);
             formData.append('file', newDiagram.file);
     
-            const response = await axios.post(`http://127.0.0.1:8000/api/projects/${projectId}/create-diagrams/`, formData, {
+            const response = await axios.post(`${API_BASE_URL}/api/projects/${projectId}/create-diagrams/`, formData, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                     'Content-Type': 'multipart/form-data',
@@ -175,7 +176,7 @@ const ProjectDetailsPage = () => {
                 throw new Error('Access token not found.');
             }
 
-            await axios.delete(`http://127.0.0.1:8000/api/projects/${projectId}/diagrams/${diagramId}/`, {
+            await axios.delete(`${API_BASE_URL}/api/projects/${projectId}/diagrams/${diagramId}/`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
@@ -237,7 +238,7 @@ const ProjectDetailsPage = () => {
                                             <td>{diagram.name}</td>
                                             <td>{diagram.description}</td>
                                             <td>{diagram.verified ? '✔️' : '❌'}</td>
-                                            <td><a href={`http://127.0.0.1:8000${diagram.file}`} target="_blank" rel="noopener noreferrer">{content.download}</a></td>
+                                            <td><a href={`${API_BASE_URL}${diagram.file}`} target="_blank" rel="noopener noreferrer">{content.download}</a></td>
                                             <td>
                                                 <div className="dropdown">
                                                     <button className="dropbtn" onClick={() => handleToggleDropdown(diagram.id)}>⋮</button>

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import BpmnViewer from 'bpmn-js/lib/NavigatedViewer';
 import './DiagramDetails.css';
 import { LanguageContext } from '../../contexts/language';
+import { API_BASE_URL } from '../../config';
 
 const DiagramDetails = () => {
   const { id } = useParams();
@@ -21,9 +22,9 @@ const DiagramDetails = () => {
     viewReport: 'Télécharger le rapport'
   };
 
-  const diagramPath = `http://127.0.0.1:8000/media/3diagrams_example/${id}/Processus.bpmn`;
-  const verifiedDiagramPath = `http://127.0.0.1:8000/media/3diagrams_example/${id}/verified_diagram.bpmn`;
-  const reportPath = `http://127.0.0.1:8000/media/3diagrams_example/${id}/report.docx`;
+  const diagramPath = `${API_BASE_URL}/media/3diagrams_example/${id}/Processus.bpmn`;
+  const verifiedDiagramPath = `${API_BASE_URL}/media/3diagrams_example/${id}/verified_diagram.bpmn`;
+  const reportPath = `${API_BASE_URL}/media/3diagrams_example/${id}/report.docx`;
 
   useEffect(() => {
     let viewer;

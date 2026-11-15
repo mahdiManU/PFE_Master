@@ -1,6 +1,7 @@
 import axios from "axios"
+import { API_BASE_URL } from "../config";
 
-const BACKEND_DOMAIN = "http://127.0.0.1:8000/"
+const BACKEND_DOMAIN = API_BASE_URL;
 
 const REGISTER_URL = `${BACKEND_DOMAIN}/api/v1/auth/users/`
 const LOGIN_URL = `${BACKEND_DOMAIN}/api/v1/auth/jwt/create/`

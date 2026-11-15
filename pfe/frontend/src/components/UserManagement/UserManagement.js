@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import axios from 'axios';
 import './UserManagement.css'; // Import CSS file for styling
 import { LanguageContext } from '../../contexts/language';
+import { API_BASE_URL } from '../../config';
 
 const UserManagement = () => {
   const { currentLanguage } = useContext(LanguageContext);
@@ -56,7 +57,7 @@ const UserManagement = () => {
 
   const fetchUsers = () => {
     const accessToken = localStorage.getItem('access');
-    axios.get('http://127.0.0.1:8000/api/users/', {
+    axios.get(`${API_BASE_URL}/api/users/`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }
@@ -72,7 +73,7 @@ const UserManagement = () => {
   const deleteUser = (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       const accessToken = localStorage.getItem('access');
-      axios.delete(`http://127.0.0.1:8000/api/users/${userId}/`, {
+      axios.delete(`${API_BASE_URL}/api/users/${userId}/`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
@@ -93,7 +94,7 @@ const UserManagement = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const accessToken = localStorage.getItem('access');
-    axios.post('http://127.0.0.1:8000/api/users/', formData, {
+    axios.post(`${API_BASE_URL}/api/users/`, formData, {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }

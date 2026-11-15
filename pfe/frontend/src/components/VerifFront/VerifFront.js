@@ -3,6 +3,7 @@ import './VerifFront.css';
 import BpmnViewer from 'bpmn-js';
 import { useParams, Link } from 'react-router-dom'; // Import Link from react-router-dom
 import { LanguageContext } from '../../contexts/language';
+import { API_BASE_URL } from '../../config';
 
 const VerifFront = () => {
     const { currentLanguage } = useContext(LanguageContext);
@@ -62,7 +63,7 @@ const VerifFront = () => {
             setLoading(true);
             try {
                 const accessToken = localStorage.getItem('access');
-                const response = await fetch(`http://127.0.0.1:8000/api/projects/${projectId}/diagrams/${diagramId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/diagrams/${diagramId}`, {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
                     },
@@ -107,7 +108,7 @@ const VerifFront = () => {
                 const formData = new FormData();
                 formData.append('file', uploadedFile);
 
-                response = await fetch(`http://127.0.0.1:8000/api/upload/verify/`, {
+                response = await fetch(`${API_BASE_URL}/api/upload/verify/`, {
                     method: 'POST',
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
@@ -116,7 +117,7 @@ const VerifFront = () => {
                 });
             } else {
                 // Verify diagram from database
-                response = await fetch(`http://127.0.0.1:8000/api/projects/${projectId}/diagrams/${diagramId}/verify/`, {
+                response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/diagrams/${diagramId}/verify/`, {
                     method: 'POST',
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
@@ -131,7 +132,7 @@ const VerifFront = () => {
             const data = await response.json();
             const canvas = document.querySelector('#canvas');
             canvas.innerHTML = ''; 
-            displayBPMNDiagram('http://127.0.0.1:8000' + data.filename);
+            displayBPMNDiagram(API_BASE_URL + data.filename);
             setAnnotations(parseAnnotations(data.annotations));
             setReportUrl(data.report_url);
             setLoading(false);
@@ -300,7 +301,7 @@ const VerifFront = () => {
             </div>
             {verifyClicked && !loading && (
                 <div className="view-report-container">
-                    <button className="view-report-btn" onClick={() => window.open(`http://127.0.0.1:8000${reportUrl}`, '_blank')}>
+                    <button className="view-report-btn" onClick={() => window.open(`${API_BASE_URL}${reportUrl}`, '_blank')}>
                         {content.report}
                     </button>
                 </div>

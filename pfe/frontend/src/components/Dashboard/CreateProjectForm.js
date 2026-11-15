@@ -3,6 +3,7 @@ import axios from 'axios';
 import './CreateProjectForm.css'
 import { useSelector} from 'react-redux'
 import { LanguageContext } from '../../contexts/language';
+import { API_BASE_URL } from '../../config';
 
 const CreateProjectForm = ({ onSuccess,fetchProjects }) => {
   const [formData, setFormData] = useState({ name: '', description: '' });
@@ -36,10 +37,8 @@ const CreateProjectForm = ({ onSuccess,fetchProjects }) => {
       projectData.owner = userInfo.id;
       
       
-      const response = await axios.post('http://127.0.0.1:8000/api/projects/', projectData, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+      const response = await axios.post(`${API_BASE_URL}/api/projects/`, projectData, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
   
       return response.data;
