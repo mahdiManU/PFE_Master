@@ -47,7 +47,8 @@ const login = async (userData) => {
 // Logout 
 
 const logout = () => {
-    return localStorage.removeItem("user")
+    localStorage.removeItem("user")
+    localStorage.removeItem("access")
 }
 
 // Activate user

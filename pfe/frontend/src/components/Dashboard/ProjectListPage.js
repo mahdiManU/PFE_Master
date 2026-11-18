@@ -1,87 +1,55 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import ProjectCard from './ProjectCard'; // Import the ProjectCard component
-import './CardAndPage.css';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import api from '../../api';
+import ProjectCard from './ProjectCard';
 import CreateProjectForm from './CreateProjectForm';
-import { LanguageContext } from '../../contexts/language';
-import { API_BASE_URL } from '../../config';
+import './CardAndPage.css';
 
+/** List of the user's projects plus the "new project" form. */
 const ProjectListPage = () => {
+  const { t } = useTranslation();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const { currentLanguage } = useContext(LanguageContext);
+  const [error, setError] = useState('');
 
-  const content = currentLanguage === 'en' ? {
-    my: 'My Projects',
-    loading: 'Loading....',
-    noproject: 'No projects found.'
-  } : {
-    my: 'Mes Projets',
-    loading: 'Chargement....',
-    noproject: 'Aucun projet trouvé.'
-  };
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
-      const accessToken = localStorage.getItem('access');
-      if (!accessToken) {
-        throw new Error('Access token not found.');
-      }
-
-      const response = await axios.get(`${API_BASE_URL}/api/projects/`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      setProjects(response.data);
-    } catch (error) {
-      setError(error.message || 'Failed to fetch projects.');
+      const { data } = await api.get('/api/projects/');
+      setProjects(data);
+    } catch (e) {
+      setError(t('projects.errorFetch'));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, [t]);
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
+  useEffect(() => { fetchProjects(); }, [fetchProjects]);
 
-  const handleProjectUpdated = (updatedProject) => {
-    setProjects((prevProjects) =>
-      prevProjects.map((project) =>
-        project.id === updatedProject.id ? updatedProject : project
-      )
-    );
-  };
-
-  const handleProjectDeleted = (deletedProjectId) => {
-    setProjects((prevProjects) =>
-      prevProjects.filter((project) => project.id !== deletedProjectId)
-    );
-  };
+  const handleUpdated = (updated) =>
+    setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+  const handleDeleted = (id) =>
+    setProjects((prev) => prev.filter((p) => p.id !== id));
 
   return (
-    <div className='project-list-page'>
-      <h2>{content.my}</h2>
-      <div id='my-projects' className='projects-grid'>
-        {loading && <p>{content.loading}</p>}
+    <div className="project-list-page">
+      <h2>{t('projects.mine')}</h2>
+      <div id="my-projects" className="projects-grid">
+        {loading && <p>{t('common.loading')}</p>}
         {error && <p>{error}</p>}
-        {projects.length === 0 && !loading && <p>{content.noproject}</p>}
+        {!loading && !error && projects.length === 0 && <p>{t('projects.none')}</p>}
         {projects.length > 0 && (
-          <div className='project-cards'>
+          <div className="project-cards">
             {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onProjectUpdated={handleProjectUpdated}
-                onProjectDeleted={handleProjectDeleted}
-              />
+              <ProjectCard key={project.id} project={project}
+                onProjectUpdated={handleUpdated} onProjectDeleted={handleDeleted} />
             ))}
           </div>
         )}
       </div>
-      <div id='create-project' className='formulaire'>
-        <CreateProjectForm fetchProjects={fetchProjects} />
+      <div id="create-project" className="formulaire">
+        <CreateProjectForm onCreated={fetchProjects} />
       </div>
     </div>
   );

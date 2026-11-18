@@ -1,304 +1,160 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import './ProjectDetailsPage.css';
-import { LanguageContext } from '../../contexts/language';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import api from '../../api';
 import { API_BASE_URL } from '../../config';
+import './ProjectDetailsPage.css';
 
+/** One project: its diagrams (download, view/verify, delete) and the upload form. */
 const ProjectDetailsPage = () => {
-    const [diagrams, setDiagrams] = useState([]);
-    const [projectName, setProjectName] = useState(''); // State to store the project name
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [newDiagram, setNewDiagram] = useState({ name: '', description: '', file: null });
-    const [showModal, setShowModal] = useState(false);
-    const [selectedDiagramId, setSelectedDiagramId] = useState(null);
-    const { projectId } = useParams();
-    const { currentLanguage } = useContext(LanguageContext);
-    const [activeDropdown, setActiveDropdown] = useState(null);
-    const navigate = useNavigate();
-    const fileInputRef = useRef(null);
+  const { t } = useTranslation();
+  const { projectId } = useParams();
+  const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
-    const handleToggleDropdown = (diagramId) => {
-        setActiveDropdown(activeDropdown === diagramId ? null : diagramId);
+  const [projectName, setProjectName] = useState('');
+  const [diagrams, setDiagrams] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [newDiagram, setNewDiagram] = useState({ name: '', description: '', file: null });
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [diagramToDelete, setDiagramToDelete] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const [project, list] = await Promise.all([
+        api.get(`/api/projects/${projectId}/`),
+        api.get(`/api/projects/${projectId}/diagrams/`),
+      ]);
+      setProjectName(project.data.name);
+      setDiagrams(list.data);
+    } catch (e) {
+      setError(t('project.errorFetch'));
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId, t]);
+
+  useEffect(() => { load(); }, [load]);
+
+  // Close the row menu when clicking elsewhere.
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (!e.target.closest('.dropdown')) setActiveDropdown(null);
     };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
 
-    const content = currentLanguage === 'en' ? {
-        diagrams: "Diagrams",
-        name: "Name",
-        description: "Description",
-        verified: "Verified",
-        file: "File",
-        download: "Download",
-        createNewDiagram: "Create a New Diagram",
-        diagramName: "Diagram Name",
-        diagramDescription: "Diagram Description",
-        create: "Create Diagram",
-        loadingDiagrams: "Loading diagrams...",
-        errorFetchingDiagrams: "Error fetching diagrams.",
-        failedToCreateDiagram: "Failed to create diagram.",
-        pleaseSelectFile: "Please select a file.",
-        chooseFile: "Choose file",
-        delete: "Delete",
-        update: "Update",
-        actions: "Actions",
-        confirmDelete: "Are you sure you want to delete this diagram?",
-        cancel: "Cancel",
-        confirm: "Confirm",
-        view: "View"
-    } : {
-        diagrams: "Diagrammes",
-        name: "Nom",
-        description: "Description",
-        verified: "Vérifié",
-        file: "Fichier",
-        download: "Télécharger",
-        createNewDiagram: "Créer un nouveau diagramme",
-        diagramName: "Nom du diagramme",
-        diagramDescription: "Description du diagramme",
-        create: "Créer Diagramme",
-        loadingDiagrams: "Chargement des diagrammes...",
-        errorFetchingDiagrams: "Erreur lors du chargement des diagrammes.",
-        failedToCreateDiagram: "Échec de la création du diagramme.",
-        pleaseSelectFile: "Veuillez sélectionner un fichier.",
-        chooseFile: "Choisir un fichier",
-        delete: "Supprimer",
-        update: "Mettre à jour",
-        actions: "Actions",
-        confirmDelete: "Êtes-vous sûr de vouloir supprimer ce diagramme?",
-        cancel: "Annuler",
-        confirm: "Confirmer",
-        view: "Voir"
-    };
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (!newDiagram.file) return setError(t('project.selectFile'));
+    const formData = new FormData();
+    formData.append('name', newDiagram.name);
+    formData.append('description', newDiagram.description);
+    formData.append('file', newDiagram.file);
+    try {
+      await api.post(`/api/projects/${projectId}/create-diagrams/`, formData);
+      setNewDiagram({ name: '', description: '', file: null });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      load();
+    } catch (err) {
+      setError(t('project.errorCreate'));
+    }
+  };
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (!event.target.closest('.dropdown')) {
-                setActiveDropdown(null);
-            }
-        };
-    
-        document.addEventListener('mousedown', handleClickOutside);
-    
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
+  const confirmDelete = async () => {
+    try {
+      await api.delete(`/api/projects/${projectId}/diagrams/${diagramToDelete}/`);
+      setDiagrams((prev) => prev.filter((d) => d.id !== diagramToDelete));
+    } catch (err) {
+      setError(t('project.errorDelete'));
+    }
+    setDiagramToDelete(null);
+    setActiveDropdown(null);
+  };
 
-    const fetchProjectDetails = async () => {
-        try {
-            const accessToken = localStorage.getItem('access');
-            if (!accessToken) {
-                throw new Error('Access token not found.');
-            }
-
-            const response = await axios.get(`${API_BASE_URL}/api/projects/${projectId}`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            });
-
-            setProjectName(response.data.name);
-        } catch (error) {
-            setError(error.message || content.errorFetchingDiagrams);
-        }
-    };
-
-    const fetchDiagrams = async () => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const accessToken = localStorage.getItem('access');
-            if (!accessToken) {
-                throw new Error('Access token not found.');
-            }
-
-            const response = await axios.get(`${API_BASE_URL}/api/projects/${projectId}/diagrams`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            });
-
-            setDiagrams(response.data);
-        } catch (error) {
-            setError(error.message || content.errorFetchingDiagrams);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchProjectDetails(); // Fetch project details on component mount
-        fetchDiagrams();
-    }, [projectId]);
-
-    const handleCreateDiagram = async (e) => {
-        e.preventDefault();
-        setError(null); // Reset error on new submission
-    
-        try {
-            const accessToken = localStorage.getItem('access');
-            if (!accessToken) {
-                throw new Error('Access token not found.');
-            }
-    
-            if (!newDiagram.file) {
-                throw new Error(content.pleaseSelectFile);
-            }
-    
-            const formData = new FormData();
-            formData.append('name', newDiagram.name);
-            formData.append('description', newDiagram.description);
-            formData.append('file', newDiagram.file);
-    
-            const response = await axios.post(`${API_BASE_URL}/api/projects/${projectId}/create-diagrams/`, formData, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-    
-            setDiagrams([...diagrams, response.data]);
-            setNewDiagram({ name: '', description: '', file: null });
-            if (fileInputRef.current) {
-                fileInputRef.current.value = ''; // Reset the file input value
-            }
-        } catch (error) {
-            setError(error.message || content.failedToCreateDiagram);
-        }
-    };
-
-    const handleDeleteDiagram = async (diagramId) => {
-        try {
-            const accessToken = localStorage.getItem('access');
-            if (!accessToken) {
-                throw new Error('Access token not found.');
-            }
-
-            await axios.delete(`${API_BASE_URL}/api/projects/${projectId}/diagrams/${diagramId}/`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            });
-
-            setDiagrams(diagrams.filter(diagram => diagram.id !== diagramId));
-        } catch (error) {
-            setError(error.message || 'Failed to delete diagram.');
-        }
-    };
-
-    const handleShowModal = (diagramId) => {
-        setSelectedDiagramId(diagramId);
-        setShowModal(true);
-    };
-
-    const handleCloseModal = () => {
-        setShowModal(false);
-        setSelectedDiagramId(null);
-        setActiveDropdown(null);
-    };
-
-    const handleConfirmDelete = () => {
-        if (selectedDiagramId) {
-            handleDeleteDiagram(selectedDiagramId);
-        }
-        handleCloseModal();
-    };
-
-    const handleNavigateToVerification = (diagramId) => {
-        navigate(`/dashboard/project/${projectId}/verify/${diagramId}`);
-    };
-
-    return (
-        <div className="container">
-            <div className="main-body">
-                <div className="project-details">
-                    <h2 className="project-name">{projectName}</h2> {/* Display project name */}
-                    {loading ? (
-                        <p>{content.loadingDiagrams}</p>
-                    ) : error ? (
-                        <p>{error}</p>
-                    ) : (
-                        <div className="diagram-list">
-                            <h3>{content.diagrams}:</h3>
-                            <table className="diagram-table">
-                                <thead>
-                                    <tr>
-                                        <th>{content.name}</th>
-                                        <th>{content.description}</th>
-                                        <th>{content.verified}</th>
-                                        <th>{content.file}</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {diagrams.map((diagram) => (
-                                        <tr key={diagram.id} className="diagram-item">
-                                            <td>{diagram.name}</td>
-                                            <td>{diagram.description}</td>
-                                            <td>{diagram.verified ? '✔️' : '❌'}</td>
-                                            <td><a href={`${API_BASE_URL}${diagram.file}`} target="_blank" rel="noopener noreferrer">{content.download}</a></td>
-                                            <td>
-                                                <div className="dropdown">
-                                                    <button className="dropbtn" onClick={() => handleToggleDropdown(diagram.id)}>⋮</button>
-                                                    {activeDropdown === diagram.id && (
-                                                    <div className="dropdown-content">
-                                                        <button onClick={() => handleShowModal(diagram.id)}>{content.delete}</button>
-                                                        <button onClick={() => handleNavigateToVerification(diagram.id)}>{content.view}</button>
-                                                    </div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            <form onSubmit={handleCreateDiagram} className="create-diagram-form">
-                                <h4>{content.createNewDiagram}</h4>
-                                <input
-                                    type="text"
-                                    id="diagramName"
-                                    placeholder={content.diagramName}
-                                    value={newDiagram.name}
-                                    onChange={(e) => setNewDiagram({ ...newDiagram, name: e.target.value })}
-                                    required
-                                    autoComplete="off"
-                                />
-                                <textarea
-                                    id="diagramDescription"
-                                    placeholder={content.diagramDescription}
-                                    value={newDiagram.description}
-                                    onChange={(e) => setNewDiagram({ ...newDiagram, description: e.target.value })}
-                                    required
-                                    autoComplete="off"
-                                ></textarea>
-                                <input
-                                    type="file"
-                                    id="diagramFile"
-                                    accept=".bpmn"
-                                    ref={fileInputRef} // Add this line
-                                    onChange={(e) => setNewDiagram({ ...newDiagram, file: e.target.files[0] })}
-                                    required
-                                    autoComplete="off"
-                                />
-                                <button type="submit">{content.create}</button>
-                            </form>
+  return (
+    <div className="container">
+      <div className="main-body">
+        <div className="project-details">
+          <h2 className="project-name">{projectName}</h2>
+          {loading ? (
+            <p>{t('project.loading')}</p>
+          ) : (
+            <div className="diagram-list">
+              {error && <p className="error">{error}</p>}
+              <h3>{t('project.diagrams')}:</h3>
+              <table className="diagram-table">
+                <thead>
+                  <tr>
+                    <th>{t('project.name')}</th>
+                    <th>{t('project.description')}</th>
+                    <th>{t('project.verified')}</th>
+                    <th>{t('project.file')}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {diagrams.map((diagram) => (
+                    <tr key={diagram.id} className="diagram-item">
+                      <td>{diagram.name}</td>
+                      <td>{diagram.description}</td>
+                      <td>{diagram.verified ? '✔️' : '❌'}</td>
+                      <td>
+                        <a href={`${API_BASE_URL}${diagram.file}`} target="_blank" rel="noopener noreferrer">
+                          {t('project.download')}
+                        </a>
+                      </td>
+                      <td>
+                        <div className="dropdown">
+                          <button className="dropbtn"
+                            onClick={() => setActiveDropdown(activeDropdown === diagram.id ? null : diagram.id)}>⋮</button>
+                          {activeDropdown === diagram.id && (
+                            <div className="dropdown-content">
+                              <button onClick={() => setDiagramToDelete(diagram.id)}>{t('common.delete')}</button>
+                              <button onClick={() => navigate(`/dashboard/project/${projectId}/verify/${diagram.id}`)}>
+                                {t('common.view')}
+                              </button>
+                            </div>
+                          )}
                         </div>
-                    )}
-                </div>
-            </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
 
-            <div id="myModal" className={`modal ${showModal ? 'show' : ''}`} onClick={handleCloseModal}>
-                <div className="modal-content" onClick={e => e.stopPropagation()}>
-                    <span className="close" onClick={handleCloseModal}>&times;</span>
-                    <p>{content.confirmDelete}</p>
-                    <button className="button cancel" onClick={handleCloseModal}>{content.cancel}</button>
-                    <button className="button confirm" onClick={handleConfirmDelete}>{content.confirm}</button>
-                </div>
+              <form onSubmit={handleCreate} className="create-diagram-form">
+                <h4>{t('project.createNew')}</h4>
+                <input type="text" placeholder={t('project.diagramName')} value={newDiagram.name}
+                  onChange={(e) => setNewDiagram({ ...newDiagram, name: e.target.value })}
+                  required autoComplete="off" />
+                <textarea placeholder={t('project.diagramDescription')} value={newDiagram.description}
+                  onChange={(e) => setNewDiagram({ ...newDiagram, description: e.target.value })}
+                  required autoComplete="off" />
+                <input type="file" accept=".bpmn" ref={fileInputRef}
+                  onChange={(e) => setNewDiagram({ ...newDiagram, file: e.target.files[0] })} required />
+                <button type="submit">{t('project.create')}</button>
+              </form>
             </div>
+          )}
         </div>
-    );
+      </div>
+
+      <div className={`modal ${diagramToDelete ? 'show' : ''}`} onClick={() => setDiagramToDelete(null)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <span className="close" onClick={() => setDiagramToDelete(null)}>&times;</span>
+          <p>{t('project.confirmDelete')}</p>
+          <button className="button cancel" onClick={() => setDiagramToDelete(null)}>{t('common.cancel')}</button>
+          <button className="button confirm" onClick={confirmDelete}>{t('common.confirm')}</button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ProjectDetailsPage;

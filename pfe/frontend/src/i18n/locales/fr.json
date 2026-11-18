@@ -93,7 +93,9 @@
     "mi": "Informations manquantes :",
     "s": "Erreurs structurelles :",
     "c": "Contradictions :",
-    "noErrors": "Aucune erreur"
+    "noErrors": "Aucune erreur",
+    "errorLoad": "Impossible de charger le diagramme.",
+    "errorVerify": "La vérification a échoué. Veuillez réessayer."
   },
   "users": {
     "title": "Gestion des utilisateurs",
@@ -106,6 +108,8 @@
     "password": "Mot de passe",
     "confirmPassword": "Confirmer le mot de passe",
     "create": "Créer l'utilisateur",
-    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?"
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
+    "passwordMismatch": "Les mots de passe ne correspondent pas.",
+    "error": "Une erreur est survenue. Veuillez réessayer."
   }
 }

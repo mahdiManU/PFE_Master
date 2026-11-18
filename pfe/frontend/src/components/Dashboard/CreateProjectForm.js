@@ -1,99 +1,44 @@
-import React, { useState, useContext } from 'react';
-import axios from 'axios';
-import './CreateProjectForm.css'
-import { useSelector} from 'react-redux'
-import { LanguageContext } from '../../contexts/language';
-import { API_BASE_URL } from '../../config';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import api from '../../api';
+import './CreateProjectForm.css';
 
-const CreateProjectForm = ({ onSuccess,fetchProjects }) => {
-  const [formData, setFormData] = useState({ name: '', description: '' });
-  const [, setError] = useState(null);
-  const { userInfo } = useSelector((state) => state.auth)
-  const { currentLanguage } = useContext(LanguageContext);
+/** Form to create a project. `onCreated` is called after success (reloads the list). */
+const CreateProjectForm = ({ onCreated }) => {
+  const { t } = useTranslation();
+  const [form, setForm] = useState({ name: '', description: '' });
+  const [error, setError] = useState('');
 
-  const content = currentLanguage === 'en' ? {
-    name: 'Name of Project :',
-    description: 'Description :',
-    create: 'Create a New Project',
-    submit: 'Create Project'
-  } : {
-    name: 'Nom du Projet :',
-    description: 'Description :',
-    create: 'Créer Un Nouveau Projet',
-    submit: 'Crée Projet'
-  };
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const createProject = async (projectData) => {
-    try {
-      const accessToken = localStorage.getItem('access');
-      if (!accessToken) {
-        throw new Error('Access token not found.');
-      }
-  
-      // Include owner field in the projectData
-      projectData.owner = userInfo.id;
-      
-      
-      const response = await axios.post(`${API_BASE_URL}/api/projects/`, projectData, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-  
-      return response.data;
-    } catch (error) {
-      setError(error.message || 'Failed to create project.');
-      throw error;
-    }
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
-      const createdProject = await createProject(formData);
-      console.log('Project created:', createdProject);
-      fetchProjects();
-      // Call the onSuccess callback if provided
-      if (onSuccess) {
-        onSuccess(createdProject);
-      }
-      // Clear the form fields after successful project creation
-      setFormData({ name: '', description: '' });
-    } catch (error) {
-      console.error('Error creating project:', error);
-      // You can handle errors (e.g., display an error message)
+      await api.post('/api/projects/', form);
+      setForm({ name: '', description: '' });
+      if (onCreated) onCreated();
+    } catch (err) {
+      setError(err.response?.data?.detail || err.message);
     }
   };
 
   return (
     <div className="create-project">
-      <h3>{content.create}</h3>
+      <h3>{t('projects.createTitle')}</h3>
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="name">{content.name}</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            autoComplete="off" 
-          />
+          <label htmlFor="name">{t('projects.nameLabel')}</label>
+          <input type="text" id="name" name="name" value={form.name}
+            onChange={handleChange} required autoComplete="off" />
         </div>
         <div>
-          <label htmlFor="description">{content.description}</label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            autoComplete="off" 
-          />
+          <label htmlFor="description">{t('projects.descriptionLabel')}</label>
+          <textarea id="description" name="description" value={form.description}
+            onChange={handleChange} required autoComplete="off" />
         </div>
-        <button type="submit">{content.submit}</button>
+        {error && <span className="error">{error}</span>}
+        <button type="submit">{t('projects.submit')}</button>
       </form>
     </div>
   );

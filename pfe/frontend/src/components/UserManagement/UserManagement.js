@@ -1,137 +1,74 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { useSelector } from 'react-redux';
-import axios from 'axios';
-import './UserManagement.css'; // Import CSS file for styling
-import { LanguageContext } from '../../contexts/language';
-import { API_BASE_URL } from '../../config';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import api from '../../api';
+import './UserManagement.css';
 
+const EMPTY_FORM = { first_name: '', last_name: '', email: '', password: '', confirmPassword: '' };
+
+/** Admin page: list, create and delete users (the backend allows admins only). */
 const UserManagement = () => {
-  const { currentLanguage } = useContext(LanguageContext);
-  const { token } = useSelector((state) => state.auth);
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [error, setError] = useState('');
 
-  const content = currentLanguage === 'en' ? {
-    manag: 'User Management',
-    listmail: 'Email',
-    listname :'First Name',
-    listsurname: 'Last Name',
-    projet : 'Projects',
-    projetcomp : 'Completed Projects',
-    delete : 'Delete',
-    creat : 'Create New User',
-    mail: 'Email',
-    name :'First Name',
-    surname: 'Last Name',
-    password : 'Password',
-    repeat : 'Confirm Password',
-    btncree: 'Create User'
+  const fetchUsers = useCallback(async () => {
+    try {
+      const { data } = await api.get('/api/users/');
+      setUsers(data);
+    } catch (e) {
+      setError(t('users.error'));
+    }
+  }, [t]);
 
-  } : {
-    manag: 'Gestion des Utilisateurs',
-    listmail: 'Email',
-    listname: 'Prénom',
-    listsurname: 'Nom de famille',
-    projet: 'Projets',
-    projetcomp: 'Projets terminés',
-    delete: 'Supprimer',
-    creat: 'Créer un nouvel utilisateur',
-    mail: 'Email',
-    name: 'Prénom',
-    surname: 'Nom de famille',
-    password: 'Mot de passe',
-    repeat: 'Confirmer le mot de passe',
-    btncree: 'Créer utilisateur'
-  };
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  useEffect(() => {
-    fetchUsers();
-  }, [token]);
-
-  const fetchUsers = () => {
-    const accessToken = localStorage.getItem('access');
-    axios.get(`${API_BASE_URL}/api/users/`, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`
-      }
-    })
-    .then(response => {
-      setUsers(response.data);
-    })
-    .catch(error => {
-      console.error('There was an error fetching the users!', error);
-    });
-  };
-
-  const deleteUser = (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      const accessToken = localStorage.getItem('access');
-      axios.delete(`${API_BASE_URL}/api/users/${userId}/`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      })
-      .then(response => {
-        setUsers(users.filter(user => user.id !== userId));
-      })
-      .catch(error => {
-        console.error('There was an error deleting the user!', error);
-      });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (form.password !== form.confirmPassword) return setError(t('users.passwordMismatch'));
+    const { confirmPassword, ...payload } = form;
+    try {
+      await api.post('/api/users/', payload);
+      setForm(EMPTY_FORM);
+      fetchUsers();
+    } catch (err) {
+      const data = err.response?.data;
+      setError(data ? Object.values(data).flat().join(' ') : t('users.error'));
     }
   };
 
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const accessToken = localStorage.getItem('access');
-    axios.post(`${API_BASE_URL}/api/users/`, formData, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`
-      }
-    })
-    .then(response => {
-      fetchUsers(); // Refresh the user list after successful creation
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      });
-    })
-    .catch(error => {
-      console.error('There was an error creating the user!', error);
-    });
+  const deleteUser = async (id) => {
+    if (!window.confirm(t('users.confirmDelete'))) return;
+    try {
+      await api.delete(`/api/users/${id}/`);
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+    } catch (e) {
+      setError(t('users.error'));
+    }
   };
 
   return (
-    <div className='container'>
-      <div className='main-body'>
-        <div className='user-list'>
-          <h1>{content.manag}</h1>
-          <table className='user-table'>
+    <div className="container">
+      <div className="main-body">
+        <div className="user-list">
+          <h1>{t('users.title')}</h1>
+          {error && <p className="error">{error}</p>}
+          <table className="user-table">
             <thead>
               <tr>
-                <th>{content.listmail}</th>
-                <th>{content.listname}</th>
-                <th>{content.listsurname}</th>
-                <th>{content.projet}</th>
-                <th>{content.projetcomp}</th>
+                <th>{t('users.email')}</th>
+                <th>{t('users.firstName')}</th>
+                <th>{t('users.lastName')}</th>
+                <th>{t('users.projects')}</th>
+                <th>{t('users.completed')}</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              {users.map(user => (
+              {users.map((user) => (
                 <tr key={user.id}>
                   <td>{user.email}</td>
                   <td>{user.first_name}</td>
@@ -139,57 +76,30 @@ const UserManagement = () => {
                   <td>{user.num_projects}</td>
                   <td>{user.num_completed_projects}</td>
                   <td>
-                    <button className='action-button' onClick={() => deleteUser(user.id)}>{content.delete}</button>
+                    <button className="action-button" onClick={() => deleteUser(user.id)}>
+                      {t('common.delete')}
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <div className='create-user-form'>
-          <h2>{content.creat}</h2>
+
+        <div className="create-user-form">
+          <h2>{t('users.createNew')}</h2>
           <form onSubmit={handleSubmit}>
-            <input
-              type='text'
-              name='firstName'
-              placeholder={content.name}
-              value={formData.firstName}
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type='text'
-              name='lastName'
-              placeholder={content.surname}
-              value={formData.lastName}
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type='email'
-              name='email'
-              placeholder={content.mail}
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type='password'
-              name='password'
-              placeholder={content.password}
-              value={formData.password}
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type='password'
-              name='confirmPassword'
-              placeholder={content.repeat}
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              required
-            />
-            <button type='submit'>{content.btncree}</button>
+            <input type="text" name="first_name" placeholder={t('users.firstName')}
+              value={form.first_name} onChange={handleChange} required />
+            <input type="text" name="last_name" placeholder={t('users.lastName')}
+              value={form.last_name} onChange={handleChange} required />
+            <input type="email" name="email" placeholder={t('users.email')}
+              value={form.email} onChange={handleChange} required />
+            <input type="password" name="password" placeholder={t('users.password')}
+              value={form.password} onChange={handleChange} required autoComplete="new-password" />
+            <input type="password" name="confirmPassword" placeholder={t('users.confirmPassword')}
+              value={form.confirmPassword} onChange={handleChange} required autoComplete="new-password" />
+            <button type="submit">{t('users.create')}</button>
           </form>
         </div>
       </div>

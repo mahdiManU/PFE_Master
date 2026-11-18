@@ -93,7 +93,9 @@
     "mi": "Missing Information:",
     "s": "Structural Errors:",
     "c": "Contradictions:",
-    "noErrors": "No errors found"
+    "noErrors": "No errors found",
+    "errorLoad": "Could not load the diagram.",
+    "errorVerify": "Verification failed. Please try again."
   },
   "users": {
     "title": "User Management",
@@ -106,6 +108,8 @@
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "create": "Create User",
-    "confirmDelete": "Are you sure you want to delete this user?"
+    "confirmDelete": "Are you sure you want to delete this user?",
+    "passwordMismatch": "Passwords do not match.",
+    "error": "Something went wrong. Please try again."
   }
 }

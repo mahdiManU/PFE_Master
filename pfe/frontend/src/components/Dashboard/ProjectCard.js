@@ -1,154 +1,84 @@
-import React, { useState,useEffect, useContext, useRef } from 'react';
-import axios from 'axios';
-import './CardAndPage.css';
-import { LanguageContext } from '../../contexts/language';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { FaEllipsisV } from 'react-icons/fa';
-import { API_BASE_URL } from '../../config';
+import api from '../../api';
+import './CardAndPage.css';
 
+/** One project card with edit / delete menu. */
 const ProjectCard = ({ project, onProjectUpdated, onProjectDeleted }) => {
-  const { currentLanguage } = useContext(LanguageContext);
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
-  const [editFormData, setEditFormData] = useState({
-    name: project.name,
-    description: project.description,
-    owner: project.owner // Add the owner field
-  });
+  const [form, setForm] = useState({ name: project.name, description: project.description });
   const [menuOpen, setMenuOpen] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const menuRef = useRef(null);
 
-  const handleEditChange = (e) => {
-    setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
-  };
+  // Close the menu when clicking elsewhere.
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleUpdate = async () => {
-    const accessToken = localStorage.getItem('access');
-    if (!accessToken) {
-      console.error('Access token not found.');
-      return;
-    }
-
-    console.log('Updating project with data:', editFormData);
-
     try {
-      const response = await axios.put(`${API_BASE_URL}/api/projects/${project.id}/`, editFormData, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
+      const { data } = await api.put(`/api/projects/${project.id}/`, form);
       setIsEditing(false);
-      onProjectUpdated(response.data);
-    } catch (error) {
-      console.error('Failed to update project:', error.response.data);
+      onProjectUpdated(data);
+    } catch (e) {
+      console.error('Failed to update project:', e.response?.data || e.message);
     }
   };
 
-  const handleDelete = async () => {
-    setShowDeleteModal(true);
-  };
-
-  const confirmDelete = () => {
-    const accessToken = localStorage.getItem('access');
-    if (!accessToken) {
-      console.error('Access token not found.');
-      return;
-    }
-
+  const confirmDelete = async () => {
     try {
-      axios.delete(`${API_BASE_URL}/api/projects/${project.id}/`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
+      await api.delete(`/api/projects/${project.id}/`);
       onProjectDeleted(project.id);
-    } catch (error) {
-      console.error('Failed to delete project:', error.message);
+    } catch (e) {
+      console.error('Failed to delete project:', e.message);
     }
     setShowDeleteModal(false);
   };
-
-  const handleMenuToggle = () => {
-    setMenuOpen(!menuOpen);
-  };
-
-  const handleClickOutside = (event) => {
-    if (menuRef.current && !menuRef.current.contains(event.target)) {
-      setMenuOpen(false);
-    }
-
-    if (!showDeleteModal) {
-      return;
-    }
-
-    if (!event.target.closest('.modal-content')) {
-      setShowDeleteModal(false);
-    }
-  };
-
-  const handleCancelDelete = () => {
-    setShowDeleteModal(false);
-  };
-
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   return (
     <div className="project-card">
       {isEditing ? (
         <>
-          <input
-            type="text"
-            name="name"
-            value={editFormData.name}
-            onChange={handleEditChange}
-          />
-          <textarea
-            name="description"
-            value={editFormData.description}
-            onChange={handleEditChange}
-          />
-          <button onClick={handleUpdate}>
-            {currentLanguage === 'en' ? 'Save' : 'Enregistrer'}
-          </button>
-          <button onClick={() => setIsEditing(false)}>
-            {currentLanguage === 'en' ? 'Cancel' : 'Annuler'}
-          </button>
+          <input type="text" name="name" value={form.name} onChange={handleChange} />
+          <textarea name="description" value={form.description} onChange={handleChange} />
+          <button onClick={handleUpdate}>{t('common.save')}</button>
+          <button onClick={() => setIsEditing(false)}>{t('common.cancel')}</button>
         </>
       ) : (
         <>
           <div className="card-header">
             <h3 className="project__description">{project.name}</h3>
-            <FaEllipsisV className="menu-icon" onClick={handleMenuToggle} />
+            <FaEllipsisV className="menu-icon" onClick={() => setMenuOpen(!menuOpen)} />
             <div ref={menuRef} className={`menu ${menuOpen ? 'open' : ''}`}>
-              <button onClick={() => setIsEditing(true)}>
-                {currentLanguage === 'en' ? 'Edit' : 'Modifier'}
-              </button>
-              <button onClick={handleDelete}>
-                {currentLanguage === 'en' ? 'Delete' : 'Supprimer'}
-              </button>
+              <button onClick={() => { setIsEditing(true); setMenuOpen(false); }}>{t('common.edit')}</button>
+              <button onClick={() => { setShowDeleteModal(true); setMenuOpen(false); }}>{t('common.delete')}</button>
             </div>
           </div>
           <p>{project.description}</p>
-          <p className="diag_number">{currentLanguage === 'en' ? 'Number of Diagrams :' : 'Totale Diagrames :'} {project.num_diagrams}</p>
+          <p className="diag_number">{t('projects.diagramCount')} {project.num_diagrams}</p>
           <Link to={`/dashboard/project/${project.id}`} className="btn-details">
-            {currentLanguage === 'en' ? 'Details' : 'Détails'}
+            {t('common.details')}
           </Link>
         </>
       )}
+
       {showDeleteModal && (
-        <div className="confirmation-modal">
-          <div className="modal-content">
-            <p>{currentLanguage === 'en' ? 'Are you sure you want to delete this project?' : 'Êtes-vous sûr de vouloir supprimer ce projet ?'}</p>
+        <div className="confirmation-modal" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <p>{t('projects.confirmDelete')}</p>
             <div className="modal-buttons">
-              <button onClick={handleCancelDelete}>Cancel</button>
-              <button onClick={confirmDelete}>Confirm</button>
+              <button onClick={() => setShowDeleteModal(false)}>{t('common.cancel')}</button>
+              <button onClick={confirmDelete}>{t('common.confirm')}</button>
             </div>
           </div>
         </div>
