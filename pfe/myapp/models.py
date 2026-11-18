@@ -71,32 +71,33 @@ def create_project_directory(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Diagram)
 def create_diagram_directory(sender, instance, created, **kwargs):
-    if created:
-        project_directory = os.path.join(settings.MEDIA_ROOT, f'user_{instance.project.owner.id}', f'project_{instance.project.id}')
-        diagram_directory = os.path.join(project_directory, f'diagram_{instance.id}')
-        none_directory = os.path.join(project_directory, 'diagram_None')
+    """
+    After the first save the diagram id is known, so move the uploaded file from
+    user_X/project_Y/diagram_None/ to user_X/project_Y/diagram_<id>/.
+    The database must store a path RELATIVE to MEDIA_ROOT (never C:\\...),
+    otherwise the project breaks as soon as it is copied to another machine.
+    """
+    if not created or not instance.file:
+        return
 
-        # Create the actual diagram directory
-        os.makedirs(diagram_directory, exist_ok=True)
+    project_dir = os.path.join(
+        settings.MEDIA_ROOT, f'user_{instance.project.owner.id}', f'project_{instance.project.id}')
+    diagram_dir = os.path.join(project_dir, f'diagram_{instance.id}')
+    os.makedirs(diagram_dir, exist_ok=True)
 
-        # Handle file upload
-        if instance.file:
-            # Construct destination path
-            destination_path = os.path.join(diagram_directory, instance.file.name.split('/')[-1])
+    old_path = instance.file.path
+    filename = os.path.basename(old_path)
+    new_path = os.path.join(diagram_dir, filename)
+    if os.path.abspath(old_path) != os.path.abspath(new_path):
+        os.replace(old_path, new_path)  # also overwrites on Windows
 
-            # Move the uploaded file to the diagram directory
-            os.rename(instance.file.path, destination_path)
+    new_name = f'user_{instance.project.owner.id}/project_{instance.project.id}/diagram_{instance.id}/{filename}'
+    Diagram.objects.filter(pk=instance.pk).update(file=new_name)
+    instance.file.name = new_name
 
-            # Update the file path in the instance
-            instance.file.name = destination_path
-            instance.save()
-
-        # Delete the `diagram_None` folder if it exists
-        if os.path.exists(none_directory):
-            try:
-                os.rmdir(none_directory)
-            except OSError:
-                print(f"Could not remove non-empty folder: {none_directory}")
+    none_dir = os.path.join(project_dir, 'diagram_None')
+    if os.path.isdir(none_dir) and not os.listdir(none_dir):
+        os.rmdir(none_dir)
 
 
 

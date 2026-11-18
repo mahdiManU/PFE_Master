@@ -100,35 +100,26 @@ class DiagramListCreateAPIView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Only diagrams of this project AND of a project owned by the current user.
         return Diagram.objects.filter(
             project_id=self.kwargs['project_id'],
-            project__owner=self.request.user,
+            project__owner=self.request.user
         )
 
     def perform_create(self, serializer):
-        # 404 if the project does not exist or belongs to someone else.
         project = get_object_or_404(
-            Project, id=self.kwargs['project_id'], owner=self.request.user)
+            Project,
+            id=self.kwargs['project_id'],
+            owner=self.request.user
+        )
 
-        # Ensure no `diagram_None` folder is left behind
-        project_directory = os.path.join(settings.MEDIA_ROOT, f'user_{project.owner.id}', f'project_{project.id}')
-        none_directory = os.path.join(project_directory, 'diagram_None')
-
-        if os.path.exists(none_directory):
-            try:
-                os.rmdir(none_directory)
-            except OSError:
-                print(f"Could not remove non-empty folder: {none_directory}")
-
+        serializer.save(project=project)
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            logging.error(f"Invalid data: {serializer.errors}")
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+            serializer = self.get_serializer(data=request.data)
+            if not serializer.is_valid():
+                logging.error(f"Invalid data: {serializer.errors}")
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)    
 
 
 class DiagramDetailAPIView(generics.RetrieveUpdateDestroyAPIView):

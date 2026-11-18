@@ -4,6 +4,7 @@ test_api.py - API tests (run with: python manage.py test myapp)
 Django creates a temporary database and we point MEDIA_ROOT at a temporary
 folder, so your real data and files are never touched.
 """
+import os
 import shutil
 import tempfile
 
@@ -82,6 +83,11 @@ class OwnershipTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.project.refresh_from_db()
         self.assertEqual(self.project.owner, self.alice)
+
+    def test_diagram_file_path_is_relative(self):
+        self.diagram.refresh_from_db()
+        self.assertFalse(os.path.isabs(self.diagram.file.name), self.diagram.file.name)
+        self.assertTrue(self.diagram.file.name.startswith("user_"))    
 
 
 class RegistrationSecurityTests(APITestCase):
