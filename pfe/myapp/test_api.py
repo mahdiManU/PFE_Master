@@ -99,4 +99,3 @@ class RegistrationSecurityTests(APITestCase):
         self.assertEqual(response.status_code, 201, response.content)
         user = get_user_model().objects.get(email="x@test.com")
         self.assertFalse(user.is_staff)
-        self.assertFalse(user.is_active)  # must wait for activation

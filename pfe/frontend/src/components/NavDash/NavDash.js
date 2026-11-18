@@ -31,14 +31,11 @@ const NavDash = () => {
       <nav className='center nav'>
         <ul style={{ display: showNavList ? 'flex' : null }} className='nav__list'>
           <li className='nav__list-item'>
-            <a href='#my-projects' onClick={() => setShowNavList(false)} className='link link--nav'>
+            <Link to='/dashboard' onClick={() => setShowNavList(false)} className='link link--nav'>{t('nav.projects')}</Link>
               {t('nav.projects')}
-            </a>
           </li>
           <li className='nav__list-item'>
-            <a href='#create-project' onClick={() => setShowNavList(false)} className='link link--nav'>
-              {t('nav.newProject')}
-            </a>
+            <Link to='/dashboard#create-project' onClick={() => setShowNavList(false)} className='link link--nav'>{t('nav.newProject')}</Link>
           </li>
           <li className='nav__list-item'>
             <Link to='/' onClick={handleLogout} className='link link--nav'>

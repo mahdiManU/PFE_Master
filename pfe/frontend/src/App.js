@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import HomePage from './HomePage'
 import Principale from './components/Dashboard/Principale'
 import DiagramDetails from './components/DiagamDetails/DiagarmDetails'; 
+import Register from './components/Register/Register';
 
 
 
@@ -21,6 +22,7 @@ const App = () => {
     <div id='top' className={`${themeName} app`}>
       <Router>
         <Routes>
+          <Route path="/register" element={<MainLayout><Register /></MainLayout>} />
           <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
           <Route path="/login" element={<MainLayout><Login /></MainLayout>} />
           <Route path="/dashboard/*" element={<Principale />} />

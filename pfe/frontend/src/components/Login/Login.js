@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { login, reset, getUserInfo } from '../../features/authSlice';
 import './Login.css';
@@ -10,6 +10,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, isError } = useSelector((state) => state.auth);
+  const location = useLocation();
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [emailError, setEmailError] = useState('');
@@ -50,6 +51,7 @@ const Login = () => {
       </button>
       <h2>{t('login.title')}</h2>
       <form onSubmit={handleSubmit}>
+        {location.state?.registered && <span className="success">{t('login.registered')}</span>}
         {userError && <span className='error'>{userError}</span>}
         <label htmlFor='email'>{t('login.email')}</label>
         <input type='email' id='email' name='email' onChange={handleChange} value={email} required />
@@ -59,6 +61,9 @@ const Login = () => {
           value={password} required autoComplete='current-password' />
         {passwordError && <span className='error'>{passwordError}</span>}
         <button type='submit'>{t('login.signIn')}</button>
+        <p style={{ marginTop: '1em' }}>
+          {t('login.noAccount')} <Link to="/register" className="link">{t('register.title')}</Link>
+        </p>
       </form>
     </div>
   );

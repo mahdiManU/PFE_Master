@@ -48,7 +48,9 @@
       "emailRequired": "Please provide your email.",
       "passwordRequired": "Please provide your password.",
       "invalidCredentials": "Invalid email or password. Please try again."
-    }
+    },
+    "registered": "Account created. You can now sign in.",
+    "noAccount": "No account yet?"
   },
   "dashboard": {
     "welcome": "Welcome",
@@ -111,5 +113,15 @@
     "confirmDelete": "Are you sure you want to delete this user?",
     "passwordMismatch": "Passwords do not match.",
     "error": "Something went wrong. Please try again."
+  },
+  "register": {
+    "title": "Sign up",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "confirmPassword": "Confirm Password",
+    "submit": "Create my account",
+    "haveAccount": "Already registered?",
+    "mismatch": "Passwords do not match.",
+    "error": "Registration failed. Please try again."
   }
 }

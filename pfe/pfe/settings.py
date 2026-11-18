@@ -178,23 +178,27 @@ SIMPLE_JWT = {
         "JWT"),
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=60),
-    "SIGNING_KEY": env("SIGNING_KEY"),
+    "SIGNING_KEY": env("SIGNING_KEY", default=SECRET_KEY),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 }
+
+# False (default): new accounts are active immediately, so anyone can test the app.
+# True: users must click the activation link sent by email.
+REQUIRE_EMAIL_ACTIVATION = env.bool("REQUIRE_EMAIL_ACTIVATION", default=False)
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
     "USER_CREATE_PASSWORD_RETYPE": True,
     "USERNAME_CHANGED_EMAIL_CONFIRMATION": True,
     "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
-    "SEND_CONFIRMATION_EMAIL": True,
+    "SEND_CONFIRMATION_EMAIL": REQUIRE_EMAIL_ACTIVATION,
+    "SEND_ACTIVATION_EMAIL": REQUIRE_EMAIL_ACTIVATION,
     "PASSWORD_RESET_CONFIRM_URL": "password/reset/confirm/{uid}/{token}",
     "SET_PASSWORD_RETYPE": True,
     "PASSWORD_RESET_CONFIRM_RETYPE": True,
     'USERNAME_RESET_CONFIRM_URL': 'username/reset/confirm/{uid}/{token}',
     'ACTIVATION_URL': 'activate/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
         'user_create': 'myapp.serializers.CreateUserSerializer',
         'user': "myapp.serializers.CreateUserSerializer",
@@ -202,19 +206,21 @@ DJOSER = {
     },
 }
 
+
 # ---------------------------------------------------------------------------
-# Email (account activation and password reset, sent through Djoser)
-# For local development, a Mailtrap sandbox account is enough.
-# ---------------------------------------------------------------------------
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = env("EMAIL_HOST")
-EMAIL_USE_TLS = True
-EMAIL_PORT = env.int("EMAIL_PORT")
-EMAIL_HOST_USER = env("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+# Email: if no SMTP login is configured, emails are printed in the terminal.
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_HOST = env("EMAIL_HOST", default="localhost")
+EMAIL_PORT = env.int("EMAIL_PORT", default=25)
+EMAIL_USE_TLS = bool(EMAIL_HOST_USER)
+EMAIL_BACKEND = (
+    "django.core.mail.backends.smtp.EmailBackend" if EMAIL_HOST_USER
+    else "django.core.mail.backends.console.EmailBackend"
+)
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@localhost")
-DOMAIN = env("DOMAIN")
-SITE_NAME = env("SITE_NAME", default="BPMN Process Verifier")
+DOMAIN = env("DOMAIN", default="localhost:3000")
+SITE_NAME = env("SITE_NAME", default="LegProV")
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',

@@ -48,7 +48,9 @@
       "emailRequired": "Veuillez fournir votre adresse e-mail.",
       "passwordRequired": "Veuillez fournir votre mot de passe.",
       "invalidCredentials": "E-mail ou mot de passe incorrect. Veuillez réessayer."
-    }
+    },
+    "registered": "Compte créé. Vous pouvez maintenant vous connecter.",
+    "noAccount": "Pas encore de compte ?"
   },
   "dashboard": {
     "welcome": "Bienvenue",
@@ -111,5 +113,15 @@
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
     "passwordMismatch": "Les mots de passe ne correspondent pas.",
     "error": "Une erreur est survenue. Veuillez réessayer."
+  },
+  "register": {
+    "title": "Créer un compte",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "confirmPassword": "Confirmer le mot de passe",
+    "submit": "Créer mon compte",
+    "haveAccount": "Déjà inscrit ?",
+    "mismatch": "Les mots de passe ne correspondent pas.",
+    "error": "L'inscription a échoué. Veuillez réessayer."
   }
 }

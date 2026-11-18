@@ -4,9 +4,11 @@ import api from '../../api';
 import ProjectCard from './ProjectCard';
 import CreateProjectForm from './CreateProjectForm';
 import './CardAndPage.css';
+import { useLocation } from 'react-router-dom';
 
 /** List of the user's projects plus the "new project" form. */
 const ProjectListPage = () => {
+  const { hash } = useLocation();
   const { t } = useTranslation();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -24,6 +26,10 @@ const ProjectListPage = () => {
       setLoading(false);
     }
   }, [t]);
+
+  useEffect(() => {
+    if (!loading && hash) document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth' });
+  }, [loading, hash]);
 
   useEffect(() => { fetchProjects(); }, [fetchProjects]);
 
