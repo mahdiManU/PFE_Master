@@ -18,3 +18,5 @@ media/uploads/
 
 # Editor
 .vscode/
+
+db.sqlite3
